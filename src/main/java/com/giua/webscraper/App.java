@@ -1,10 +1,7 @@
 package com.giua.webscraper;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -71,7 +68,7 @@ public class App {
 
 		int totalVotes = votesHTML.size();
 		for (int i = 0; i < totalVotes; i++) {
-			String voteAsString = votesHTML.get(i).text(); //prende il voto
+			final String voteAsString = votesHTML.get(i).text(); //prende il voto
 			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
 				String subject = votesHTML.get(i).parent().parent().child(0).text(); //prende il nome della materia
 				if (returnVotes.containsKey(subject)) {
@@ -182,6 +179,15 @@ public class App {
 
 	//Main function, only used on the console version for testing
 	public static void main(String[] args) {
+
+		Scanner sc= new Scanner(System.in);
+		if(user=="" && password==""){
+			print("Please enter username: ");
+			user= sc.nextLine();
+			print("Password: ");
+			password= sc.nextLine();
+		}
+
 		print("----FIRST LOGIN----\n");
 		login(user, password);
 
@@ -200,6 +206,13 @@ public class App {
 		print("Website title: " + page.title());
 
 
+		print("Get votes");
+		Map<String, List<String>> votes = getAllVotes();
+		for(Map.Entry m:votes.entrySet()){
+			print(m.getKey()+" "+m.getValue());
+		}
+
+		/*
 		Elements table_div = page.getElementsByTag("tbody"); //Table
 		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");
 		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table
@@ -230,8 +243,8 @@ public class App {
     		/*
     		for(String[] voto : voti_materia[]) {
     			print(materia + " - voto: " + voto + "\n" + info);
-    		}*/
+    		}*
 
-		}
+		}*/
 	}
 }

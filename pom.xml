@@ -31,11 +31,6 @@
           <artifactId>jsoup</artifactId>
           <version>1.11.3</version>
       </dependency>
-      <dependency>
-			<groupId>net.sourceforge.htmlunit</groupId>
-  			<artifactId>htmlunit</artifactId>
-  			<version>2.49.1</version>
-	</dependency>
   </dependencies>
 
   <build>
@@ -94,7 +89,7 @@
                           <transformers>
                               <transformer
                                       implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                  <mainClass>com.codetriage.scraper.App</mainClass>
+                                  <mainClass>com.giua.webscraper</mainClass>
                               </transformer>
                           </transformers>
                       </configuration>

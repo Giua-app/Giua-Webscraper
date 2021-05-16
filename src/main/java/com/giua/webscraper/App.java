@@ -1,10 +1,7 @@
 package com.giua.webscraper;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -16,12 +13,12 @@ import org.jsoup.select.Elements;
 
 
 /* Giua Webscraper 0.6.1
- * 
+ *
  *  JSoup: library for webscraping
  *
  */
-
-public class App {
+public class App 
+{
 
 	public static class Avviso {    //Da usare come una struttura di C#
 		public final String stato;
@@ -59,8 +56,8 @@ public class App {
 
 	public static Document getPage(String url) {
 		try {
-
-			if (!checkLogin()) {
+			
+			if(checkLogin() == false) {
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
 				login(user, password);
@@ -137,14 +134,14 @@ public class App {
 	public static Boolean checkLogin() {
 		try {
 
-			if (PHPSESSID == null) {
+			if(PHPSESSID == null) {
 				return false; //Not logged in
 			}
 
 			Connection.Response res = Jsoup.connect("https://registro.giua.edu.it/login/form/")
-					.method(Method.POST)
-					.cookies(PHPSESSID)
-					.execute();
+				    .method(Method.POST)
+				    .cookies(PHPSESSID)
+				    .execute();
 
 			Document doc = res.parse();
 
@@ -166,15 +163,16 @@ public class App {
 
 
 	//The most important function, it handles the login process
-	public static void login(String username, String password) {
+	public static void login(String username, String password)
+	{
 		try {
 
 			Connection.Response res = Jsoup.connect("https://registro.giua.edu.it/login/form")
-					.method(Method.GET)
-					.execute();
+            	    .method(Method.GET)
+            	    .execute();
 
-			Document doc = res.parse();
-			PHPSESSID = res.cookies();
+            	Document doc = res.parse();
+            	PHPSESSID = res.cookies();
 
 			print("login: First connection (login form)");
 			System.out.printf("login: Title: %s\n", doc.title());
@@ -220,8 +218,18 @@ public class App {
 	}
 
 
+
 	//Main function, only used on the console version for testing
 	public static void main(String[] args) {
+
+		Scanner sc= new Scanner(System.in);
+		if(user=="" && password==""){
+			print("Please enter username: ");
+			user= sc.nextLine();
+			print("Password: ");
+			password= sc.nextLine();
+		}
+
 		print("----FIRST LOGIN----\n");
 		login(user, password);
 
@@ -240,8 +248,45 @@ public class App {
 		print("Website title: " + page.title());
 
 
-		/*Elements table_div = page.getElementsByTag("tbody"); //Table
-		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");		Dovremmo togliere questa parte perche da errore quando checkLogin() da false
-		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table*/
+		print("Get votes");
+		Map<String, List<String>> votes = getAllVotes();
+		for(Map.Entry m:votes.entrySet()){
+			print(m.getKey()+" "+m.getValue());
+		}
+
+		/*
+		Elements table_div = page.getElementsByTag("tbody"); //Table
+		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");
+		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table
+
+
+		for (Element container : riga_div) {
+			String materia = container.getElementsByTag("strong").first().text(); //Get the subject
+
+			Elements voti_div = container.getElementsByTag("button"); //Get number from button
+			Elements info_voti_div = container.getElementsByTag("div"); //Get information from the popup
+			String voti_materia = null;
+			//Integer i = 0;
+			String info = null;
+
+			print("\n" + materia);
+			for (Element container_v : voti_div) {
+				voti_materia = container_v.text();
+
+				for (Element container_iv : info_voti_div) {
+					info = container_iv.text();
+				}
+
+				print("Voto: " + voti_materia + "\n" + info);
+			}
+
+
+
+    		/*
+    		for(String[] voto : voti_materia[]) {
+    			print(materia + " - voto: " + voto + "\n" + info);
+    		}*
+
+		}*/
 	}
 }

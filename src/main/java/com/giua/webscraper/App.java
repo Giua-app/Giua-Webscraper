@@ -20,8 +20,34 @@ import org.jsoup.select.Elements;
  *  JSoup: library for webscraping
  *
  */
+
 public class App {
 
+	public static class Avviso {    //Da usare come una struttura di C#
+		public final String stato;
+		public final String data;
+		public final String destinatari;
+		public final String oggetto;
+		public String dettagli;
+		public String creatore;
+		public final int id;		//Indica quanto e' lontano dal primo avviso partendo dall'alto
+
+		Avviso(String stato, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
+			this.stato = stato;
+			this.data = data;
+			this.destinatari = destinatari;
+			this.oggetto = oggetto;
+			this.id = id;
+		}
+
+		public String getDetails(){		//carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
+			Document allAvvisiHTML = getPage("https://registro.giua.edu.it/genitori/avvisi");
+			Document dettagliAvvisoHTML = getPage("https://registro.giua.edu.it" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
+			this.dettagli = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
+			this.creatore = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+			return this.dettagli;
+		}
+	}
 
 	// Insert user and password of the account
 	private static String user = "";
@@ -34,7 +60,7 @@ public class App {
 	public static Document getPage(String url) {
 		try {
 
-			if (checkLogin() == false) {
+			if (!checkLogin()) {
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
 				login(user, password);
@@ -54,10 +80,30 @@ public class App {
 
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	//Ritorna una lista di Avvisi con tutti i loro componenti
+	public static List<Avviso> getAllAvvisi() {
+		List<Avviso> allAvvisi = new Vector<Avviso>();
+		Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
+		Elements allAvvisiStatusHTML = doc.getElementsByClass("label label-default");
+
+		int i = 0;
+		for (Element el : allAvvisiStatusHTML) {
+			allAvvisi.add(new Avviso(el.text(),
+					el.parent().parent().child(1).text(),
+					el.parent().parent().child(2).text(),
+					el.parent().parent().child(3).text(),
+					i
+					));
+			i++;
+		}
+
+		return allAvvisi;
 	}
 
 	//Ritorna una mappa fatta in questo modo: {"italiano": [tutti voti italiano], ...}
@@ -65,15 +111,15 @@ public class App {
 		//TODO: Aggiungere il supporto per gli asterischi
 		//TODO: Distinguere voti del primo quadrimestre e del secondo
 
-		Map<String, List<String>> returnVotes = new HashMap<String, List<String>>();
+		Map<String, List<String>> returnVotes = new HashMap<>();
 		Document doc = getPage("https://registro.giua.edu.it/genitori/voti");
 		Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
 		int totalVotes = votesHTML.size();
-		for (int i = 0; i < totalVotes; i++) {
-			String voteAsString = votesHTML.get(i).text(); //prende il voto
+		for (Element voteHTML : votesHTML) {
+			String voteAsString = voteHTML.text(); //prende il voto
 			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-				String subject = votesHTML.get(i).parent().parent().child(0).text(); //prende il nome della materia
+				String subject = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
 				if (returnVotes.containsKey(subject)) {
 					List<String> tempList = returnVotes.get(subject); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
 					tempList.add(voteAsString);
@@ -107,15 +153,12 @@ public class App {
 			//The login screen is the most simple to scrape information from, in this case we search
 			//for the log out button, if it doesn't exist we are not logged in.
 			// Since we have already loaded the login page, this process is very fast
-			if (logout_button.toString() != "") {
-				return true; //logged in
-			} else {
-				return false; //logged out
-			}
+			//logged out
+			return logout_button.size() > 0; //ritorna true se sei loggato altrimenti false
 
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -147,10 +190,7 @@ public class App {
 
 			print("login: get csrf token");
 
-			String[] temp = res2.body().split(":", 0);
-			String temp2 = temp[1].replaceAll("\"}", ""); //regex things idk
-			CSRFToken = temp2.replaceAll("\"", "");
-
+			CSRFToken = res2.body().split("\":\"", 0)[1].replaceAll("\"}", "");		//prende solo il valore del csrf
 
 			//print("Page content: " + res2.body());
 			print("login: CSRF Token: " + CSRFToken);
@@ -200,38 +240,8 @@ public class App {
 		print("Website title: " + page.title());
 
 
-		Elements table_div = page.getElementsByTag("tbody"); //Table
-		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");
-		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table
-
-
-		for (Element container : riga_div) {
-			String materia = container.getElementsByTag("strong").first().text(); //Get the subject
-
-			Elements voti_div = container.getElementsByTag("button"); //Get number from button
-			Elements info_voti_div = container.getElementsByTag("div"); //Get information from the popup
-			String voti_materia = null;
-			//Integer i = 0;
-			String info = null;
-
-			print("\n" + materia);
-			for (Element container_v : voti_div) {
-				voti_materia = container_v.text();
-
-				for (Element container_iv : info_voti_div) {
-					info = container_iv.text();
-				}
-
-				print("Voto: " + voti_materia + "\n" + info);
-			}
-    		
-    		
-    		
-    		/*
-    		for(String[] voto : voti_materia[]) {
-    			print(materia + " - voto: " + voto + "\n" + info);
-    		}*/
-
-		}
+		/*Elements table_div = page.getElementsByTag("tbody"); //Table
+		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");		Dovremmo togliere questa parte perche da errore quando checkLogin() da false
+		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table*/
 	}
 }

@@ -10,6 +10,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.print.Doc;
 
 
 /* Giua Webscraper 0.6.1
@@ -52,6 +53,36 @@ public class App
 			return this.status.equals("LETTA");
 		}
 
+		//Ritorna una lista di Avvisi con tutti i loro componenti
+		public static List<Avviso> getAllAvvisi() {
+			List<Avviso> allAvvisi = new Vector<Avviso>();
+			Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
+			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
+			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
+
+			int i = 0;
+			for (Element el : allAvvisiLettiStatusHTML) {
+				allAvvisi.add(new Avviso(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						i
+				));
+				i++;
+			}
+			for (Element el : allAvvisiDaLeggereStatusHTML) {
+				allAvvisi.add(new Avviso(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						i
+				));
+				i++;
+			}
+
+			return allAvvisi;
+		}
+
 		public String toString(){
 			if(!this.isDetailed)
 				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso;
@@ -60,9 +91,81 @@ public class App
 		}
 	}
 
+	public static class Homework{
+		public String day;		//usato per trovare quale verifica interessa
+		public String date;
+		public String subject;
+		public String creator;
+		public String details;
+
+		public Homework(String day, String date, String subject, String creator, String details){
+			this.day = day;
+			this.date = date;
+			this.subject = subject;
+			this.creator = creator;
+			this.details = details;
+		}
+
+		public String toString() {
+			return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details;
+		}
+
+		public static List<Homework> getAllHomeworks(){
+			List<Homework> allHomeworks = new Vector<>();
+			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
+			for(Element homeworkHTML: homeworksHTML){
+				Document detailsHTML = getPage("https://registro.giua.edu.it" + homeworkHTML.attributes().get("data-href"));
+				String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
+				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+
+				allHomeworks.add(new Homework(
+						homeworkHTML.parent().parent().text(),
+						homeworkHTML.attributes().get("data-href").split("/")[4],
+						subject,
+						creator,
+						details
+				));
+			}
+
+			return allHomeworks;
+		}
+
+		public static Homework EmptyHomework(String date){
+			return new Homework(
+					date.split("-")[2],
+					date,
+					"",
+					"",
+					"No compiti"
+			);
+		}
+
+		//Restituisce il compito di una determinata data. Data deve essere cosi: anno-mese-giorno
+		public static Homework getHomework(String date){
+			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi/dettagli/" + date + "/P");
+			try {
+				String subject = doc.getElementsByClass("gs-big").get(0).text();
+				String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = doc.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+
+				return new Homework(
+						date.split("-")[2],
+						date,
+						subject,
+						creator,
+						details
+				);
+			} catch (NullPointerException e){		//Non ci sono compiti in questo giorno
+				return EmptyHomework(date);
+			}
+		}
+	}
+
 	// Insert user and password of the account
-	private static String user = "***REMOVED***";
-	private static String password = "***REMOVED***";
+	private static String user = "";
+	private static String password = "";
 
 	private static Map<String, String> PHPSESSID = null;
 	private static String CSRFToken = null;
@@ -71,10 +174,11 @@ public class App
 	public static Document getPage(String url) {
 		try {
 			
-			if(checkLogin() == false) {
+			if(!checkLogin()) {
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
 				login(user, password);
+				return new Document("");
 			}
 
 			print("getPage: Getting page...");
@@ -95,36 +199,6 @@ public class App
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	//Ritorna una lista di Avvisi con tutti i loro componenti
-	public static List<Avviso> getAllAvvisi() {
-		List<Avviso> allAvvisi = new Vector<Avviso>();
-		Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
-		Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
-		Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
-
-		int i = 0;
-		for (Element el : allAvvisiLettiStatusHTML) {
-			allAvvisi.add(new Avviso(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					i
-					));
-			i++;
-		}
-		for (Element el : allAvvisiDaLeggereStatusHTML) {
-			allAvvisi.add(new Avviso(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					i
-			));
-			i++;
-		}
-
-		return allAvvisi;
 	}
 
 	//Ritorna una mappa fatta in questo modo: {"italiano": [tutti voti italiano], ...}
@@ -282,12 +356,18 @@ public class App
 		print("--------AVVISI---------");
 
 		print("Get avvisi");
-		List<Avviso> allAvvisi = getAllAvvisi();
+		List<Avviso> allAvvisi = Avviso.getAllAvvisi();
 		for(Avviso a: allAvvisi){
 			print(a.toString());
 		}
 
-		print("---------------------");
+		print("--------COMPITI--------");
+		print("Get homeworks");
+		List<Homework> allHomework = Homework.getAllHomeworks();
+		for(Homework a: allHomework){
+			print(a.toString());
+		}
+		print(Homework.getHomework("2021-05-28").toString());
 
 		/*
 		Elements table_div = page.getElementsByTag("tbody"); //Table

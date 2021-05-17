@@ -10,18 +10,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.print.Doc;
-
 
 /* Giua Webscraper 0.6.1
  *
  *  JSoup: library for webscraping
  *
  */
-public class App 
+public class App
 {
 
-	public static class Avviso {    //Da usare come una struttura di C#
+	public static class Alerts {    //Da usare come una struttura di C#
 		public final String status;
 		public final String date;
 		public final String receivers;
@@ -31,7 +29,7 @@ public class App
 		public final int id;		//Indica quanto e' lontano dal primo avviso partendo dall'alto
 		public boolean isDetailed;
 
-		Avviso(String status, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
+		Alerts(String status, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
 			this.status = status;
 			this.date = data;
 			this.receivers = destinatari;
@@ -54,15 +52,15 @@ public class App
 		}
 
 		//Ritorna una lista di Avvisi con tutti i loro componenti
-		public static List<Avviso> getAllAvvisi() {
-			List<Avviso> allAvvisi = new Vector<Avviso>();
+		public static List<Alerts> getAllAvvisi() {
+			List<Alerts> allAvvisi = new Vector<Alerts>();
 			Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
 			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
 			int i = 0;
 			for (Element el : allAvvisiLettiStatusHTML) {
-				allAvvisi.add(new Avviso(el.text(),
+				allAvvisi.add(new Alerts(el.text(),
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
@@ -71,7 +69,7 @@ public class App
 				i++;
 			}
 			for (Element el : allAvvisiDaLeggereStatusHTML) {
-				allAvvisi.add(new Avviso(el.text(),
+				allAvvisi.add(new Alerts(el.text(),
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
@@ -92,7 +90,7 @@ public class App
 	}
 
 	public static class Homework{
-		public String day;		//usato per trovare quale verifica interessa
+		public String day;		//usato per trovare quale compito interessa
 		public String date;
 		public String subject;
 		public String creator;
@@ -163,6 +161,123 @@ public class App
 		}
 	}
 
+	public static class Test{
+		public String day;		//usato per trovare quale verifica interessa
+		public String date;
+		public String subject;
+		public String creator;
+		public String details;
+
+		public Test(String day, String date, String subject, String creator, String details){
+			this.day = day;
+			this.date = date;
+			this.subject = subject;
+			this.creator = creator;
+			this.details = details;
+		}
+
+		public String toString() {
+			return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details;
+		}
+
+		public static List<Test> getAllTests(){
+			List<Test> allTests = new Vector<>();
+			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
+			for(Element testHTML: testsHTML){
+				Document detailsHTML = getPage("https://registro.giua.edu.it" + testHTML.attributes().get("data-href"));
+				String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
+				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+
+				allTests.add(new Test(
+						testHTML.parent().parent().text(),
+						testHTML.attributes().get("data-href").split("/")[4],
+						subject,
+						creator,
+						details
+				));
+			}
+
+			return allTests;
+		}
+
+		public static Test EmptyTest(String date){
+			return new Test(
+					date.split("-")[2],
+					date,
+					"",
+					"",
+					"No verifiche"
+			);
+		}
+
+		//Restituisce il compito di una determinata data. Data deve essere cosi: anno-mese-giorno
+		public static Test getTest(String date){
+			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi/dettagli/" + date + "/V");
+			try {
+				String subject = doc.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
+				String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = doc.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+
+				return new Test(
+						date.split("-")[2],
+						date,
+						subject,
+						creator,
+						details
+				);
+			} catch (IndexOutOfBoundsException e){		//Non ci sono verifiche in questo giorno
+				return EmptyTest(date);
+			}
+		}
+	}
+
+	public static class Vote{
+		//TODO: Aggiungere data, giudizio e tipo di verifica (orale o scritta)
+		public String value;
+		public boolean isFirstQuarterly;
+		public String date;
+		public String judgement;
+		public String testType;
+
+		public Vote(String value){
+			this.value = value;
+		}
+
+		//Ritorna una mappa fatta in questo modo: {"italiano": [tutti voti italiano], ...}
+		public static Map<String, List<Vote>> getAllVotes() {
+			//TODO: Aggiungere il supporto per gli asterischi
+			//TODO: Distinguere voti del primo quadrimestre e del secondo
+
+			Map<String, List<Vote>> returnVotes = new HashMap<>();
+			Document doc = getPage("https://registro.giua.edu.it/genitori/voti");
+			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
+
+			int totalVotes = votesHTML.size();
+			for (Element voteHTML : votesHTML) {
+				final String voteAsString = voteHTML.text(); //prende il voto
+				if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
+					String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
+					if (returnVotes.containsKey(materiaName)) {			//Se la materia esiste gia aggiungo solamente il voto
+						List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
+						tempList.add(new Vote(voteAsString));
+					} else {
+						returnVotes.put(materiaName, new Vector<Vote>() {{
+							add(new Vote(voteAsString));    //il voto lo aggiungo direttamente
+						}});
+					}
+				}
+			}
+
+			return returnVotes;
+		}
+
+		public String toString(){
+			return this.value;
+		}
+	}
+
 	// Insert user and password of the account
 	private static String user = "";
 	private static String password = "";
@@ -173,7 +288,7 @@ public class App
 
 	public static Document getPage(String url) {
 		try {
-			
+
 			if(!checkLogin()) {
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
@@ -199,34 +314,6 @@ public class App
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	//Ritorna una mappa fatta in questo modo: {"italiano": [tutti voti italiano], ...}
-	public static Map<String, List<String>> getAllVotes() {
-		//TODO: Aggiungere il supporto per gli asterischi
-		//TODO: Distinguere voti del primo quadrimestre e del secondo
-
-		Map<String, List<String>> returnVotes = new HashMap<>();
-		Document doc = getPage("https://registro.giua.edu.it/genitori/voti");
-		Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
-
-		int totalVotes = votesHTML.size();
-		for (Element voteHTML : votesHTML) {
-			final String voteAsString = voteHTML.text(); //prende il voto
-			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-				String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-				if (returnVotes.containsKey(materiaName)) {
-					List<String> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-					tempList.add(voteAsString);
-				} else {
-					returnVotes.put(materiaName, new Vector<String>() {{
-						add(voteAsString);    //il voto lo aggiungo direttamente
-					}});
-				}
-			}
-		}
-
-		return returnVotes;
 	}
 
 	public static Boolean checkLogin() {
@@ -348,7 +435,7 @@ public class App
 		print("--------VOTI--------");
 
 		print("Get votes");
-		Map<String, List<String>> votes = getAllVotes();
+		Map<String, List<Vote>> votes = Vote.getAllVotes();
 		for(Map.Entry m:votes.entrySet()){
 			print(m.getKey()+" "+m.getValue());
 		}
@@ -356,8 +443,8 @@ public class App
 		print("--------AVVISI---------");
 
 		print("Get avvisi");
-		List<Avviso> allAvvisi = Avviso.getAllAvvisi();
-		for(Avviso a: allAvvisi){
+		List<Alerts> allAvvisi = Alerts.getAllAvvisi();
+		for(Alerts a: allAvvisi){
 			print(a.toString());
 		}
 
@@ -368,6 +455,14 @@ public class App
 			print(a.toString());
 		}
 		print(Homework.getHomework("2021-05-28").toString());
+
+		print("--------VERIFICHE--------");
+		print("Get tests");
+		List<Test> allTests = Test.getAllTests();
+		for(Test a: allTests){
+			print(a.toString());
+		}
+		print(Test.getTest("2021-05-18").toString());
 
 		/*
 		Elements table_div = page.getElementsByTag("tbody"); //Table

@@ -61,8 +61,8 @@ public class App
 	}
 
 	// Insert user and password of the account
-	private static String user = "";
-	private static String password = "";
+	private static String user = "***REMOVED***";
+	private static String password = "***REMOVED***";
 
 	private static Map<String, String> PHPSESSID = null;
 	private static String CSRFToken = null;
@@ -101,16 +101,26 @@ public class App
 	public static List<Avviso> getAllAvvisi() {
 		List<Avviso> allAvvisi = new Vector<Avviso>();
 		Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
-		Elements allAvvisiStatusHTML = doc.getElementsByClass("label label-default");
+		Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
+		Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
 		int i = 0;
-		for (Element el : allAvvisiStatusHTML) {
+		for (Element el : allAvvisiLettiStatusHTML) {
 			allAvvisi.add(new Avviso(el.text(),
 					el.parent().parent().child(1).text(),
 					el.parent().parent().child(2).text(),
 					el.parent().parent().child(3).text(),
 					i
 					));
+			i++;
+		}
+		for (Element el : allAvvisiDaLeggereStatusHTML) {
+			allAvvisi.add(new Avviso(el.text(),
+					el.parent().parent().child(1).text(),
+					el.parent().parent().child(2).text(),
+					el.parent().parent().child(3).text(),
+					i
+			));
 			i++;
 		}
 

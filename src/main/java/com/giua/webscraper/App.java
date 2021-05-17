@@ -280,7 +280,16 @@ public class App
 
 	// Insert user and password of the account
 	private static String user = "";
+
+	public static void setUser(String u){
+		user = u;
+	}
+
 	private static String password = "";
+
+	public static void setPassword(String p){
+		password = p;
+	}
 
 	private static Map<String, String> PHPSESSID = null;
 	private static String CSRFToken = null;
@@ -394,6 +403,7 @@ public class App
 
 			print("login: get csrf token");
 
+			//Nota: Questo regex non piace ad android per qualche motivo			   v
 			CSRFToken = res2.body().split("\":\"", 0)[1].replaceAll("\"}", "");		//prende solo il valore del csrf
 
 			//print("Page content: " + res2.body());

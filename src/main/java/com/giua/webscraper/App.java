@@ -286,6 +286,22 @@ public class App
 	private static String CSRFToken = null;
 
 
+	public static class SessionCookieEmpty
+			extends RuntimeException {
+		public SessionCookieEmpty(String errorMessage) {
+			super(errorMessage);
+		}
+	}
+
+	public static class UnableToLogin
+			extends RuntimeException {
+		public UnableToLogin(String errorMessage) {
+			super(errorMessage);
+		}
+	}
+
+
+
 	public static Document getPage(String url) {
 		try {
 
@@ -293,7 +309,6 @@ public class App
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
 				login(user, password);
-				return new Document("");
 			}
 
 			print("getPage: Getting page...");
@@ -304,6 +319,13 @@ public class App
 					.execute();
 
 			Document doc = res.parse();
+
+
+			if(!checkLogin()) {
+				//Questo errore non dovrebbe mai accadere a meno che non ci siano problemi con il sito
+				print("getPage: Something went wrong!");
+				throw new UnableToLogin("Unable to login, checkLogin returned false after a successful login");
+			}
 
 			print("getPage: Done!");
 			return doc;
@@ -335,7 +357,6 @@ public class App
 			//The login screen is the most simple to scrape information from, in this case we search
 			//for the log out button, if it doesn't exist we are not logged in.
 			// Since we have already loaded the login page, this process is very fast
-			//logged out
 			return logout_button.size() > 0; //ritorna true se sei loggato altrimenti false
 
 
@@ -388,7 +409,15 @@ public class App
 			PHPSESSID = res3.cookies();
 			System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
-			//Document doc2 = res3.parse();
+			Document doc2 = res3.parse();
+
+
+			if(PHPSESSID.isEmpty()){
+				Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
+				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
+			}
+
+
 			//print("HTML: " + doc2);
 
 
@@ -414,18 +443,6 @@ public class App
 			print("Password: ");
 			password= sc.nextLine();
 		}
-
-		print("----FIRST LOGIN----\n");
-		login(user, password);
-
-		print("------ ARE WE LOGGED IN? ----- ");
-		print(checkLogin().toString());
-
-		print("----GET PAGE----\n");
-		getPage("https://registro.giua.edu.it/genitori/voti");
-
-		print("------ ARE WE LOGGED IN? ----- ");
-		print(checkLogin().toString());
 
 
 		Document page = getPage("https://registro.giua.edu.it/genitori/voti");

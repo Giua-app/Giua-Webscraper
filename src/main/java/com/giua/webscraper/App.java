@@ -21,28 +21,42 @@ public class App
 {
 
 	public static class Avviso {    //Da usare come una struttura di C#
-		public final String stato;
-		public final String data;
-		public final String destinatari;
-		public final String oggetto;
-		public String dettagli;
-		public String creatore;
+		public final String status;
+		public final String date;
+		public final String receivers;
+		public final String objectAvviso;
+		public String details;
+		public String creator;
 		public final int id;		//Indica quanto e' lontano dal primo avviso partendo dall'alto
+		public boolean isDetailed;
 
-		Avviso(String stato, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
-			this.stato = stato;
-			this.data = data;
-			this.destinatari = destinatari;
-			this.oggetto = oggetto;
+		Avviso(String status, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
+			this.status = status;
+			this.date = data;
+			this.receivers = destinatari;
+			this.objectAvviso = oggetto;
 			this.id = id;
+			this.isDetailed = false;
 		}
 
 		public String getDetails(){		//carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
 			Document allAvvisiHTML = getPage("https://registro.giua.edu.it/genitori/avvisi");
 			Document dettagliAvvisoHTML = getPage("https://registro.giua.edu.it" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
-			this.dettagli = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
-			this.creatore = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
-			return this.dettagli;
+			this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
+			this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+			this.isDetailed = true;
+			return this.details;
+		}
+
+		public boolean isRead(){
+			return this.status.equals("LETTA");
+		}
+
+		public String toString(){
+			if(!this.isDetailed)
+				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso;
+			else
+				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso + "; " + this.creator + "; " + this.details;
 		}
 	}
 
@@ -114,14 +128,14 @@ public class App
 
 		int totalVotes = votesHTML.size();
 		for (Element voteHTML : votesHTML) {
-			String voteAsString = voteHTML.text(); //prende il voto
+			final String voteAsString = voteHTML.text(); //prende il voto
 			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-				String subject = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-				if (returnVotes.containsKey(subject)) {
-					List<String> tempList = returnVotes.get(subject); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
+				String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
+				if (returnVotes.containsKey(materiaName)) {
+					List<String> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
 					tempList.add(voteAsString);
 				} else {
-					returnVotes.put(subject, new Vector<String>() {{
+					returnVotes.put(materiaName, new Vector<String>() {{
 						add(voteAsString);    //il voto lo aggiungo direttamente
 					}});
 				}
@@ -247,12 +261,23 @@ public class App
 
 		print("Website title: " + page.title());
 
+		print("--------VOTI--------");
 
 		print("Get votes");
 		Map<String, List<String>> votes = getAllVotes();
 		for(Map.Entry m:votes.entrySet()){
 			print(m.getKey()+" "+m.getValue());
 		}
+
+		print("--------AVVISI---------");
+
+		print("Get avvisi");
+		List<Avviso> allAvvisi = getAllAvvisi();
+		for(Avviso a: allAvvisi){
+			print(a.toString());
+		}
+
+		print("---------------------");
 
 		/*
 		Elements table_div = page.getElementsByTag("tbody"); //Table

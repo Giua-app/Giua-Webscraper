@@ -114,7 +114,7 @@ public class App
 
 		int totalVotes = votesHTML.size();
 		for (Element voteHTML : votesHTML) {
-			String voteAsString = voteHTML.text(); //prende il voto
+			final String voteAsString = voteHTML.text(); //prende il voto
 			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
 				String subject = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
 				if (returnVotes.containsKey(subject)) {

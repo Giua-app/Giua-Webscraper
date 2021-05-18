@@ -11,11 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 
-/* Giua Webscraper 0.6.1
- *
- *  JSoup: library for webscraping
- *
- */
+/* -- Giua Webscraper alpha 0.6.x -- */
 public class App
 {
 
@@ -389,28 +385,28 @@ public class App
             	Document doc = res.parse();
             	PHPSESSID = res.cookies();
 
-			print("login: First connection (login form)");
-			System.out.printf("login: Title: %s\n", doc.title());
-			System.out.printf("login: Cookie: %s\n", PHPSESSID);
+			//print("login: First connection (login form)");
+			//System.out.printf("login: Title: %s\n", doc.title());
+			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 
-			print("login: Second connection (authenticate)");
+			//print("login: Second connection (authenticate)");
 			Connection.Response res2 = Jsoup.connect("https://registro.giua.edu.it/ajax/token/authenticate")
 					.cookies(PHPSESSID)
 					.method(Method.GET)
 					.ignoreContentType(true)
 					.execute();
 
-			print("login: get csrf token");
+			//print("login: get csrf token");
 
-			//Nota: Questo regex non piace ad android per qualche motivo
+
 			String csrfString = res2.body().split("\":\"")[1];
 			CSRFToken = csrfString.substring(0, csrfString.length()-2);		//prende solo il valore del csrf
 
 			//print("Page content: " + res2.body());
 			print("login: CSRF Token: " + CSRFToken);
 
-			print("login: Third connection (login form)");
+			//print("login: Third connection (login form)");
 			Connection.Response res3 = Jsoup.connect("https://registro.giua.edu.it/login/form/")
 					.data("_username", username, "_password", password, "_csrf_token", CSRFToken, "login", "")
 					.cookies(PHPSESSID)
@@ -427,6 +423,8 @@ public class App
 				Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 			}
+
+			print("login: Logged in as " + username);
 
 
 			//print("HTML: " + doc2);
@@ -455,6 +453,7 @@ public class App
 			password= sc.nextLine();
 		}
 
+		login(user,password);
 
 		Document page = getPage("https://registro.giua.edu.it/genitori/voti");
 
@@ -492,39 +491,5 @@ public class App
 		}
 		print(Test.getTest("2021-05-18").toString());
 
-		/*
-		Elements table_div = page.getElementsByTag("tbody"); //Table
-		//print("-------HTML TABLE------\n\n" + table_div.toString() + "\n-----\n");
-		Elements riga_div = table_div.first().getElementsByTag("tr"); //sub-table
-
-
-		for (Element container : riga_div) {
-			String materia = container.getElementsByTag("strong").first().text(); //Get the subject
-
-			Elements voti_div = container.getElementsByTag("button"); //Get number from button
-			Elements info_voti_div = container.getElementsByTag("div"); //Get information from the popup
-			String voti_materia = null;
-			//Integer i = 0;
-			String info = null;
-
-			print("\n" + materia);
-			for (Element container_v : voti_div) {
-				voti_materia = container_v.text();
-
-				for (Element container_iv : info_voti_div) {
-					info = container_iv.text();
-				}
-
-				print("Voto: " + voti_materia + "\n" + info);
-			}
-
-
-
-    		/*
-    		for(String[] voto : voti_materia[]) {
-    			print(materia + " - voto: " + voto + "\n" + info);
-    		}*
-
-		}*/
 	}
 }

@@ -22,15 +22,17 @@ public class App
 		public final String objectAvviso;
 		public String details;
 		public String creator;
+		public final int page;
 		public final int id;		//Indica quanto e' lontano dal primo avviso partendo dall'alto
 		public boolean isDetailed;
 
-		Alerts(String status, String data, String destinatari, String oggetto, int id) {    //Costruttore (suona malissimo in italiano)
+		Alerts(String status, String data, String destinatari, String oggetto, int id, int page) {    //Costruttore (suona malissimo in italiano)
 			this.status = status;
 			this.date = data;
 			this.receivers = destinatari;
 			this.objectAvviso = oggetto;
 			this.id = id;
+			this.page = page;
 			this.isDetailed = false;
 		}
 
@@ -48,7 +50,7 @@ public class App
 		}
 
 		//Ritorna una lista di Avvisi con tutti i loro componenti
-		public static List<Alerts> getAllAvvisi() {
+		public static List<Alerts> getAllAvvisi(int page) {
 			List<Alerts> allAvvisi = new Vector<Alerts>();
 			Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
 			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
@@ -60,7 +62,8 @@ public class App
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
-						i
+						i,
+						page
 				));
 				i++;
 			}
@@ -69,7 +72,8 @@ public class App
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
-						i
+						i,
+						page
 				));
 				i++;
 			}
@@ -82,6 +86,68 @@ public class App
 				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso;
 			else
 				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso + "; " + this.creator + "; " + this.details;
+		}
+	}
+
+	public static class Newsletters {
+		public final String status;
+		public final String date;
+		public final String newslettersObject;
+		public final String detailsUrl;
+		public final String number;
+		public final int page;
+		public final int id;		//Indica quanto e' lontano dalla prima circolare
+
+		Newsletters(String status, String numebr, String date, String newslettersObject, String detailsUrl, int id, int page) {
+			this.status = status;
+			this.date = date;
+			this.newslettersObject = newslettersObject;
+			this.detailsUrl = detailsUrl;
+			this.number = numebr;
+			this.id = id;
+			this.page = page;
+		}
+
+		public boolean isRead(){
+			return this.status.equals("LETTA");
+		}
+
+		//Ritorna una lista di Newsletters con tutti i loro componenti di una determinata pagina
+		public static List<Newsletters> getAllNewsletters(int page) {
+			List<Newsletters> allCirculars = new Vector<Newsletters>();
+			Document doc = getPage("https://registro.giua.edu.it/circolari/genitori/" + page);
+			Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
+			Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
+
+			int i = 0;
+			for (Element el : allNewslettersLettiStatusHTML) {
+				allCirculars.add(new Newsletters(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						"https://registro.giua.edu.it" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						i,
+						page
+				));
+				i++;
+			}
+			for (Element el : allNewslettersDaLeggereStatusHTML) {
+				allCirculars.add(new Newsletters(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						"https://registro.giua.edu.it" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						i,
+						page
+				));
+				i++;
+			}
+
+			return allCirculars;
+		}
+
+		public String toString(){
+			return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl;
 		}
 	}
 
@@ -176,7 +242,26 @@ public class App
 			return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details;
 		}
 
-		public static List<Test> getAllTests(){
+		public static List<Test> getAllTestsWithoutDetails(){
+			List<Test> allTests = new Vector<>();
+			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
+			for(Element testHTML: testsHTML){
+
+				allTests.add(new Test(
+						testHTML.parent().parent().text(),
+						testHTML.attributes().get("data-href").split("/")[4],
+						"",
+						"",
+						""
+				));
+			}
+
+			return allTests;
+		}
+
+		public static List<Test> getAllTests(){		//Se ci sono molti elementi e quindi link potrebbe dare connection timed out.
+													//Meglio utilizzare prima quello senza dettagli e poi andare a prendere la verifica singolarmente con getTest
 			List<Test> allTests = new Vector<>();
 			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
@@ -229,44 +314,74 @@ public class App
 		}
 	}
 
-	public static class Vote{
-		//TODO: Aggiungere data, giudizio e tipo di verifica (orale o scritta)
+	private static class Vote{
 		public String value;
 		public boolean isFirstQuarterly;
+		public boolean isAsterisk;
 		public String date;
 		public String judgement;
 		public String testType;
+		public String arguments;
 
-		public Vote(String value){
+		public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk){
 			this.value = value;
+			this.date = date;
+			this.testType = testType;
+			this.arguments = arguments;
+			this.judgement = judgement;
+			this.isFirstQuarterly = isFirstQuarterly;
+			this.isAsterisk = isAsterisk;
+		}
+
+		//Deve essere usata solo da getAllVotes e serve a gestire quei voti che non hanno alcuni dettagli
+		//TODO: NON funziona molto bene da rivedere
+		private static String getDetailOfVote(Element e, int index){
+			try {
+				String s =  e.parent().child(1).child(0).child(0).child(index).text();
+				return s;
+			} catch (Exception err){
+				return "";
+			}
 		}
 
 		//Ritorna una mappa fatta in questo modo: {"italiano": [tutti voti italiano], ...}
 		public static Map<String, List<Vote>> getAllVotes() {
-			//TODO: Aggiungere il supporto per gli asterischi
-			//TODO: Distinguere voti del primo quadrimestre e del secondo
 
 			Map<String, List<Vote>> returnVotes = new HashMap<>();
 			Document doc = getPage("https://registro.giua.edu.it/genitori/voti");
 			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
-			int totalVotes = votesHTML.size();
-			for (Element voteHTML : votesHTML) {
+			for (final Element voteHTML : votesHTML) {
 				final String voteAsString = voteHTML.text(); //prende il voto
+				final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
+				final String voteDate = getDetailOfVote(voteHTML, 0);
+				final String type = getDetailOfVote(voteHTML, 1);
+				final String args = getDetailOfVote(voteHTML, 2);
+				final String judg = getDetailOfVote(voteHTML, 3);
+				final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
+
 				if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-					String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
 					if (returnVotes.containsKey(materiaName)) {			//Se la materia esiste gia aggiungo solamente il voto
 						List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-						tempList.add(new Vote(voteAsString));
+						tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
 					} else {
 						returnVotes.put(materiaName, new Vector<Vote>() {{
-							add(new Vote(voteAsString));    //il voto lo aggiungo direttamente
+							add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
 						}});
 					}
+				} else {		//e' un asterisco
+					returnVotes.put(materiaName, new Vector<Vote>() {{
+						add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+					}});
 				}
 			}
 
 			return returnVotes;
+		}
+
+		//Mette anche i dettagli nella stringa
+		public String allToString(){
+			return this.value + "; " + this.judgement;
 		}
 
 		public String toString(){
@@ -466,11 +581,15 @@ public class App
 		for(Map.Entry m:votes.entrySet()){
 			print(m.getKey()+" "+m.getValue());
 		}
+		print(votes.get("Ed. civica").get(0).arguments);
+		print(String.valueOf(votes.get("Ed. civica").get(1).judgement));
+		print(String.valueOf(votes.get("Ed. civica").get(1).isFirstQuarterly));
+		print(String.valueOf(votes.get("Informatica").get(0).isAsterisk));
 
 		print("--------AVVISI---------");
 
 		print("Get avvisi");
-		List<Alerts> allAvvisi = Alerts.getAllAvvisi();
+		List<Alerts> allAvvisi = Alerts.getAllAvvisi(1);
 		for(Alerts a: allAvvisi){
 			print(a.toString());
 		}
@@ -485,11 +604,18 @@ public class App
 
 		print("--------VERIFICHE--------");
 		print("Get tests");
-		List<Test> allTests = Test.getAllTests();
+		List<Test> allTests = Test.getAllTestsWithoutDetails();
 		for(Test a: allTests){
 			print(a.toString());
 		}
 		print(Test.getTest("2021-05-18").toString());
+
+		print("--------CIRCOLARI--------");
+		print("Get tests");
+		List<Newsletters> allNewsletters = Newsletters.getAllNewsletters(2);
+		for(Newsletters a: allNewsletters){
+			print(a.toString());
+		}
 
 	}
 }

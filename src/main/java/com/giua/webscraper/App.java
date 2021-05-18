@@ -403,8 +403,9 @@ public class App
 
 			print("login: get csrf token");
 
-			//Nota: Questo regex non piace ad android per qualche motivo			   v
-			CSRFToken = res2.body().split("\":\"", 0)[1].replaceAll("\"}", "");		//prende solo il valore del csrf
+			//Nota: Questo regex non piace ad android per qualche motivo
+			String csrfString = res2.body().split("\":\"")[1];
+			CSRFToken = csrfString.substring(0, csrfString.length()-2);		//prende solo il valore del csrf
 
 			//print("Page content: " + res2.body());
 			print("login: CSRF Token: " + CSRFToken);

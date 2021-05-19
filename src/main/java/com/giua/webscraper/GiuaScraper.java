@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
 /* -- Giua Webscraper alpha 0.6.x -- */
 public class App
 {
@@ -224,11 +223,11 @@ public class App
 	}
 
 	public static class Test{
-		public String day;		//usato per trovare quale verifica interessa
-		public String date;
-		public String subject;
-		public String creator;
-		public String details;
+		public final String day;		//usato per trovare quale verifica interessa
+		public final String date;
+		public final String subject;
+		public final String creator;
+		public final String details;
 
 		public Test(String day, String date, String subject, String creator, String details){
 			this.day = day;
@@ -315,13 +314,13 @@ public class App
 	}
 
 	private static class Vote{
-		public String value;
-		public boolean isFirstQuarterly;
-		public boolean isAsterisk;
-		public String date;
-		public String judgement;
-		public String testType;
-		public String arguments;
+		public final String value;
+		public final boolean isFirstQuarterly;
+		public final boolean isAsterisk;
+		public final String date;
+		public final String judgement;
+		public final String testType;
+		public final String arguments;
 
 		public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk){
 			this.value = value;
@@ -404,7 +403,6 @@ public class App
 
 	private static Map<String, String> PHPSESSID = null;
 	private static String CSRFToken = null;
-
 
 	public static class SessionCookieEmpty
 			extends RuntimeException {

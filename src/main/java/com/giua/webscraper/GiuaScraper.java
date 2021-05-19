@@ -11,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /* -- Giua Webscraper alpha 0.6.x -- */
-public class App
+public class GiuaScraper
 {
 
 	public static class Alerts {    //Da usare come una struttura di C#

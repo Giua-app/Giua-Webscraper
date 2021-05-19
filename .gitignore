@@ -146,3 +146,8 @@ buildNumber.properties
 # End of https://www.toptal.com/developers/gitignore/api/intellij,java,maven
 
 
+.idea/.name
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/jarRepositories.xml
+.idea/vcs.xml

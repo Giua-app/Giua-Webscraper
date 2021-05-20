@@ -12,10 +12,10 @@ import org.jsoup.select.Elements;
 
 /* -- Giua Webscraper alpha 0.6.x -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
-public class GiuaScraper
+public class GiuaScraper extends GiuaScraperExceptions
 {
 
-	public static class Alerts {    //Da usare come una struttura di C#
+	public static class Alerts {
 		public final String status;
 		public final String date;
 		public final String receivers;
@@ -23,10 +23,10 @@ public class GiuaScraper
 		public String details;
 		public String creator;
 		public final int page;
-		public final int id;		//Indica quanto e' lontano dal primo avviso partendo dall'alto
+		public final int id;        //Indica quanto e' lontano dal primo avviso partendo dall'alto
 		public boolean isDetailed;
 
-		Alerts(String status, String data, String destinatari, String oggetto, int id, int page) {    //Costruttore (suona malissimo in italiano)
+		Alerts(String status, String data, String destinatari, String oggetto, int id, int page) {
 			this.status = status;
 			this.date = data;
 			this.receivers = destinatari;
@@ -36,8 +36,8 @@ public class GiuaScraper
 			this.isDetailed = false;
 		}
 
-		public String getDetails(){		//carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
-			Document allAvvisiHTML = getPage(SiteURL + "/genitori/avvisi");
+		public String getDetails() {        //carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
+			Document allAvvisiHTML = getPage(SiteURL + "/genitori/avvisi/" + page);
 			Document dettagliAvvisoHTML = getPage(SiteURL + "" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
 			this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
 			this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
@@ -45,14 +45,15 @@ public class GiuaScraper
 			return this.details;
 		}
 
-		public boolean isRead(){
+		public boolean isRead() {
 			return this.status.equals("LETTA");
 		}
 
-		//Ritorna una lista di Avvisi con tutti i loro componenti
+		//Ritorna una lista di Avvisi con tutti i loro componenti ma senza i dettagli
 		public static List<Alerts> getAllAvvisi(int page) {
+			if(page < 0){throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");}
 			List<Alerts> allAvvisi = new Vector<Alerts>();
-			Document doc = getPage(SiteURL + "/genitori/avvisi");
+			Document doc = getPage(SiteURL + "/genitori/avvisi/" + page);
 			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
@@ -81,8 +82,8 @@ public class GiuaScraper
 			return allAvvisi;
 		}
 
-		public String toString(){
-			if(!this.isDetailed)
+		public String toString() {
+			if (!this.isDetailed)
 				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso;
 			else
 				return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso + "; " + this.creator + "; " + this.details;
@@ -340,10 +341,9 @@ public class GiuaScraper
 		}
 
 		//Deve essere usata solo da getAllVotes e serve a gestire quei voti che non hanno alcuni dettagli
-		//TODO: NON funziona molto bene da rivedere
 		private static String getDetailOfVote(Element e, int index){
 			try {
-				return e.parent().child(1).child(0).child(0).child(index).text();
+				return e.siblingElements().get(e.elementSiblingIndex()).child(0).child(0).child(index).text().split(": ")[1];
 			} catch (Exception err){
 				return "";
 			}
@@ -389,8 +389,12 @@ public class GiuaScraper
 		}
 
 		//Mette anche i dettagli nella stringa
-		public String allToString(){
-			return this.value + "; " + this.judgement;
+		public String allToString() {
+			if (this.isAsterisk) {
+				return "*; " + this.date + "; " + this.testType + "; " + this.arguments + "; " + this.judgement;
+			} else {
+				return this.value + "; " + this.date + "; " + this.testType + "; " + this.arguments + "; " + this.judgement;
+			}
 		}
 
 		public String toString(){
@@ -412,27 +416,10 @@ public class GiuaScraper
 	}
 
 	//URL del registro
-	private static String SiteURL = "https://registro.giua.edu.it";
+	private static final String SiteURL = "https://registro.giua.edu.it";
 
 	private static Map<String, String> PHPSESSID = null; //TODO: modificare la variabile in modo che contenga solo il cookie che ci interessa e non tutti
 	private static String CSRFToken = null;
-
-
-
-	public static class SessionCookieEmpty
-			extends RuntimeException {
-		public SessionCookieEmpty(String errorMessage) {
-			super(errorMessage);
-		}
-	}
-
-	public static class UnableToLogin
-			extends RuntimeException {
-		public UnableToLogin(String errorMessage) {
-			super(errorMessage);
-		}
-	}
-
 
 
 	public static Document getPage(String url) {
@@ -596,10 +583,10 @@ public class GiuaScraper
 		for(String m: votes.keySet()){
 			print(m + ": " + votes.get(m).toString());
 		}
-		print(votes.get("Informatica").get(0).toString());
-		print(votes.get("Informatica").get(1).toString());
+		print(votes.get("Ed. civica").get(0).allToString());
+		print(votes.get("Ed. civica").get(1).allToString());
 
-		print("--------AVVISI---------");
+		/*print("--------AVVISI---------");
 
 		print("Get avvisi");
 		List<Alerts> allAvvisi = Alerts.getAllAvvisi(1);
@@ -628,7 +615,7 @@ public class GiuaScraper
 		List<Newsletters> allNewsletters = Newsletters.getAllNewsletters(2);
 		for(Newsletters a: allNewsletters){
 			print(a.toString());
-		}
+		}*/
 
 	}
 }

@@ -343,8 +343,7 @@ public class GiuaScraper
 		//TODO: NON funziona molto bene da rivedere
 		private static String getDetailOfVote(Element e, int index){
 			try {
-				String s =  e.parent().child(1).child(0).child(0).child(index).text();
-				return s;
+				return e.parent().child(1).child(0).child(0).child(index).text();
 			} catch (Exception err){
 				return "";
 			}
@@ -490,8 +489,8 @@ public class GiuaScraper
 		} catch (IOException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 
 
@@ -506,11 +505,9 @@ public class GiuaScraper
             	    .method(Method.GET)
             	    .execute();
 
-            	Document doc = res.parse();
+            	//Document doc = res.parse();
             	PHPSESSID = res.cookies();
 
-			//System.out.printf("login: Title: %s\n", doc.title());
-			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 
 			//print("login: Second connection (authenticate)");
@@ -582,7 +579,7 @@ public class GiuaScraper
 
 
 		Scanner sc= new Scanner(System.in);
-		if(user=="" && password==""){
+		if(user.equals("") && password.equals("")){
 			print("Please enter username: ");
 			user= sc.nextLine();
 			print("Password: ");
@@ -590,11 +587,7 @@ public class GiuaScraper
 		}
 
 		print("\n-------------------\nConnecting to " + SiteURL + "\n-------------------\n");
-		//login(user,password);
 
-		//Document page = getPage(SiteURL + "/genitori/voti");
-
-		//print("Website title: " + page.title());
 
 		print("--------VOTI--------");
 

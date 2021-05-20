@@ -415,8 +415,10 @@ public class GiuaScraper
 	//URL del registro
 	private static String SiteURL = "https://registro.giua.edu.it";
 
-	private static Map<String, String> PHPSESSID = null;
+	private static Map<String, String> PHPSESSID = null; //TODO: modificare la variabile in modo che contenga solo il cookie che ci interessa e non tutti
 	private static String CSRFToken = null;
+
+
 
 	public static class SessionCookieEmpty
 			extends RuntimeException {
@@ -451,13 +453,6 @@ public class GiuaScraper
 					.execute();
 
 			Document doc = res.parse();
-
-
-			if(!checkLogin()) {
-				//Questo errore non dovrebbe mai accadere a meno che non ci siano problemi con il sito
-				print("getPage: Something went wrong!");
-				throw new UnableToLogin("Unable to login, checkLogin returned false after a successful login");
-			}
 
 			print("getPage: Done!");
 			return doc;
@@ -505,7 +500,7 @@ public class GiuaScraper
 	{
 		try {
 
-			print("login: First connection (login form)");
+			//print("login: First connection (login form)");
 
 			Connection.Response res = Jsoup.connect(SiteURL + "/login/form")
             	    .method(Method.GET)
@@ -518,7 +513,7 @@ public class GiuaScraper
 			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 
-			print("login: Second connection (authenticate)");
+			//print("login: Second connection (authenticate)");
 			Connection.Response res2 = Jsoup.connect(SiteURL + "/ajax/token/authenticate")
 					.cookies(PHPSESSID)
 					.method(Method.GET)
@@ -552,7 +547,7 @@ public class GiuaScraper
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 			}
 
-			print("login: Logged in as " + username);
+			print("login: Logged in as " + username + " with account type " + getUserType(doc2));
 
 
 			//print("HTML: " + doc2);
@@ -568,6 +563,17 @@ public class GiuaScraper
 		//WHY THE FUCK IS THE PRINTING FUCTION SO LONG???
 	}
 
+
+	public static String getUserType(Document doc){
+		//final Document doc = getPage(SiteURL + "/");
+		//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
+		//TODO: quindi per ora lo lascio commentato
+		final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+		String text = elm.get(0).getElementsByTag("a").text();
+		final String[] text2 = text.split("\\(");
+		text = text2[1].replaceAll("\\)", "");
+		return text;
+	}
 
 
 	//Main function, only used on the console version for testing

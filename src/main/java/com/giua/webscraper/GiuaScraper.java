@@ -11,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /* -- Giua Webscraper alpha 0.6.x -- */
+// Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper
 {
 
@@ -36,8 +37,8 @@ public class GiuaScraper
 		}
 
 		public String getDetails(){		//carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
-			Document allAvvisiHTML = getPage("https://registro.giua.edu.it/genitori/avvisi");
-			Document dettagliAvvisoHTML = getPage("https://registro.giua.edu.it" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
+			Document allAvvisiHTML = getPage(SiteURL + "/genitori/avvisi");
+			Document dettagliAvvisoHTML = getPage(SiteURL + "" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
 			this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
 			this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
 			this.isDetailed = true;
@@ -51,7 +52,7 @@ public class GiuaScraper
 		//Ritorna una lista di Avvisi con tutti i loro componenti
 		public static List<Alerts> getAllAvvisi(int page) {
 			List<Alerts> allAvvisi = new Vector<Alerts>();
-			Document doc = getPage("https://registro.giua.edu.it/genitori/avvisi");
+			Document doc = getPage(SiteURL + "/genitori/avvisi");
 			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
@@ -114,7 +115,7 @@ public class GiuaScraper
 		//Ritorna una lista di Newsletters con tutti i loro componenti di una determinata pagina
 		public static List<Newsletters> getAllNewsletters(int page) {
 			List<Newsletters> allCirculars = new Vector<Newsletters>();
-			Document doc = getPage("https://registro.giua.edu.it/circolari/genitori/" + page);
+			Document doc = getPage(SiteURL + "/circolari/genitori/" + page);
 			Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
@@ -124,7 +125,7 @@ public class GiuaScraper
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
-						"https://registro.giua.edu.it" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
 						i,
 						page
 				));
@@ -135,7 +136,7 @@ public class GiuaScraper
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
 						el.parent().parent().child(3).text(),
-						"https://registro.giua.edu.it" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
 						i,
 						page
 				));
@@ -171,10 +172,10 @@ public class GiuaScraper
 
 		public static List<Homework> getAllHomeworks(){
 			List<Homework> allHomeworks = new Vector<>();
-			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Document doc = getPage(SiteURL + "/genitori/eventi");
 			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
 			for(Element homeworkHTML: homeworksHTML){
-				Document detailsHTML = getPage("https://registro.giua.edu.it" + homeworkHTML.attributes().get("data-href"));
+				Document detailsHTML = getPage(SiteURL + "" + homeworkHTML.attributes().get("data-href"));
 				String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
 				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -203,7 +204,7 @@ public class GiuaScraper
 
 		//Restituisce il compito di una determinata data. Data deve essere cosi: anno-mese-giorno
 		public static Homework getHomework(String date){
-			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi/dettagli/" + date + "/P");
+			Document doc = getPage(SiteURL + "/genitori/eventi/dettagli/" + date + "/P");
 			try {
 				String subject = doc.getElementsByClass("gs-big").get(0).text();
 				String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
@@ -245,7 +246,7 @@ public class GiuaScraper
 
 		public static List<Test> getAllTestsWithoutDetails(){
 			List<Test> allTests = new Vector<>();
-			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Document doc = getPage(SiteURL + "/genitori/eventi");
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 			for(Element testHTML: testsHTML){
 
@@ -265,10 +266,10 @@ public class GiuaScraper
 		public static List<Test> getAllTests(){		//Se ci sono molti elementi e quindi link potrebbe dare connection timed out.
 													//Meglio utilizzare prima quello senza dettagli e poi andare a prendere la verifica singolarmente con getTest
 			List<Test> allTests = new Vector<>();
-			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi");
+			Document doc = getPage(SiteURL + "/genitori/eventi");
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 			for(Element testHTML: testsHTML){
-				Document detailsHTML = getPage("https://registro.giua.edu.it" + testHTML.attributes().get("data-href"));
+				Document detailsHTML = getPage(SiteURL + "" + testHTML.attributes().get("data-href"));
 				String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
 				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -299,7 +300,7 @@ public class GiuaScraper
 
 		//Restituisce il compito di una determinata data. Data deve essere cosi: anno-mese-giorno
 		public static Test getTest(String date){
-			Document doc = getPage("https://registro.giua.edu.it/genitori/eventi/dettagli/" + date + "/V");
+			Document doc = getPage(SiteURL + "/genitori/eventi/dettagli/" + date + "/V");
 			try {
 				String subject = doc.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
 				String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
@@ -353,7 +354,7 @@ public class GiuaScraper
 		public static Map<String, List<Vote>> getAllVotes() {
 
 			Map<String, List<Vote>> returnVotes = new HashMap<>();
-			Document doc = getPage("https://registro.giua.edu.it/genitori/voti");
+			Document doc = getPage(SiteURL + "/genitori/voti");
 			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
 			for (final Element voteHTML : votesHTML) {
@@ -410,6 +411,9 @@ public class GiuaScraper
 	public static void setPassword(String p){
 		password = p;
 	}
+
+	//URL del registro
+	private static String SiteURL = "https://registro.giua.edu.it";
 
 	private static Map<String, String> PHPSESSID = null;
 	private static String CSRFToken = null;
@@ -473,7 +477,7 @@ public class GiuaScraper
 				return false; //Not logged in
 			}
 
-			Connection.Response res = Jsoup.connect("https://registro.giua.edu.it/login/form/")
+			Connection.Response res = Jsoup.connect(SiteURL + "/login/form/")
 				    .method(Method.POST)
 				    .cookies(PHPSESSID)
 				    .execute();
@@ -501,26 +505,27 @@ public class GiuaScraper
 	{
 		try {
 
-			Connection.Response res = Jsoup.connect("https://registro.giua.edu.it/login/form")
+			print("login: First connection (login form)");
+
+			Connection.Response res = Jsoup.connect(SiteURL + "/login/form")
             	    .method(Method.GET)
             	    .execute();
 
             	Document doc = res.parse();
             	PHPSESSID = res.cookies();
 
-			//print("login: First connection (login form)");
 			//System.out.printf("login: Title: %s\n", doc.title());
 			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 
-			//print("login: Second connection (authenticate)");
-			Connection.Response res2 = Jsoup.connect("https://registro.giua.edu.it/ajax/token/authenticate")
+			print("login: Second connection (authenticate)");
+			Connection.Response res2 = Jsoup.connect(SiteURL + "/ajax/token/authenticate")
 					.cookies(PHPSESSID)
 					.method(Method.GET)
 					.ignoreContentType(true)
 					.execute();
 
-			//print("login: get csrf token");
+			print("login: get csrf token");
 
 
 			String csrfString = res2.body().split("\":\"")[1];
@@ -530,7 +535,7 @@ public class GiuaScraper
 			print("login: CSRF Token: " + CSRFToken);
 
 			//print("login: Third connection (login form)");
-			Connection.Response res3 = Jsoup.connect("https://registro.giua.edu.it/login/form/")
+			Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
 					.data("_username", username, "_password", password, "_csrf_token", CSRFToken, "login", "")
 					.cookies(PHPSESSID)
 					.method(Method.POST)
@@ -568,6 +573,8 @@ public class GiuaScraper
 	//Main function, only used on the console version for testing
 	public static void main(String[] args) {
 
+
+
 		Scanner sc= new Scanner(System.in);
 		if(user=="" && password==""){
 			print("Please enter username: ");
@@ -576,11 +583,12 @@ public class GiuaScraper
 			password= sc.nextLine();
 		}
 
-		login(user,password);
+		print("\n-------------------\nConnecting to " + SiteURL + "\n-------------------\n");
+		//login(user,password);
 
-		Document page = getPage("https://registro.giua.edu.it/genitori/voti");
+		//Document page = getPage(SiteURL + "/genitori/voti");
 
-		print("Website title: " + page.title());
+		//print("Website title: " + page.title());
 
 		print("--------VOTI--------");
 

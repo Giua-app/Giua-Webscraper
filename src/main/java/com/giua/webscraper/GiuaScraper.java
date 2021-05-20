@@ -228,17 +228,19 @@ public class GiuaScraper
 		public final String subject;
 		public final String creator;
 		public final String details;
+		public final boolean exists;
 
-		public Test(String day, String date, String subject, String creator, String details){
+		public Test(String day, String date, String subject, String creator, String details, boolean exists){
 			this.day = day;
 			this.date = date;
 			this.subject = subject;
 			this.creator = creator;
 			this.details = details;
+			this.exists = exists;
 		}
 
 		public String toString() {
-			return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details;
+			return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details + "; " + this.exists;
 		}
 
 		public static List<Test> getAllTestsWithoutDetails(){
@@ -252,7 +254,8 @@ public class GiuaScraper
 						testHTML.attributes().get("data-href").split("/")[4],
 						"",
 						"",
-						""
+						"",
+						true
 				));
 			}
 
@@ -275,7 +278,8 @@ public class GiuaScraper
 						testHTML.attributes().get("data-href").split("/")[4],
 						subject,
 						creator,
-						details
+						details,
+						true
 				));
 			}
 
@@ -288,7 +292,8 @@ public class GiuaScraper
 					date,
 					"",
 					"",
-					"No verifiche"
+					"No verifiche",
+					false
 			);
 		}
 
@@ -305,7 +310,8 @@ public class GiuaScraper
 						date,
 						subject,
 						creator,
-						details
+						details,
+						true
 				);
 			} catch (IndexOutOfBoundsException e){		//Non ci sono verifiche in questo giorno
 				return EmptyTest(date);
@@ -369,9 +375,13 @@ public class GiuaScraper
 						}});
 					}
 				} else {		//e' un asterisco
-					returnVotes.put(materiaName, new Vector<Vote>() {{
-						add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-					}});
+					if(returnVotes.containsKey(materiaName)){
+						returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+					} else {
+						returnVotes.put(materiaName, new Vector<Vote>() {{
+							add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+						}});
+					}
 				}
 			}
 
@@ -384,7 +394,7 @@ public class GiuaScraper
 		}
 
 		public String toString(){
-			return this.value;
+			return (this.isAsterisk) ? "*" : this.value;
 		}
 	}
 
@@ -576,13 +586,11 @@ public class GiuaScraper
 
 		print("Get votes");
 		Map<String, List<Vote>> votes = Vote.getAllVotes();
-		for(Map.Entry m:votes.entrySet()){
-			print(m.getKey()+" "+m.getValue());
+		for(String m: votes.keySet()){
+			print(m + ": " + votes.get(m).toString());
 		}
-		print(votes.get("Ed. civica").get(0).arguments);
-		print(String.valueOf(votes.get("Ed. civica").get(1).judgement));
-		print(String.valueOf(votes.get("Ed. civica").get(1).isFirstQuarterly));
-		print(String.valueOf(votes.get("Informatica").get(0).isAsterisk));
+		print(votes.get("Informatica").get(0).toString());
+		print(votes.get("Informatica").get(1).toString());
 
 		print("--------AVVISI---------");
 

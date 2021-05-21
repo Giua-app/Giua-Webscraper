@@ -27,7 +27,7 @@ class TestClasses {
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 
 
-        System.out.println("--------VOTI--------");
+        /*System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
         Map<String, List<Vote>> votes = Vote.getAllVotes(gS);
@@ -59,14 +59,16 @@ class TestClasses {
 		for(Test a: allTests){
 			System.out.println(a.toString());
 		}
-		System.out.println(Test.getTest("2021-05-18", gS).toString());
+		System.out.println(Test.getTest("2021-05-18", gS).toString());*/
 
 		System.out.println("--------CIRCOLARI--------");
 		System.out.println("Get tests");
 		List<Newsletter> allNewsletters = Newsletter.getAllNewsletters(2, gS);
-		for(Newsletter a: allNewsletters){
+		/*for(Newsletter a: allNewsletters){
 			System.out.println(a.toString());
-		}
+		}*/
+        System.out.println(allNewsletters.get(5).attachments.get(0));
+        System.out.println(allNewsletters.get(5).attachments.get(1));
 
     }
 }

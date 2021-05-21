@@ -16,7 +16,7 @@ public class Vote{
     public final String testType;
     public final String arguments;
 
-    public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk){
+    Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk){
         this.value = value;
         this.date = date;
         this.testType = testType;

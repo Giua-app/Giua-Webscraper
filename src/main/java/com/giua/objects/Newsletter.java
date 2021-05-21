@@ -8,20 +8,23 @@ import org.jsoup.select.Elements;
 import java.util.*;
 
 public class Newsletter {
+
     public final String status;
     public final String date;
     public final String newslettersObject;
     public final String detailsUrl;
     public final String number;
+    public final List<String> attachments;
     public final int page;
     public final int id;		//Indica quanto e' lontano dalla prima circolare
 
-    Newsletter(String status, String numebr, String date, String newslettersObject, String detailsUrl, int id, int page) {
+    Newsletter(String status, String numebr, String date, String newslettersObject, String detailsUrl, List<String> attachments, int id, int page) {
         this.status = status;
         this.date = date;
         this.newslettersObject = newslettersObject;
         this.detailsUrl = detailsUrl;
         this.number = numebr;
+        this.attachments = attachments;
         this.id = id;
         this.page = page;
     }
@@ -30,7 +33,23 @@ public class Newsletter {
         return this.status.equals("LETTA");
     }
 
-    //Ritorna una lista di Newsletters con tutti i loro componenti di una determinata pagina
+    private static List<String> attachmentsUrls(Element el){
+        Elements els = el.parent().siblingElements().get(3).child(1).children();
+        List<String> r = new Vector<>();
+        if(els.size() > 2){     //Ci sono allegati
+            Elements allAttachmentsHTML = els.get(1).child(0).children();
+
+            for(Element attachment: allAttachmentsHTML){
+                r.add(GiuaScraper.SiteURL + attachment.child(1).attr("href"));
+            }
+        } else {        //Non ha allegati
+            return null;
+        }
+
+        return r;
+    }
+
+    //Ritorna una lista di Newsletter con tutti i loro componenti di una determinata pagina
     public static List<Newsletter> getAllNewsletters(int page, GiuaScraper gS) {
         List<Newsletter> allCirculars = new Vector<>();
         Document doc = gS.getPage(GiuaScraper.SiteURL + "/circolari/genitori/" + page);
@@ -44,6 +63,7 @@ public class Newsletter {
                     el.parent().parent().child(2).text(),
                     el.parent().parent().child(3).text(),
                     GiuaScraper.SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+                    attachmentsUrls(el),
                     i,
                     page
             ));
@@ -55,6 +75,7 @@ public class Newsletter {
                     el.parent().parent().child(2).text(),
                     el.parent().parent().child(3).text(),
                     GiuaScraper.SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+                    attachmentsUrls(el),
                     i,
                     page
             ));
@@ -65,6 +86,6 @@ public class Newsletter {
     }
 
     public String toString(){
-        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl;
+        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null) ? this.attachments.get(0) : "null");
     }
 }

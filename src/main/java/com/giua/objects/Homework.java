@@ -14,7 +14,7 @@ public class Homework{
     public String creator;
     public String details;
 
-    public Homework(String day, String date, String subject, String creator, String details){
+    Homework(String day, String date, String subject, String creator, String details){
         this.day = day;
         this.date = date;
         this.subject = subject;

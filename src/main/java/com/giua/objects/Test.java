@@ -15,7 +15,7 @@ public class Test{
     public final String details;
     public final boolean exists;
 
-    public Test(String day, String date, String subject, String creator, String details, boolean exists){
+    Test(String day, String date, String subject, String creator, String details, boolean exists){
         this.day = day;
         this.date = date;
         this.subject = subject;

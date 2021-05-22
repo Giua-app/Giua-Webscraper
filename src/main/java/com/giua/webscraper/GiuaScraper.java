@@ -45,7 +45,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 			if(!checkLogin()) {
 				print("getPage: Not logged in");
 				print("getPage: Calling login method");
-				login(user, password);
+				login();
 			}
 
 			print("getPage: Getting page...");
@@ -99,7 +99,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 
 
 	//The most important function, it handles the login process
-	public void login(String username, String password)
+	public void login()
 	{
 		try {
 
@@ -132,7 +132,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 
 			//print("login: Third connection (login form)");
 			Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
-					.data("_username", username, "_password", password, "_csrf_token", CSRFToken, "login", "")
+					.data("_username", this.user, "_password", this.password, "_csrf_token", this.CSRFToken, "login", "")
 					.cookie("PHPSESSID", PHPSESSID)
 					.method(Method.POST)
 					.execute();
@@ -148,7 +148,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 			}
 
-			print("login: Logged in as " + username + " with account type " + getUserType(doc2));
+			print("login: Logged in as " + this.user + " with account type " + getUserType(doc2));
 
 
 			//print("HTML: " + doc2);

@@ -59,16 +59,23 @@ class TestClasses {
 		for(Test a: allTests){
 			System.out.println(a.toString());
 		}
-		System.out.println(Test.getTest("2021-05-18", gS).toString());*/
+		System.out.println(Test.getTest("2021-05-18", gS).toString());
 
 		System.out.println("--------CIRCOLARI--------");
 		System.out.println("Get tests");
 		List<Newsletter> allNewsletters = Newsletter.getAllNewsletters(2, gS);
 		/*for(Newsletter a: allNewsletters){
 			System.out.println(a.toString());
-		}*/
-        System.out.println(allNewsletters.get(5).attachments.get(0));
-        System.out.println(allNewsletters.get(5).attachments.get(1));
+		}
+        System.out.println(allNewsletters.get(5).attachments.get(0));*/
+
+        System.out.println("--------LEZIONI--------");
+        System.out.println("Get lessons");
+        List<Lesson> lessons = Lesson.getLesson("2021-05-13", gS);
+		for(Lesson a: lessons){
+			System.out.println(a.toString());
+		}
+        System.out.println(lessons.get(2).activities);
 
     }
 }

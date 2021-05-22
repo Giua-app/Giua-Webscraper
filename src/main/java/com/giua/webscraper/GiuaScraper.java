@@ -31,7 +31,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	//URL del registro
 	public static final String SiteURL = "https://registro.giua.edu.it";
 
-	private Map<String, String> PHPSESSID = null; //TODO: modificare la variabile in modo che contenga solo il cookie che ci interessa e non tutti
+	private String PHPSESSID = null;
 	private String CSRFToken = null;
 
 	public GiuaScraper(String user, String password){
@@ -52,7 +52,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 
 			Connection.Response res = Jsoup.connect(url)
 					.method(Method.GET)
-					.cookies(PHPSESSID)
+					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
 
 			Document doc = res.parse();
@@ -77,7 +77,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 
 			Connection.Response res = Jsoup.connect(SiteURL + "/login/form/")
 				    .method(Method.POST)
-				    .cookies(PHPSESSID)
+				    .cookie("PHPSESSID", PHPSESSID)
 				    .execute();
 
 			Document doc = res.parse();
@@ -110,13 +110,13 @@ public class GiuaScraper extends GiuaScraperExceptions
             	    .execute();
 
             	//Document doc = res.parse();
-            	PHPSESSID = res.cookies();
+            	PHPSESSID = res.cookie("PHPSESSID");
 
 
 
 			//print("login: Second connection (authenticate)");
 			Connection.Response res2 = Jsoup.connect(SiteURL + "/ajax/token/authenticate")
-					.cookies(PHPSESSID)
+					.cookie("PHPSESSID", PHPSESSID)
 					.method(Method.GET)
 					.ignoreContentType(true)
 					.execute();
@@ -133,11 +133,11 @@ public class GiuaScraper extends GiuaScraperExceptions
 			//print("login: Third connection (login form)");
 			Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
 					.data("_username", username, "_password", password, "_csrf_token", CSRFToken, "login", "")
-					.cookies(PHPSESSID)
+					.cookie("PHPSESSID", PHPSESSID)
 					.method(Method.POST)
 					.execute();
 
-			PHPSESSID = res3.cookies();
+			PHPSESSID = res3.cookie("PHPSESSID");
 			System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 			Document doc2 = res3.parse();

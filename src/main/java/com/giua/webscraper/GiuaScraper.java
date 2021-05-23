@@ -165,7 +165,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	}
 
 
-	public static String getUserType(Document doc){
+	public String getUserType(Document doc){
 		//final Document doc = getPage(SiteURL + "/");
 		//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
 		//TODO: quindi per ora lo lascio commentato

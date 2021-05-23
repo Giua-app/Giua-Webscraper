@@ -9,8 +9,8 @@ class TestClasses {
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
 
-        String user = "***REMOVED***";
-        String password = "***REMOVED***";
+        String user = "";
+        String password = "";
 
         Scanner sc= new Scanner(System.in);
         /*if(user.equals("") && password.equals("")){

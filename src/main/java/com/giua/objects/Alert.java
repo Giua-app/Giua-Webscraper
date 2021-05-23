@@ -18,7 +18,7 @@ public class Alert {
     public final int id;        //Indica quanto e' lontano dal primo avviso partendo dall'alto
     public boolean isDetailed;
 
-    Alert(String status, String data, String destinatari, String oggetto, int id, int page) {
+    public Alert(String status, String data, String destinatari, String oggetto, int id, int page) {
         this.status = status;
         this.date = data;
         this.receivers = destinatari;
@@ -39,39 +39,6 @@ public class Alert {
 
     public boolean isRead() {
         return this.status.equals("LETTA");
-    }
-
-    //Ritorna una lista di Avvisi con tutti i loro componenti ma senza i dettagli
-    public static List<Alert> getAllAvvisi(int page, GiuaScraper gS) {
-        if(page < 0){throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");}
-        List<Alert> allAvvisi = new Vector<Alert>();
-        Document doc = gS.getPage(GiuaScraper.SiteURL + "/genitori/avvisi/" + page);
-        Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
-        Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
-
-        int i = 0;
-        for (Element el : allAvvisiLettiStatusHTML) {
-            allAvvisi.add(new Alert(el.text(),
-                    el.parent().parent().child(1).text(),
-                    el.parent().parent().child(2).text(),
-                    el.parent().parent().child(3).text(),
-                    i,
-                    page
-            ));
-            i++;
-        }
-        for (Element el : allAvvisiDaLeggereStatusHTML) {
-            allAvvisi.add(new Alert(el.text(),
-                    el.parent().parent().child(1).text(),
-                    el.parent().parent().child(2).text(),
-                    el.parent().parent().child(3).text(),
-                    i,
-                    page
-            ));
-            i++;
-        }
-
-        return allAvvisi;
     }
 
     public String toString() {

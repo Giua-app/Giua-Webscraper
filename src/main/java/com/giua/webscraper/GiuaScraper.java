@@ -17,10 +17,10 @@ import org.jsoup.select.Elements;
 public class GiuaScraper extends GiuaScraperExceptions
 {
 	private String user = "";
-	public void getUser(String u){user = u;}
+	public String getUser(){return user;}
 
 	private String password = "";
-	public void getPassword(String p){password = p;}
+	public String getPassword(){return password;}
 
 	//URL del registro
 	public static final String SiteURL = "https://registro.giua.edu.it";

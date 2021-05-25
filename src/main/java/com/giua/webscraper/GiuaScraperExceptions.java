@@ -10,8 +10,22 @@ public class GiuaScraperExceptions {
     }
 
     public static class UnableToLogin extends RuntimeException {
-        public UnableToLogin(String errorMessage) {
+        public UnableToLogin(String errorMessage, Exception e) {
             super(errorMessage);
+            e.printStackTrace();
+        }
+    }
+
+    public static class NotLoggedIn extends RuntimeException {
+        public NotLoggedIn(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
+    public static class UnableToGetUserType extends RuntimeException {
+        public UnableToGetUserType(String errorMessage, Exception e) {
+            super(errorMessage);
+            e.printStackTrace();
         }
     }
 }

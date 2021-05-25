@@ -22,6 +22,8 @@ public class GiuaScraper extends GiuaScraperExceptions
 	private String password = "";
 	public String getPassword(){return password;}
 
+	//TODO: Non abbiamo bisogno di getPassword, la password non dovrebbe mai uscire dalla libreria
+
 	//URL del registro
 	public static final String SiteURL = "https://registro.giua.edu.it";
 
@@ -49,7 +51,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	public List<Alert> getAllAlerts(int page) {
 		if(page < 0){throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");}
 		List<Alert> allAvvisi = new Vector<Alert>();
-		Document doc = getPage(GiuaScraper.SiteURL + "/genitori/avvisi/" + page);
+		Document doc = getPage("genitori/avvisi/" + page);
 		Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
 		Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
@@ -90,7 +92,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 			Elements allAttachmentsHTML = els.get(1).child(0).children();
 
 			for(Element attachment: allAttachmentsHTML){
-				r.add(GiuaScraper.SiteURL + attachment.child(1).attr("href"));
+				r.add(attachment.child(1).attr("href"));
 			}
 		} else {        //Non ha allegati
 			return null;
@@ -106,7 +108,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 */
 	public List<Newsletter> getAllNewsletters(int page) {
 		List<Newsletter> allCirculars = new Vector<>();
-		Document doc = getPage(GiuaScraper.SiteURL + "/circolari/genitori/" + page);
+		Document doc = getPage("circolari/genitori/" + page);
 		Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
 		Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
@@ -116,7 +118,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 					el.parent().parent().child(1).text(),
 					el.parent().parent().child(2).text(),
 					el.parent().parent().child(3).text(),
-					GiuaScraper.SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+					"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
 					attachmentsUrls(el),
 					i,
 					page
@@ -128,7 +130,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 					el.parent().parent().child(1).text(),
 					el.parent().parent().child(2).text(),
 					el.parent().parent().child(3).text(),
-					GiuaScraper.SiteURL + "" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+					"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
 					attachmentsUrls(el),
 					i,
 					page
@@ -145,7 +147,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 * @return Il compito della data specificata se esiste, altrimenti un compito vuoto
 	 */
 	public Homework getHomework(String date){
-		Document doc = getPage(GiuaScraper.SiteURL + "/genitori/eventi/dettagli/" + date + "/P");
+		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
 		try {
 			String subject = doc.getElementsByClass("gs-big").get(0).text();
 			String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
@@ -178,10 +180,10 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 */
 	public List<Homework> getAllHomeworks(String date){
 		List<Homework> allHomeworks = new Vector<>();
-		Document doc = (date == null) ? getPage(GiuaScraper.SiteURL + "/genitori/eventi"): getPage(GiuaScraper.SiteURL + "/genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 		Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
 		for(Element homeworkHTML: homeworksHTML){
-			Document detailsHTML = getPage(GiuaScraper.SiteURL + "" + homeworkHTML.attributes().get("data-href"));
+			Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href"));
 			String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
 			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -205,7 +207,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 * @return Test di un determinato giorno
 	 */
 	public Test getTest(String date){
-		Document doc = getPage(GiuaScraper.SiteURL + "/genitori/eventi/dettagli/" + date + "/V");
+		Document doc = getPage("genitori/eventi/dettagli/" + date + "/V");
 		try {
 			String subject = doc.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
 			String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
@@ -238,7 +240,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 */
 	public List<Test> getAllTestsWithoutDetails(String date){
 		List<Test> allTests = new Vector<>();
-		Document doc = (date == null) ? getPage(GiuaScraper.SiteURL + "/genitori/eventi"): getPage(GiuaScraper.SiteURL + "/genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 		Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 		for(Element testHTML: testsHTML){
 
@@ -263,10 +265,10 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 */
 	public List<Test> getAllTests(String date){
 		List<Test> allTests = new Vector<>();
-		Document doc = (date == null) ? getPage(GiuaScraper.SiteURL + "/genitori/eventi"): getPage(GiuaScraper.SiteURL + "/genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 		Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 		for(Element testHTML: testsHTML){
-			Document detailsHTML = getPage(GiuaScraper.SiteURL + "" + testHTML.attributes().get("data-href"));
+			Document detailsHTML = getPage("" + testHTML.attributes().get("data-href"));
 			String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
 			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -305,7 +307,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	public Map<String, List<Vote>> getAllVotes() {
 
 		Map<String, List<Vote>> returnVotes = new HashMap<>();
-		Document doc = getPage(GiuaScraper.SiteURL + "/genitori/voti");
+		Document doc = getPage("genitori/voti");
 		Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
 		for (final Element voteHTML : votesHTML) {
@@ -346,7 +348,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	 * @return Una List delle {@link Lesson} di un dato giorno
 	 */
 	public List<Lesson> getAllLessons(String date){ //date deve essere tipo: 2021-05-21
-		Document doc = getPage(GiuaScraper.SiteURL + "/genitori/lezioni/" + date);
+		Document doc = getPage("genitori/lezioni/" + date);
 		List<Lesson> returnLesson = new Vector<>();
 
 		Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
@@ -365,22 +367,21 @@ public class GiuaScraper extends GiuaScraperExceptions
 	}
 
 	/**
-	 * Ottiene la pagina HTML di un URL, se non e' loggato prova a loggarsi
-	 * @param url
+	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL}
+	 * Non c'e' bisogno di inserire {@code /} prima di un URL
+	 * @param page
 	 * @return Una pagina HTML come {@link Document}
 	 */
-	public Document getPage(String url) {
+	public Document getPage(String page) {
 		try {
 
-			if(!checkLogin()) {
-				System.out.println("getPage: Not logged in");
-				System.out.println("getPage: Calling login method");
-				login();
+			if(!checkLogin() && page != "" && page != "login/form") {
+				throw new NotLoggedIn("Please login before requesting this page");
 			}
 
 			System.out.println("getPage: Getting page...");
 
-			Connection.Response res = Jsoup.connect(url)
+			Connection.Response res = Jsoup.connect(SiteURL + "/" + page)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
@@ -399,7 +400,35 @@ public class GiuaScraper extends GiuaScraperExceptions
 	}
 
 	/**
-	 * Controlla se e' loggato e in caso contrario fa il login in modo automatico se {@code autoLogin} e vero
+	 * Ottiene la pagina HTML specificata da un URL
+	 * @param url
+	 * @return Una pagina HTML come {@link Document}
+	 */
+	public Document getExtPage(String url) {
+		try {
+
+			System.out.println("getExtPage: Getting external page...");
+
+			Connection.Response res = Jsoup.connect(url)
+					.method(Method.GET)
+					//.cookie("PHPSESSID", PHPSESSID)
+					.execute();
+
+			Document doc = res.parse();
+
+			System.out.println("getExtPage: Done!");
+			return doc;
+
+
+		} catch (IOException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Controlla se si è loggati dentro il registro
 	 * @return true se e' loggato altrimenti false
 	 */
 	public Boolean checkLogin() {
@@ -468,7 +497,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 			Document doc2 = res3.parse();
 
 
-			if(PHPSESSID.isEmpty()){
+			if(PHPSESSID == null){
 				Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 			}
@@ -480,21 +509,25 @@ public class GiuaScraper extends GiuaScraperExceptions
 
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new UnableToLogin("Unable to login in, is the site down?", e);
 		}
 	}
 
 
 	public String getUserType(Document doc){
-		//final Document doc = getPage(SiteURL + "/");
-		//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
-		//TODO: quindi per ora lo lascio commentato
-		/*final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-		String text = elm.get(0).getElementsByTag("a").text();
-		final String[] text2 = text.split("\\(");
-		text = text2[1].replaceAll("\\)", "");*/
-		final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-		String text = elm.text().split(".+\\(|\\)")[0];
-		return text;
+		try{
+			//final Document doc = getPage(SiteURL + "/");
+			//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
+			//TODO: quindi per ora lo lascio commentato
+			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+			String text = elm.get(0).getElementsByTag("a").text();
+			text = text.split("\\(")[1];
+			text = text.replaceAll("\\)", "");
+			//final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+			//String text = elm.text().split(".+\\(|\\)")[0];
+			return text;
+		} catch (Exception e){
+			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);
+		}
 	}
 }

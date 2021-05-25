@@ -29,8 +29,8 @@ public class Alert {
     }
 
     public String getDetails(GiuaScraper gS) {        //carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
-        Document allAvvisiHTML = gS.getPage(GiuaScraper.SiteURL + "/genitori/avvisi/" + page);
-        Document dettagliAvvisoHTML = gS.getPage(GiuaScraper.SiteURL + "" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
+        Document allAvvisiHTML = gS.getPage("genitori/avvisi/" + page);
+        Document dettagliAvvisoHTML = gS.getPage("" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
         this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
         this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
         this.isDetailed = true;

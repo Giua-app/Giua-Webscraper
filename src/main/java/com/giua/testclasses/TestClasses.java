@@ -2,6 +2,7 @@ package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
+import org.jsoup.nodes.Document;
 
 import java.util.*;
 
@@ -13,15 +14,18 @@ class TestClasses {
         String password = "";
 
         Scanner sc= new Scanner(System.in);
-        /*if(user.equals("") && password.equals("")){
+        if(user.equals("") && password.equals("")){
             System.out.println("Please enter username: ");
             user= sc.nextLine();
             System.out.println("Password: ");
             password= sc.nextLine();
-        }*/
+        }
 
         GiuaScraper gS = new GiuaScraper(user, password);
         gS.login();
+
+        //Document doc = gS.getPage("");
+        //System.out.println("FUCK U"+gS.getUserType(doc));
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 

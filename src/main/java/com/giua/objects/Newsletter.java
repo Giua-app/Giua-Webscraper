@@ -1,10 +1,5 @@
 package com.giua.objects;
 
-import com.giua.webscraper.GiuaScraper;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.util.*;
 
 public class Newsletter {

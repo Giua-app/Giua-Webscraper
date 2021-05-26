@@ -2,10 +2,6 @@ package com.giua.objects;
 
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.*;
 
 public class Alert {
     public final String status;
@@ -30,7 +26,7 @@ public class Alert {
 
     public String getDetails(GiuaScraper gS) {        //carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
         Document allAvvisiHTML = gS.getPage("genitori/avvisi/" + page);
-        Document dettagliAvvisoHTML = gS.getPage("" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href"));
+        Document dettagliAvvisoHTML = gS.getPage("" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
         this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
         this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
         this.isDetailed = true;

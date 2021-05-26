@@ -20,9 +20,6 @@ public class GiuaScraper extends GiuaScraperExceptions
 	public String getUser(){return user;}
 
 	private String password = "";
-	public String getPassword(){return password;}
-
-	//TODO: Non abbiamo bisogno di getPassword, la password non dovrebbe mai uscire dalla libreria
 
 	//URL del registro
 	public static final String SiteURL = "https://registro.giua.edu.it";
@@ -38,6 +35,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	public GiuaScraper(String user, String password){
 		this.user = user;
 		this.password = password;
+		login();
 	}
 
 
@@ -183,7 +181,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 		Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
 		for(Element homeworkHTML: homeworksHTML){
-			Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href"));
+			Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href").substring(1));
 			String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
 			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -268,7 +266,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 		Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 		for(Element testHTML: testsHTML){
-			Document detailsHTML = getPage("" + testHTML.attributes().get("data-href"));
+			Document detailsHTML = getPage("" + testHTML.attributes().get("data-href").substring(1));
 			String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
 			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
@@ -375,7 +373,7 @@ public class GiuaScraper extends GiuaScraperExceptions
 	public Document getPage(String page) {
 		try {
 
-			if(!checkLogin() && page != "" && page != "login/form") {
+			if(!checkLogin() && !page.equals("") && !page.equals("login/form")) {
 				throw new NotLoggedIn("Please login before requesting this page");
 			}
 
@@ -454,7 +452,9 @@ public class GiuaScraper extends GiuaScraperExceptions
 	}
 
 
-	//The most important function, it handles the login process
+	/**
+	 * La funzione per loggarsi effetivamente. Genera un phpsessid e un csrftoken per potersi loggare.
+	 */
 	public void login()
 	{
 		try {
@@ -519,12 +519,12 @@ public class GiuaScraper extends GiuaScraperExceptions
 			//final Document doc = getPage(SiteURL + "/");
 			//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
 			//TODO: quindi per ora lo lascio commentato
-			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+			/*final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
 			String text = elm.get(0).getElementsByTag("a").text();
 			text = text.split("\\(")[1];
-			text = text.replaceAll("\\)", "");
-			//final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			//String text = elm.text().split(".+\\(|\\)")[0];
+			text = text.replaceAll("\\)", "");*/
+			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+			String text = elm.text().split(".+\\(|\\)")[1];
 			return text;
 		} catch (Exception e){
 			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);

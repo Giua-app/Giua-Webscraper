@@ -22,7 +22,6 @@ class TestClasses {
         }
 
         GiuaScraper gS = new GiuaScraper(user, password);
-        gS.login();
 
         //Document doc = gS.getPage("");
         //System.out.println("FUCK U"+gS.getUserType(doc));
@@ -74,7 +73,7 @@ class TestClasses {
 		for(Newsletter a: allNewsletters){
 			System.out.println(a.toString());
 		}
-        System.out.println(allNewsletters.get(5).attachments.get(0));
+        System.out.println(allNewsletters.get(5).attachments != null);
 
         System.out.println("--------LEZIONI--------");
 

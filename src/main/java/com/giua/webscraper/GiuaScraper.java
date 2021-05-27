@@ -3,6 +3,7 @@ package com.giua.webscraper;
 import com.giua.objects.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 import org.jsoup.Connection;
@@ -14,7 +15,7 @@ import org.jsoup.select.Elements;
 
 /* -- Giua Webscraper alpha 0.6.x -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
-public class GiuaScraper extends GiuaScraperExceptions
+public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 {
 	private String user = "";
 	public String getUser(){return user;}

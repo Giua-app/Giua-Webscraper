@@ -13,7 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-/* -- Giua Webscraper alpha 0.6.x -- */
+/* -- Giua Webscraper alpha 0.7.x -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 {

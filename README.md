@@ -1,4 +1,6 @@
 # Giua-Webscraper
+ver 0.7.x Alpha
+
 questo readme è una bozza
 
 ## Che cos'è?

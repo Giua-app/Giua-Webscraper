@@ -21,6 +21,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	public String getUser(){return user;}
 
 	private String password = "";
+	private String userType = "";
 
 	//URL del registro
 	public static final String SiteURL = "https://registro.giua.edu.it";
@@ -503,7 +504,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 			}
 
-			System.out.println("login: Logged in as " + this.user + " with account type " + getUserType(doc2));
+			System.out.println("login: Logged in as " + this.user + " with account type " + getUserType());
 
 
 			//System.out.println("HTML: " + doc2);
@@ -515,18 +516,17 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	}
 
 
-	public String getUserType(Document doc){
+	public String getUserType(){
 		try{
-			//final Document doc = getPage(SiteURL + "/");
-			//TODO: Forse è un pò troppo eccessivo caricare una pagina ogni volta che si vuole il tipo di account
-			//TODO: quindi per ora lo lascio commentato
-			/*final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			String text = elm.get(0).getElementsByTag("a").text();
-			text = text.split("\\(")[1];
-			text = text.replaceAll("\\)", "");*/
-			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			String text = elm.text().split(".+\\(|\\)")[1];
-			return text;
+			if(userType.equals("")){
+				final Document doc = getPage(SiteURL);
+				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+				String text = elm.text().split(".+\\(|\\)")[1];
+				userType = text;
+				return text;
+			} else {
+				return  userType;
+			}
 		} catch (Exception e){
 			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);
 		}

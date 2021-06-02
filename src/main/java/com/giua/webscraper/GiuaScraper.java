@@ -29,6 +29,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private String PHPSESSID = null;
 	private String CSRFToken = null;
 
+	final public boolean cacheable;		//Indica se si possono utilizzare le cache
+	private Map<String, List<Vote>> allVotesCache = null;
+	private List<Newsletter> allNewslettersCache = null;
+	private List<Alert> allAlertsCache = null;
+	private List<Test> allTestsCache = null;
+	private List<Homework> allHomeworksCache = null;
+
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
 	 * @param user
@@ -37,6 +44,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	public GiuaScraper(String user, String password){
 		this.user = user;
 		this.password = password;
+		this.cacheable = true;
+		login();
+	}
+
+	public GiuaScraper(String user, String password, boolean cacheable){
+		this.user = user;
+		this.password = password;
+		this.cacheable = cacheable;
 		login();
 	}
 
@@ -45,39 +60,49 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
 	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
 	 * @param page La pagina da cui prendere gli avvisi
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
 	 * @throws IndexOutOfBoundsException
 	 */
-	public List<Alert> getAllAlerts(int page) {
-		if(page < 0){throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");}
-		List<Alert> allAvvisi = new Vector<Alert>();
-		Document doc = getPage("genitori/avvisi/" + page);
-		Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
-		Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
+	public List<Alert> getAllAlerts(int page, boolean refresh) {
+		if(allAlertsCache == null || refresh) {
+			if (page < 0) {
+				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
+			}
+			List<Alert> allAvvisi = new Vector<Alert>();
+			Document doc = getPage("genitori/avvisi/" + page);
+			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
+			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
-		int i = 0;
-		for (Element el : allAvvisiLettiStatusHTML) {
-			allAvvisi.add(new Alert(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					i,
-					page
-			));
-			i++;
-		}
-		for (Element el : allAvvisiDaLeggereStatusHTML) {
-			allAvvisi.add(new Alert(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					i,
-					page
-			));
-			i++;
-		}
+			int i = 0;
+			for (Element el : allAvvisiLettiStatusHTML) {
+				allAvvisi.add(new Alert(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						i,
+						page
+				));
+				i++;
+			}
+			for (Element el : allAvvisiDaLeggereStatusHTML) {
+				allAvvisi.add(new Alert(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						i,
+						page
+				));
+				i++;
+			}
 
-		return allAvvisi;
+			if(cacheable) {
+				allAlertsCache = allAvvisi;
+			}
+			return allAvvisi;
+		} else {
+			return allAlertsCache;
+		}
 	}
 
 	/**
@@ -104,41 +129,49 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
 	 * @param page
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 */
-	public List<Newsletter> getAllNewsletters(int page) {
-		List<Newsletter> allCirculars = new Vector<>();
-		Document doc = getPage("circolari/genitori/" + page);
-		Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
-		Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
+	public List<Newsletter> getAllNewsletters(int page, boolean refresh) {
+		if(allNewslettersCache == null || refresh) {
+			List<Newsletter> allNewsletters = new Vector<>();
+			Document doc = getPage("circolari/genitori/" + page);
+			Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
+			Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
-		int i = 0;
-		for (Element el : allNewslettersLettiStatusHTML) {
-			allCirculars.add(new Newsletter(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-					attachmentsUrls(el),
-					i,
-					page
-			));
-			i++;
-		}
-		for (Element el : allNewslettersDaLeggereStatusHTML) {
-			allCirculars.add(new Newsletter(el.text(),
-					el.parent().parent().child(1).text(),
-					el.parent().parent().child(2).text(),
-					el.parent().parent().child(3).text(),
-					"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-					attachmentsUrls(el),
-					i,
-					page
-			));
-			i++;
-		}
+			int i = 0;
+			for (Element el : allNewslettersLettiStatusHTML) {
+				allNewsletters.add(new Newsletter(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						attachmentsUrls(el),
+						i,
+						page
+				));
+				i++;
+			}
+			for (Element el : allNewslettersDaLeggereStatusHTML) {
+				allNewsletters.add(new Newsletter(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						attachmentsUrls(el),
+						i,
+						page
+				));
+				i++;
+			}
 
-		return allCirculars;
+			if(cacheable) {
+				allNewslettersCache = allNewsletters;
+			}
+			return allNewsletters;
+		} else {
+			return allNewslettersCache;
+		}
 	}
 
 	/**
@@ -175,30 +208,68 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 	/**
 	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale
-	 * @param date puo essere {@code null}
+	 * @param date puo essere {@code null}. Formato: anno-mese
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
 	 */
-	public List<Homework> getAllHomeworks(String date){
-		List<Homework> allHomeworks = new Vector<>();
-		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-		Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
-		for(Element homeworkHTML: homeworksHTML){
-			Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href").substring(1));
-			String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
-			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+	public List<Homework> getAllHomeworks(String date, boolean refresh){
+		if(allHomeworksCache == null || refresh) {
+			List<Homework> allHomeworks = new Vector<>();
+			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
+			for (Element homeworkHTML : homeworksHTML) {
+				Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href").substring(1));
+				String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
+				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
 
-			allHomeworks.add(new Homework(
-					homeworkHTML.parent().parent().text(),
-					homeworkHTML.attributes().get("data-href").split("/")[4],
-					subject,
-					creator,
-					details,
-					true
-			));
+				allHomeworks.add(new Homework(
+						homeworkHTML.parent().parent().text(),
+						homeworkHTML.attributes().get("data-href").split("/")[4],
+						subject,
+						creator,
+						details,
+						true
+				));
+			}
+			if(cacheable) {
+				allHomeworksCache = allHomeworks;
+			}
+			return allHomeworks;
+		} else {
+			return allHomeworksCache;
 		}
+	}
 
-		return allHomeworks;
+	/**
+	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale senza dettagli
+	 * @param date puo essere {@code null}. Formato: anno-mese
+	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @return Lista di Homework del mese specificato oppure del mese attuale
+	 */
+	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean refresh) {
+		if (allHomeworksCache == null || refresh) {
+			List<Homework> allHomeworks = new Vector<>();
+			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
+			for (Element homeworkHTML : homeworksHTML) {
+				allHomeworks.add(new Homework(
+						homeworkHTML.parent().parent().text(),
+						homeworkHTML.attributes().get("data-href").split("/")[4],
+						"",
+						"",
+						"",
+						true
+				));
+			}
+
+			if(cacheable) {
+				allHomeworksCache = allHomeworks;
+			}
+			return allHomeworks;
+		} else {
+			return allHomeworksCache;
+		}
 	}
 
 	/**
@@ -236,58 +307,73 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Ottiene tutti i {@link Test} di una determinata data senza i dettagli
 	 * @param date puo essere {@code null}
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return Lista dei Test della data specificata o del mese attuale
 	 */
-	public List<Test> getAllTestsWithoutDetails(String date){
-		List<Test> allTests = new Vector<>();
-		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-		Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
-		for(Element testHTML: testsHTML){
+	public List<Test> getAllTestsWithoutDetails(String date, boolean refresh){
+		if(allTestsCache == null || refresh) {
+			List<Test> allTests = new Vector<>();
+			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
+			for (Element testHTML : testsHTML) {
 
-			allTests.add(new Test(
-					testHTML.parent().parent().text(),
-					testHTML.attributes().get("data-href").split("/")[4],
-					"",
-					"",
-					"",
-					true
-			));
+				allTests.add(new Test(
+						testHTML.parent().parent().text(),
+						testHTML.attributes().get("data-href").split("/")[4],
+						"",
+						"",
+						"",
+						true
+				));
+			}
+
+			if(cacheable) {
+				allTestsCache = allTests;
+			}
+			return allTests;
+		} else {
+			return allTestsCache;
 		}
-
-		return allTests;
 	}
 
 	/**
 	 * Se ci sono molti elementi e quindi link potrebbe dare connection timed out.
-	 * Meglio utilizzare prima {@link #getAllTestsWithoutDetails(String)} e poi andare a prendere la verifica singolarmente con {@link #getTest(String)}
+	 * Meglio utilizzare prima {@link #getAllTestsWithoutDetails(String, boolean)} e poi andare a prendere la verifica singolarmente con {@link #getTest(String)}
 	 * @param date puo essere {@code null}
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Test con tutti i dettagli
 	 */
-	public List<Test> getAllTests(String date){
-		List<Test> allTests = new Vector<>();
-		Document doc = (date == null) ? getPage("genitori/eventi"): getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-		Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
-		for(Element testHTML: testsHTML){
-			Document detailsHTML = getPage("" + testHTML.attributes().get("data-href").substring(1));
-			String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
-			String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-			String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+	public List<Test> getAllTests(String date, boolean refresh){
+		if(allTestsCache == null || refresh) {
+			List<Test> allTests = new Vector<>();
+			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
+			for (Element testHTML : testsHTML) {
+				Document detailsHTML = getPage("" + testHTML.attributes().get("data-href").substring(1));
+				String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
+				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
+				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
 
-			allTests.add(new Test(
-					testHTML.parent().parent().text(),
-					testHTML.attributes().get("data-href").split("/")[4],
-					subject,
-					creator,
-					details,
-					true
-			));
+				allTests.add(new Test(
+						testHTML.parent().parent().text(),
+						testHTML.attributes().get("data-href").split("/")[4],
+						subject,
+						creator,
+						details,
+						true
+				));
+			}
+			if(cacheable) {
+				allTestsCache = allTests;
+			}
+			return allTests;
+		} else {
+			return allTestsCache;
 		}
-
-		return allTests;
 	}
 
 	/**
-	 * Deve essere usata solo da {@link #getAllVotes()} e serve a gestire quei voti che non hanno alcuni dettagli
+	 * Deve essere usata solo da {@link #getAllVotes(boolean)} e serve a gestire quei voti che non hanno alcuni dettagli
 	 * @param e
 	 * @param index
 	 * @return Stringa contenente i dettagli di quel voto
@@ -302,44 +388,51 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 	/**
 	 * Ottiene tutti i {@link Vote}
+	 * @param refresh Ricarica effettivamente tutti i voti
 	 * @return {@code Map<String, List<Vote>>}. Esempio di come e' fatta: {"Italiano": [9,3,1,4,2], ...}
 	 */
-	public Map<String, List<Vote>> getAllVotes() {
+	public Map<String, List<Vote>> getAllVotes(boolean refresh) {
+		if(allVotesCache == null || refresh) {
+			Map<String, List<Vote>> returnVotes = new HashMap<>();
+			Document doc = getPage("genitori/voti");
+			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
-		Map<String, List<Vote>> returnVotes = new HashMap<>();
-		Document doc = getPage("genitori/voti");
-		Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
+			for (final Element voteHTML : votesHTML) {
+				final String voteAsString = voteHTML.text(); //prende il voto
+				final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
+				final String voteDate = getDetailOfVote(voteHTML, 0);
+				final String type = getDetailOfVote(voteHTML, 1);
+				final String args = getDetailOfVote(voteHTML, 2);
+				final String judg = getDetailOfVote(voteHTML, 3);
+				final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
 
-		for (final Element voteHTML : votesHTML) {
-			final String voteAsString = voteHTML.text(); //prende il voto
-			final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-			final String voteDate = getDetailOfVote(voteHTML, 0);
-			final String type = getDetailOfVote(voteHTML, 1);
-			final String args = getDetailOfVote(voteHTML, 2);
-			final String judg = getDetailOfVote(voteHTML, 3);
-			final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
-
-			if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-				if (returnVotes.containsKey(materiaName)) {			//Se la materia esiste gia aggiungo solamente il voto
-					List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-					tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
-				} else {
-					returnVotes.put(materiaName, new Vector<Vote>() {{
-						add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
-					}});
-				}
-			} else {		//e' un asterisco
-				if(returnVotes.containsKey(materiaName)){
-					returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-				} else {
-					returnVotes.put(materiaName, new Vector<Vote>() {{
-						add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-					}});
+				if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
+					if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
+						List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
+						tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
+					} else {
+						returnVotes.put(materiaName, new Vector<Vote>() {{
+							add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
+						}});
+					}
+				} else {        //e' un asterisco
+					if (returnVotes.containsKey(materiaName)) {
+						returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+					} else {
+						returnVotes.put(materiaName, new Vector<Vote>() {{
+							add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+						}});
+					}
 				}
 			}
-		}
 
-		return returnVotes;
+			if(cacheable) {
+				allVotesCache = returnVotes;
+			}
+			return returnVotes;
+		} else {
+			return allVotesCache;
+		}
 	}
 
 	/**
@@ -347,7 +440,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * @param date Formato: anno-mese-giorno
 	 * @return Una List delle {@link Lesson} di un dato giorno
 	 */
-	public List<Lesson> getAllLessons(String date){ //date deve essere tipo: 2021-05-21
+	public List<Lesson> getAllLessons(String date){
 		Document doc = getPage("genitori/lezioni/" + date);
 		List<Lesson> returnLesson = new Vector<>();
 
@@ -400,7 +493,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	}
 
 	/**
-	 * Ottiene la pagina HTML specificata da un URL
+	 * Ottiene la pagina HTML specificata da un URL esterna al sito del Giua
 	 * @param url
 	 * @return Una pagina HTML come {@link Document}
 	 */
@@ -519,7 +612,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	public String getUserType(){
 		try{
 			if(userType.equals("")){
-				final Document doc = getPage(SiteURL);
+				final Document doc = getPage("");
 				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
 				String text = elm.text().split(".+\\(|\\)")[1];
 				userType = text;

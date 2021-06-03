@@ -111,7 +111,7 @@ class TestClasses {
         System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
-        Map<String, List<Vote>> votes2 = gS.getAllVotes(true);
+        Map<String, List<Vote>> votes2 = gS.getAllVotes(false);
         for(String m: votes2.keySet()){
             System.out.println(m + ": " + votes2.get(m).toString());
         }
@@ -121,7 +121,7 @@ class TestClasses {
         System.out.println("--------AVVISI---------");
 
         System.out.println("Get avvisi");
-        List<Alert> allAvvisi2 = gS.getAllAlerts(1, true);
+        List<Alert> allAvvisi2 = gS.getAllAlerts(1, false);
         for(Alert a: allAvvisi2){
             System.out.println(a.toString());
         }
@@ -130,7 +130,7 @@ class TestClasses {
         System.out.println("--------COMPITI--------");
 
         System.out.println("Get homeworks");
-        List<Homework> allHomework2 = gS.getAllHomeworks(null, true);
+        List<Homework> allHomework2 = gS.getAllHomeworks(null, false);
         for(Homework a: allHomework2){
             System.out.println(a.toString());
         }
@@ -139,7 +139,7 @@ class TestClasses {
         System.out.println("--------VERIFICHE--------");
 
         System.out.println("Get tests");
-        List<Test> allTests2 = gS.getAllTests(null, true);
+        List<Test> allTests2 = gS.getAllTests(null, false);
         for(Test a: allTests2){
             System.out.println(a.toString());
         }
@@ -148,7 +148,7 @@ class TestClasses {
         System.out.println("--------CIRCOLARI--------");
 
         System.out.println("Get tests");
-        List<Newsletter> allNewsletters2 = gS.getAllNewsletters(2, true);
+        List<Newsletter> allNewsletters2 = gS.getAllNewsletters(2, false);
         for(Newsletter a: allNewsletters2){
             System.out.println(a.toString());
         }

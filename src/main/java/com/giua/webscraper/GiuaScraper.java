@@ -4,6 +4,7 @@ import com.giua.objects.*;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.SocketTimeoutException;
 import java.util.*;
 
 import org.jsoup.Connection;
@@ -53,6 +54,20 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		this.password = password;
 		this.cacheable = cacheable;
 		login();
+	}
+
+	/**
+	 * Puoi usare questo per fare il login diretto con il phpsessid
+	 * @param user
+	 * @param password
+	 * @param phpsessid
+	 * @param cacheable
+	 */
+	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable){
+		this.user = user;
+		this.password = password;
+		this.cacheable = cacheable;
+		this.PHPSESSID = phpsessid;
 	}
 
 
@@ -546,6 +561,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		}
 	}
 
+	public boolean isCookieValid(String phpsessid){
+		try{
+			PHPSESSID = phpsessid;
+			return checkLogin();
+		} catch (Exception e){
+			return false;
+		}
+	}
 
 	/**
 	 * La funzione per loggarsi effetivamente. Genera un phpsessid e un csrftoken per potersi loggare.
@@ -608,6 +631,27 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		}
 	}
 
+	public static boolean isMyInternetWorking(){
+		try{
+			Jsoup.connect("https://www.google.it").method(Method.GET).timeout(5000).execute();
+			return true;
+		} catch (IOException io){
+			return false;
+		}
+	}
+
+	public static boolean isSiteWorking(){
+		try {
+			Jsoup.connect(SiteURL).method(Method.GET).timeout(5000).execute();	//Se la richiesta impiega più di 5 secondi
+			return true;
+		} catch (IOException io){
+			if(isMyInternetWorking()) {
+				return false;
+			} else {
+				throw new InternetProblems("Your internet may not work properly");
+			}
+		}
+	}
 
 	public String getUserType(){
 		try{

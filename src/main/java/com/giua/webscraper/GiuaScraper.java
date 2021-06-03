@@ -60,12 +60,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
 	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
 	 * @param page La pagina da cui prendere gli avvisi
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
 	 * @throws IndexOutOfBoundsException
 	 */
-	public List<Alert> getAllAlerts(int page, boolean refresh) {
-		if(allAlertsCache == null || refresh) {
+	public List<Alert> getAllAlerts(int page, boolean forceRefresh) {
+		if(allAlertsCache == null || forceRefresh) {
 			if (page < 0) {
 				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
 			}
@@ -129,11 +129,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
 	 * @param page
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 */
-	public List<Newsletter> getAllNewsletters(int page, boolean refresh) {
-		if(allNewslettersCache == null || refresh) {
+	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) {
+		if(allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			Document doc = getPage("circolari/genitori/" + page);
 			Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
@@ -209,11 +209,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale
 	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
 	 */
-	public List<Homework> getAllHomeworks(String date, boolean refresh){
-		if(allHomeworksCache == null || refresh) {
+	public List<Homework> getAllHomeworks(String date, boolean forceRefresh){
+		if(allHomeworksCache == null || forceRefresh) {
 			List<Homework> allHomeworks = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
@@ -244,11 +244,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale senza dettagli
 	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
 	 */
-	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean refresh) {
-		if (allHomeworksCache == null || refresh) {
+	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
+		if (allHomeworksCache == null || forceRefresh) {
 			List<Homework> allHomeworks = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
@@ -307,11 +307,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Ottiene tutti i {@link Test} di una determinata data senza i dettagli
 	 * @param date puo essere {@code null}
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista dei Test della data specificata o del mese attuale
 	 */
-	public List<Test> getAllTestsWithoutDetails(String date, boolean refresh){
-		if(allTestsCache == null || refresh) {
+	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh){
+		if(allTestsCache == null || forceRefresh) {
 			List<Test> allTests = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
@@ -340,11 +340,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * Se ci sono molti elementi e quindi link potrebbe dare connection timed out.
 	 * Meglio utilizzare prima {@link #getAllTestsWithoutDetails(String, boolean)} e poi andare a prendere la verifica singolarmente con {@link #getTest(String)}
 	 * @param date puo essere {@code null}
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Test con tutti i dettagli
 	 */
-	public List<Test> getAllTests(String date, boolean refresh){
-		if(allTestsCache == null || refresh) {
+	public List<Test> getAllTests(String date, boolean forceRefresh){
+		if(allTestsCache == null || forceRefresh) {
 			List<Test> allTests = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
@@ -388,11 +388,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 	/**
 	 * Ottiene tutti i {@link Vote}
-	 * @param refresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return {@code Map<String, List<Vote>>}. Esempio di come e' fatta: {"Italiano": [9,3,1,4,2], ...}
 	 */
-	public Map<String, List<Vote>> getAllVotes(boolean refresh) {
-		if(allVotesCache == null || refresh) {
+	public Map<String, List<Vote>> getAllVotes(boolean forceRefresh) {
+		if(allVotesCache == null || forceRefresh) {
 			Map<String, List<Vote>> returnVotes = new HashMap<>();
 			Document doc = getPage("genitori/voti");
 			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");

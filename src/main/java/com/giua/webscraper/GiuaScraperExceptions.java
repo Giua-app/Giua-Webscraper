@@ -28,6 +28,12 @@ public class GiuaScraperExceptions {
         }
     }
 
+    public static class SiteConnectionProblems extends RuntimeException {
+        public SiteConnectionProblems(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
     public static class UnableToGetUserType extends RuntimeException {
         public UnableToGetUserType(String errorMessage, Exception e) {
             super(errorMessage);

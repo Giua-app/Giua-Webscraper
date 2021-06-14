@@ -37,7 +37,7 @@ class TestClasses {
         //In questa prima parte vengono generate tutte le cose mentre nella seconda viene usata la cache
 
         t1 = System.currentTimeMillis();
-        GiuaScraper gS = new GiuaScraper(user, password, "phpsessid", true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
+        GiuaScraper gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
 
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
@@ -166,6 +166,82 @@ class TestClasses {
 
         System.out.println("Get lessons");
         List<Lesson> lessons2 = gS.getAllLessons("2021-05-22");
+        for(Lesson a: lessons2){
+            System.out.println(a.toString());
+        }
+        System.out.println(lessons2.get(2).activities);
+        t2 = System.currentTimeMillis();
+        System.out.println("---------------------------------------------------");
+        System.out.println("Tempo: " + (t2-t1));
+        System.out.println("---------------------------------------------------");
+
+
+
+
+
+
+        System.out.println("Logout...");
+        String sessid = gS.getSessionCookie();
+
+        gS = new GiuaScraper(user, password, sessid, true);
+        System.out.println("Created new gS variable");
+
+
+        System.out.println("Account type: " + gS.getUserType());
+
+        System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
+
+
+        System.out.println("--------VOTI--------");
+
+        System.out.println("Get votes");
+        Map<String, List<Vote>> votes3 = gS.getAllVotes(false);
+        for(String m: votes2.keySet()){
+            System.out.println(m + ": " + votes2.get(m).toString());
+        }
+        System.out.println(votes2.get("Ed. civica").get(0).allToString());
+        System.out.println(votes2.get("Ed. civica").get(1).allToString());
+
+        System.out.println("--------AVVISI---------");
+
+        System.out.println("Get avvisi");
+        List<Alert> allAvvisi3 = gS.getAllAlerts(1, false);
+        for(Alert a: allAvvisi2){
+            System.out.println(a.toString());
+        }
+        allAvvisi.get(0).getDetails(gS);
+
+        System.out.println("--------COMPITI--------");
+
+        System.out.println("Get homeworks");
+        List<Homework> allHomework3 = gS.getAllHomeworks(null, false);
+        for(Homework a: allHomework2){
+            System.out.println(a.toString());
+        }
+        System.out.println(gS.getHomework("2021-05-28").toString());
+
+        System.out.println("--------VERIFICHE--------");
+
+        System.out.println("Get tests");
+        List<Test> allTests3 = gS.getAllTests(null, false);
+        for(Test a: allTests2){
+            System.out.println(a.toString());
+        }
+        System.out.println(gS.getTest("2021-05-18").toString());
+
+        System.out.println("--------CIRCOLARI--------");
+
+        System.out.println("Get tests");
+        List<Newsletter> allNewsletters3 = gS.getAllNewsletters(2, false);
+        for(Newsletter a: allNewsletters2){
+            System.out.println(a.toString());
+        }
+        System.out.println(allNewsletters2.get(5).attachments != null);
+
+        System.out.println("--------LEZIONI--------");
+
+        System.out.println("Get lessons");
+        List<Lesson> lessons3 = gS.getAllLessons("2021-05-22");
         for(Lesson a: lessons2){
             System.out.println(a.toString());
         }

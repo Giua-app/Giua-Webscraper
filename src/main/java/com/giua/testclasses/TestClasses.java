@@ -2,7 +2,6 @@ package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
-import org.jsoup.nodes.Document;
 
 import java.util.*;
 
@@ -24,12 +23,21 @@ class TestClasses {
         long t1;
         long t2;
 
+        t1 = System.currentTimeMillis();
+        System.out.println("My internet work: " + GiuaScraper.isMyInternetWorking());
+        t2 = System.currentTimeMillis();
+        System.out.println("Tempo: " + (t2-t1));
+        t1 = System.currentTimeMillis();
+        System.out.println("The site work: " + GiuaScraper.isSiteWorking());
+        t2 = System.currentTimeMillis();
+        System.out.println("Tempo: " + (t2-t1));
+
         /////////////////////////////////////////////////////////////////////
         //NO CACHE
         //In questa prima parte vengono generate tutte le cose mentre nella seconda viene usata la cache
 
         t1 = System.currentTimeMillis();
-        GiuaScraper gS = new GiuaScraper(user, password, true);
+        GiuaScraper gS = new GiuaScraper(user, password, "phpsessid", true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
 
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
@@ -166,7 +174,5 @@ class TestClasses {
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));
         System.out.println("---------------------------------------------------");
-
-
     }
 }

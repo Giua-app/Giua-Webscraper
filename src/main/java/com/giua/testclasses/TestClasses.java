@@ -94,7 +94,7 @@ class TestClasses {
         System.out.println("--------LEZIONI--------");
 
         System.out.println("Get lessons");
-        List<Lesson> lessons = gS.getAllLessons("2021-05-22");
+        List<Lesson> lessons = gS.getAllLessons("2021-05-22", true);
 		for(Lesson a: lessons){
 			System.out.println(a.toString());
 		}
@@ -109,6 +109,8 @@ class TestClasses {
         //CACHE
 
         t1 = System.currentTimeMillis();
+
+        //gS.setSiteURL("https://registroasiaiai.giua.edu.it");
 
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
@@ -133,7 +135,7 @@ class TestClasses {
         for(Alert a: allAvvisi2){
             System.out.println(a.toString());
         }
-        allAvvisi.get(0).getDetails(gS);
+        //allAvvisi.get(0).getDetails(gS);
 
         System.out.println("--------COMPITI--------");
 
@@ -142,7 +144,7 @@ class TestClasses {
         for(Homework a: allHomework2){
             System.out.println(a.toString());
         }
-        System.out.println(gS.getHomework("2021-05-28").toString());
+        //System.out.println(gS.getHomework("2021-05-28").toString());
 
         System.out.println("--------VERIFICHE--------");
 
@@ -151,25 +153,27 @@ class TestClasses {
         for(Test a: allTests2){
             System.out.println(a.toString());
         }
-        System.out.println(gS.getTest("2021-05-18").toString());
+        //System.out.println(gS.getTest("2021-05-18").toString());
 
         System.out.println("--------CIRCOLARI--------");
 
-        System.out.println("Get tests");
+        System.out.println("Get newsletters");
         List<Newsletter> allNewsletters2 = gS.getAllNewsletters(2, false);
         for(Newsletter a: allNewsletters2){
             System.out.println(a.toString());
         }
-        System.out.println(allNewsletters2.get(5).attachments != null);
+        //System.out.println(allNewsletters2.get(5).attachments != null);
 
         System.out.println("--------LEZIONI--------");
 
         System.out.println("Get lessons");
-        List<Lesson> lessons2 = gS.getAllLessons("2021-05-22");
+        List<Lesson> lessons2 = gS.getAllLessons("2021-05-22", false);
         for(Lesson a: lessons2){
             System.out.println(a.toString());
         }
-        System.out.println(lessons2.get(2).activities);
+        //System.out.println(lessons2.get(2).activities);
+
+
         t2 = System.currentTimeMillis();
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));
@@ -241,7 +245,7 @@ class TestClasses {
         System.out.println("--------LEZIONI--------");
 
         System.out.println("Get lessons");
-        List<Lesson> lessons3 = gS.getAllLessons("2021-05-22");
+        List<Lesson> lessons3 = gS.getAllLessons("2021-05-22", false);
         for(Lesson a: lessons2){
             System.out.println(a.toString());
         }

@@ -14,7 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-/* -- Giua Webscraper alpha 0.7.9 -- */
+/* -- Giua Webscraper alpha 0.7.10 -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 {
@@ -25,8 +25,23 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private String userType = "";
 
 	//URL del registro
-	public static final String SiteURL = "https://registro.giua.edu.it";
-	//TODO: Aggiungere funzione per settare/ottenere site url
+	public static String SiteURL = "https://registro.giua.edu.it";
+
+	/**
+	 * Permette di settare l'URL del registro
+	 * @param newurl formattato come "https://example.com"
+	 */
+	public void setSiteURL(String newurl){
+		SiteURL = newurl;
+	}
+
+	/**
+	 * Permette di ottenre l'URL del registro
+	 * @return l'URL del registro formattato come "https://example.com"
+	 */
+	public String getSiteURL(){
+		return SiteURL;
+	}
 
 	private String PHPSESSID = null;
 	public String getSessionCookie(){return PHPSESSID;}
@@ -39,6 +54,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private List<Alert> allAlertsCache = null;
 	private List<Test> allTestsCache = null;
 	private List<Homework> allHomeworksCache = null;
+	private List<Lesson> allLessonsCache = null;
 
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
@@ -458,25 +474,33 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * Ottiene tutte le lezioni di un dato giorno
 	 * @param date Formato: anno-mese-giorno
+	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
 	 * @return Una List delle {@link Lesson} di un dato giorno
 	 */
-	public List<Lesson> getAllLessons(String date){
-		Document doc = getPage("genitori/lezioni/" + date);
-		List<Lesson> returnLesson = new Vector<>();
+	public List<Lesson> getAllLessons(String date, boolean forceRefresh){
+		if(allLessonsCache == null || forceRefresh) {
+			Document doc = getPage("genitori/lezioni/" + date);
+			List<Lesson> returnLesson = new Vector<>();
 
-		Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
+			Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
 
-		for(Element lessonHTML: allLessonsHTML){
-			returnLesson.add(new Lesson(
-					date,
-					lessonHTML.child(0).text(),
-					lessonHTML.child(1).text(),
-					lessonHTML.child(2).text(),
-					lessonHTML.child(3).text()
-			));
+			for(Element lessonHTML: allLessonsHTML){
+				returnLesson.add(new Lesson(
+						date,
+						lessonHTML.child(0).text(),
+						lessonHTML.child(1).text(),
+						lessonHTML.child(2).text(),
+						lessonHTML.child(3).text()
+				));
+			}
+
+			if(cacheable) {
+				allLessonsCache = returnLesson;
+			}
+			return returnLesson;
+		} else {
+			return allLessonsCache;
 		}
-
-		return returnLesson;
 	}
 
 	/**
@@ -639,7 +663,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 				System.out.println("login: get csrf token");
 
-				CSRFToken = res2.body().split(".+\":\"|\".")[1];;		//prende solo il valore del csrf
+				CSRFToken = res2.body().split(".+\":\"|\".")[1];		//prende solo il valore del csrf
 
 				//System.out.println("Page content: " + res2.body());
 				System.out.println("login: CSRF Token: " + CSRFToken);
@@ -673,7 +697,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 			if(!isSiteWorking()){
 				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
 			}
-			throw new UnableToLogin("Unable to log in, is the site down?", e);
+			throw new UnableToLogin("Something unexpected happened", e);
 		}
 	}
 

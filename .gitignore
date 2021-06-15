@@ -151,3 +151,5 @@ buildNumber.properties
 .idea/encodings.xml
 .idea/jarRepositories.xml
 .idea/vcs.xml
+.idea/icon_dark.png
+.idea/icon_light.png

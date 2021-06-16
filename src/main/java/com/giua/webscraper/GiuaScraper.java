@@ -14,7 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-/* -- Giua Webscraper alpha 0.7.10 -- */
+/* -- Giua Webscraper alpha 0.7.11 -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 {

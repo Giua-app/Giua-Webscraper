@@ -85,6 +85,9 @@
                           <goal>shade</goal>
                       </goals>
                       <configuration>
+                          <excludes>
+                              <exclude>**/com.giua.testclasses/*.java</exclude>
+                          </excludes>
                           <transformers>
                               <transformer
                                       implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">

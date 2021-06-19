@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -547,12 +548,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 */
 	public Document getExtPage(String url) {
 		try {
-
 			System.out.println("getExtPage: Getting external page...");
 
 			Connection.Response res = Jsoup.connect(url)
 					.method(Method.GET)
-					//.cookie("PHPSESSID", PHPSESSID)
 					.execute();
 
 			Document doc = res.parse();
@@ -560,10 +559,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 			System.out.println("getExtPage: Done!");
 			return doc;
 
-
 		} catch (IOException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
+			if(!isMyInternetWorking()){
+				throw new InternetProblems("Your internet may not work properly");
+			}
 		}
 		return null;
 	}

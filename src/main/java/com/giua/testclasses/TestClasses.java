@@ -42,21 +42,28 @@ class TestClasses {
         t1 = System.currentTimeMillis();
         GiuaScraper gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
 
+        //gS.setSiteURL("http://localhost");
+
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 
+        List<DisciplNotice> allDN = gS.getAllDisciplNotices(true);
+        for(DisciplNotice a: allDN){
+            System.out.println(a.toString());
+        }
 
-        System.out.println("--------VOTI--------");
+
+        /*System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
         Map<String, List<Vote>> votes = gS.getAllVotes(true);
         for(String m: votes.keySet()){
             System.out.println(m + ": " + votes.get(m).toString());
         }
-        System.out.println(votes.get("Ed. civica").get(0).allToString());
-        System.out.println(votes.get("Ed. civica").get(1).allToString());
+        //System.out.println(votes.get("Ed. civica").get(0).allToString());
+        //System.out.println(votes.get("Ed. civica").get(1).allToString());
 
         System.out.println("--------AVVISI---------");
 
@@ -65,7 +72,7 @@ class TestClasses {
         for(Alert a: allAvvisi){
             System.out.println(a.toString());
         }
-        allAvvisi.get(0).getDetails(gS);
+        //allAvvisi.get(0).getDetails(gS);
 
 		System.out.println("--------COMPITI--------");
 
@@ -74,7 +81,7 @@ class TestClasses {
 		for(Homework a: allHomework){
 			System.out.println(a.toString());
 		}
-		System.out.println(gS.getHomework("2021-05-28").toString());
+		//System.out.println(gS.getHomework("2021-05-28").toString());
 
 		System.out.println("--------VERIFICHE--------");
 
@@ -83,7 +90,7 @@ class TestClasses {
 		for(Test a: allTests){
 			System.out.println(a.toString());
 		}
-		System.out.println(gS.getTest("2021-05-18").toString());
+		//System.out.println(gS.getTest("2021-05-18").toString());
 
 		System.out.println("--------CIRCOLARI--------");
 
@@ -92,7 +99,7 @@ class TestClasses {
 		for(Newsletter a: allNewsletters){
 			System.out.println(a.toString());
 		}
-        System.out.println(allNewsletters.get(5).attachments != null);
+        //System.out.println(allNewsletters.get(5).attachments != null);
 
         System.out.println("--------LEZIONI--------");
 
@@ -101,21 +108,21 @@ class TestClasses {
 		for(Lesson a: lessons){
 			System.out.println(a.toString());
 		}
-        System.out.println(lessons.get(2).activities);
+        //System.out.println(lessons.get(2).activities);
 
         System.out.println("--------PAGELLA--------");
         System.out.println("Get report card");
-        ReportCard reportCard = gS.getReportCard(false, true);
+        /*ReportCard reportCard = gS.getReportCard(false, true);
         for(String a: reportCard.allVotes.keySet()){
             System.out.println(a);
-        }
+        }*/
         t2 = System.currentTimeMillis();
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));
         System.out.println("---------------------------------------------------");
 
 
-        ////////////////////////////////////////////////////////////
+        /*///////////////////////////////////////////////////////////
         //CACHE
 
         t1 = System.currentTimeMillis();
@@ -265,12 +272,12 @@ class TestClasses {
 
         System.out.println("Get report card");
         ReportCard reportCard2 = gS.getReportCard(false, false);
-        for(String a: reportCard.allVotes.keySet()){
+        for(String a: reportCard2.allVotes.keySet()){
             System.out.println(a);
         }
         t2 = System.currentTimeMillis();
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));
-        System.out.println("---------------------------------------------------");
+        System.out.println("---------------------------------------------------");*/
     }
 }

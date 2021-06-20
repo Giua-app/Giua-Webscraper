@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-/* -- Giua Webscraper alpha 0.8.1 -- */
+/* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
@@ -33,6 +33,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<Homework> allHomeworksCache = null;
 	private List<Lesson> allLessonsCache = null;
 	private ReportCard reportCardCache = null;
+	private List<DisciplNotice> allDisciplNoticesCache = null;
 	//endregion
 
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
@@ -54,7 +55,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	}
 
 	/**
-	 * Permette di ottenre l'URL del registro
+	 * Permette di ottenere l'URL del registro
 	 *
 	 * @return l'URL del registro formattato come "https://example.com"
 	 */
@@ -117,6 +118,49 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	/**
 	 * Ti da una {@code ReportCard} del quadrimestre indicato
 	 *
+	 *
+	 * @param forceRefresh
+	 * @return La pagella del quadrimestre indicato
+	 */
+	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
+		if(allDisciplNoticesCache == null || forceRefresh) {
+			List<DisciplNotice> allDisciplNotices = new Vector<>();
+			Document doc = getPage("genitori/note/");
+			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
+			//Elements allDisciplNoticeRowHTML = allDisciplNoticeTBodyHTML.;
+			//allDisciplNoticeRowHTML.remove(0);
+			logln(allDisciplNoticeTBodyHTML.toString());
+
+			for (Element el : allDisciplNoticeTBodyHTML) {
+
+
+				for (Element el2 : el.children()){
+					//logln(" -------\n" + el2.toString());
+					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
+					allDisciplNotices.add(new DisciplNotice(el2.child(0).text(),
+							el2.child(1).text(),
+							el2.child(2).text(),
+							el2.child(3).text(),
+							""));
+				}
+			}
+
+			if(cacheable) {
+				allDisciplNoticesCache = allDisciplNotices;
+			}
+			return allDisciplNotices;
+		} else {
+			return allDisciplNoticesCache;
+		}
+	}
+
+
+
+
+
+	/**
+	 * Ti da una {@code ReportCard} del quadrimestre indicato
+	 *
 	 * @param firstQuarterly
 	 * @param forceRefresh
 	 * @return La pagella del quadrimestre indicato
@@ -155,6 +199,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			return reportCardCache;
 
 	}
+
 
 	/**
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.

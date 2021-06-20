@@ -1,13 +1,15 @@
 package com.giua.objects;
 
-public class Lesson {
+import java.io.Serializable;
+
+public class Lesson implements Serializable {
     public final String date;
     public final String time;
     public final String subject;
     public final String arguments;
     public final String activities;
 
-    public Lesson(String date, String time, String subject, String arguments, String activities){
+    public Lesson(String date, String time, String subject, String arguments, String activities) {
         this.date = date;
         this.time = time;
         this.subject = subject;

@@ -803,6 +803,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		}
 	}
 
+	public void clearCache() {
+		allVotesCache = null;
+		allNewslettersCache = null;
+		allAlertsCache = null;
+		allTestsCache = null;
+		allHomeworksCache = null;
+		allLessonsCache = null;
+		reportCardCache = null;
+	}
+
 	//endregion
 
 	//region Funzioni di debug

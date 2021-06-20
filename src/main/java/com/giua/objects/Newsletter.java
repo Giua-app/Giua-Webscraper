@@ -1,8 +1,9 @@
 package com.giua.objects;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.List;
 
-public class Newsletter {
+public class Newsletter implements Serializable {
 
     public final String status;
     public final String date;
@@ -11,7 +12,7 @@ public class Newsletter {
     public final String number;
     public final List<String> attachments;
     public final int page;
-    public final int id;		//Indica quanto e' lontano dalla prima circolare
+    public final int id;        //Indica quanto e' lontano dalla prima circolare
 
     public Newsletter(String status, String numebr, String date, String newslettersObject, String detailsUrl, List<String> attachments, int id, int page) {
         this.status = status;

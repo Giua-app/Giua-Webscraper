@@ -3,7 +3,9 @@ package com.giua.objects;
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
 
-public class Alert {
+import java.io.Serializable;
+
+public class Alert implements Serializable {
     public final String status;
     public final String date;
     public final String receivers;

@@ -1,14 +1,16 @@
 package com.giua.objects;
 
-public class Test{
-    public final String day;		//usato per trovare quale verifica interessa
+import java.io.Serializable;
+
+public class Test implements Serializable {
+    public final String day;        //usato per trovare quale verifica interessa
     public final String date;
     public final String subject;
     public final String creator;
     public final String details;
     public final boolean exists;
 
-    public Test(String day, String date, String subject, String creator, String details, boolean exists){
+    public Test(String day, String date, String subject, String creator, String details, boolean exists) {
         this.day = day;
         this.date = date;
         this.subject = subject;

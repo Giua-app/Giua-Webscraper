@@ -1,6 +1,8 @@
 package com.giua.objects;
 
-public class Vote{
+import java.io.Serializable;
+
+public class Vote implements Serializable {
     public final String value;
     public final boolean isFirstQuarterly;
     public final boolean isAsterisk;
@@ -9,7 +11,7 @@ public class Vote{
     public final String testType;
     public final String arguments;
 
-    public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk){
+    public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk) {
         this.value = value;
         this.date = date;
         this.testType = testType;

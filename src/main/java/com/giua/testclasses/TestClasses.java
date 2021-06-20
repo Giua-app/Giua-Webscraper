@@ -3,12 +3,15 @@ package com.giua.testclasses;
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 class TestClasses {
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
 
+        GiuaScraper.setDebugMode(true);
         String user = "";
         String password = "";
 

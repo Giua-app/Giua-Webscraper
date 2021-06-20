@@ -15,39 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-/* -- Giua Webscraper alpha 0.8.0 -- */
+/* -- Giua Webscraper alpha 0.8.1 -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
-public class GiuaScraper extends GiuaScraperExceptions implements Serializable
-{
+public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
+
+	//region Variabili globali
 	private final String user;
-	public String getUser(){return user;}
-
 	private final String password;
-	private String userType;
-
-	//URL del registro
-	public static String SiteURL = "https://registro.giua.edu.it";
-
-	/**
-	 * Permette di settare l'URL del registro
-	 * @param newurl formattato come "https://example.com"
-	 */
-	public void setSiteURL(String newurl){
-		SiteURL = newurl;
-	}
-
-	/**
-	 * Permette di ottenre l'URL del registro
-	 * @return l'URL del registro formattato come "https://example.com"
-	 */
-	public String getSiteURL(){
-		return SiteURL;
-	}
-
+	private String userType = "";
 	private String PHPSESSID = null;
-	public String getSessionCookie(){return PHPSESSID;}
 
-	final public boolean cacheable;		//Indica se si possono utilizzare le cache
+	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
 	private List<Newsletter> allNewslettersCache = null;
 	private List<Alert> allAlertsCache = null;
@@ -55,13 +33,54 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private List<Homework> allHomeworksCache = null;
 	private List<Lesson> allLessonsCache = null;
 	private ReportCard reportCardCache = null;
+	//endregion
+
+	final public boolean cacheable;        //Indica se si possono utilizzare le cache
+
+	public static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
+	private static boolean debugMode;
+
+	//endregion
+
+	//region Metodi getter e setter
+
+	/**
+	 * Permette di settare l'URL del registro
+	 *
+	 * @param newurl formattato come "https://example.com"
+	 */
+	public void setSiteURL(String newurl) {
+		SiteURL = newurl;
+	}
+
+	/**
+	 * Permette di ottenre l'URL del registro
+	 *
+	 * @return l'URL del registro formattato come "https://example.com"
+	 */
+	public String getSiteURL() {
+		return SiteURL;
+	}
+
+	public String getSessionCookie() {
+		return PHPSESSID;
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	//endregion
+
+	//region Costruttori della classe
 
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+	 *
 	 * @param user
 	 * @param password
 	 */
-	public GiuaScraper(String user, String password){
+	public GiuaScraper(String user, String password) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
@@ -83,7 +102,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * @param phpsessid
 	 * @param cacheable
 	 */
-	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable){
+	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
@@ -91,14 +110,19 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		login();
 	}
 
+	//endregion
+
+	//region Funzioni per ottenere dati dal registro
+
 	/**
 	 * Ti da una {@code ReportCard} del quadrimestre indicato
+	 *
 	 * @param firstQuarterly
 	 * @param forceRefresh
 	 * @return La pagella del quadrimestre indicato
 	 */
-	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh){
-		if(reportCardCache == null || forceRefresh){
+	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
+		if (reportCardCache == null || forceRefresh){
 			ReportCard returnReportCard;
 			Map<String, List<String>> returnReportCardValue = new HashMap<>();
 			Document doc;
@@ -533,7 +557,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 				));
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allLessonsCache = returnLesson;
 			}
 			return returnLesson;
@@ -542,22 +566,29 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		}
 	}
 
+	//endregion
+
+	//region Funzioni fondamentali
+
 	/**
 	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL}
 	 * Non c'e' bisogno di inserire {@code /} prima di un URL
+	 *
 	 * @param page
 	 * @return Una pagina HTML come {@link Document}
 	 */
 	public Document getPage(String page) {
 		try {
 
-			if(!checkLogin() && !page.equals("") && !page.equals("login/form")) {
+			if (!checkLogin() && !page.equals("") && !page.equals("login/form")) {
 				throw new NotLoggedIn("Please login before requesting this page");
 			}
 
-			if(PHPSESSID == null){ PHPSESSID = ""; } //Per risolvere errore strano che capita quando è null
+			if (PHPSESSID == null) {
+				PHPSESSID = "";
+			} //Per risolvere errore strano che capita quando è null
 
-			System.out.println("getPage: Getting page...");
+			log("getPage: Getting page " + SiteURL + "/" + page);
 
 			Connection.Response res = Jsoup.connect(SiteURL + "/" + page)
 					.method(Method.GET)
@@ -566,7 +597,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 			Document doc = res.parse();
 
-			System.out.println("getPage: Done!");
+			logln("\t Done!");
 			return doc;
 
 
@@ -586,7 +617,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 */
 	public Document getExtPage(String url) {
 		try {
-			System.out.println("getExtPage: Getting external page...");
+			log("getExtPage: Getting external page " + url);
 
 			Connection.Response res = Jsoup.connect(url)
 					.method(Method.GET)
@@ -594,7 +625,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 			Document doc = res.parse();
 
-			System.out.println("getExtPage: Done!");
+			logln("\t Done!");
 			return doc;
 
 		} catch (IOException e) {
@@ -611,8 +642,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 */
 	public Boolean checkLogin() {
 		try {
-			if(PHPSESSID == null) {		//Non e loggato
-					return false;
+			if (PHPSESSID == null) {        //Non e loggato
+				return false;
 			}
 
 			Connection.Response res = Jsoup.connect(SiteURL)
@@ -623,7 +654,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
 			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
 			//Attenzione: Il sito ritorna 200 anche quando il PHPSESSID non è valido!
-			System.out.println(res.statusCode());
+			logln("Calling checklogin() the site answered with status code: " + res.statusCode());
 			return res.statusCode() != 302;
 
 		} catch (IOException e) {
@@ -668,17 +699,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	/**
 	 * La funzione per loggarsi effetivamente. Genera un phpsessid e un csrftoken per potersi loggare.
 	 */
-	public void login()
-	{
+	public void login() {
 		try {
 
-			if(isCookieValid(PHPSESSID)){
+			if (isCookieValid(PHPSESSID)) {
 				//Il cookie esistente è ancora valido, niente login.
-				System.out.println("login: Session still valid, ignoring");
+				logln("login: Session still valid, ignoring");
 			} else {
-				System.out.println("login: Session invalid, logging in...");
+				logln("login: Session invalid, logging in...");
 
-				//System.out.println("login: First connection (login form)");
+				//logln("login: First connection (login form)");
 
 				Connection.Response res = Jsoup.connect(SiteURL + "/login/form")
 						.method(Method.GET)
@@ -688,22 +718,21 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 				PHPSESSID = res.cookie("PHPSESSID");
 
 
-
-				//System.out.println("login: Second connection (authenticate)");
+				//logln("login: Second connection (authenticate)");
 				Connection.Response res2 = Jsoup.connect(SiteURL + "/ajax/token/authenticate")
 						.cookie("PHPSESSID", PHPSESSID)
 						.method(Method.GET)
 						.ignoreContentType(true)
 						.execute();
 
-				System.out.println("login: get csrf token");
+				logln("login: get csrf token");
 
 				String CSRFToken = res2.body().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
-				//System.out.println("Page content: " + res2.body());
-				System.out.println("login: CSRF Token: " + CSRFToken);
+				//logln("Page content: " + res2.body());
+				logln("login: CSRF Token: " + CSRFToken);
 
-				//System.out.println("login: Third connection (login form)");
+				//logln("login: Third connection (login form)");
 				Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
 						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 						.cookie("PHPSESSID", PHPSESSID)
@@ -716,16 +745,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 				Document doc2 = res3.parse();
 
 
-				if(PHPSESSID == null){
+				if (PHPSESSID == null) {
 					Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
 					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 				}
 			}
 
-			System.out.println("login: Logged in as " + this.user + " with account type " + getUserType());
+			logln("login: Logged in as " + this.user + " with account type " + getUserType());
 
 
-			//System.out.println("HTML: " + doc2);
+			//logln("HTML: " + doc2);
 
 
 		} catch (Exception e){
@@ -767,10 +796,36 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 				userType = text;
 				return text;
 			} else {
-				return  userType;
+				return userType;
 			}
-		} catch (Exception e){
+		} catch (Exception e) {
 			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);
 		}
 	}
+
+	//endregion
+
+	//region Funzioni di debug
+
+	/**
+	 * Stampa una stringa e va a capo.
+	 */
+	protected static void logln(Object message) {
+		if (debugMode)
+			System.out.println(message);
+	}
+
+	/**
+	 * Stampa una stringa.
+	 */
+	protected static void log(Object message) {
+		if (debugMode)
+			System.out.print(message);
+	}
+
+	public static void setDebugMode(boolean mode){
+		debugMode = mode;
+	}
+
+	//endregion
 }

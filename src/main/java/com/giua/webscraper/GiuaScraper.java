@@ -1,29 +1,29 @@
 package com.giua.webscraper;
 
 import com.giua.objects.*;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.SocketTimeoutException;
-import java.util.*;
-import java.util.logging.Logger;
-
 import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.Connection.Method;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-/* -- Giua Webscraper alpha 0.7.12 -- */
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+/* -- Giua Webscraper alpha 0.8.0 -- */
 // Tested with version 1.2.x and 1.3.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 {
-	private String user = "";
+	private final String user;
 	public String getUser(){return user;}
 
-	private String password = "";
-	private String userType = "";
+	private final String password;
+	private String userType;
 
 	//URL del registro
 	public static String SiteURL = "https://registro.giua.edu.it";
@@ -47,8 +47,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private String PHPSESSID = null;
 	public String getSessionCookie(){return PHPSESSID;}
 
-	private String CSRFToken = null;
-
 	final public boolean cacheable;		//Indica se si possono utilizzare le cache
 	private Map<String, List<Vote>> allVotesCache = null;
 	private List<Newsletter> allNewslettersCache = null;
@@ -56,6 +54,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	private List<Test> allTestsCache = null;
 	private List<Homework> allHomeworksCache = null;
 	private List<Lesson> allLessonsCache = null;
+	private ReportCard reportCardCache = null;
 
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
@@ -92,6 +91,46 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 		login();
 	}
 
+	/**
+	 * Ti da una {@code ReportCard} del quadrimestre indicato
+	 * @param firstQuarterly
+	 * @param forceRefresh
+	 * @return La pagella del quadrimestre indicato
+	 */
+	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh){
+		if(reportCardCache == null || forceRefresh){
+			ReportCard returnReportCard;
+			Map<String, List<String>> returnReportCardValue = new HashMap<>();
+			Document doc;
+			if(firstQuarterly)
+				doc = getPage("genitori/pagelle/P");
+			else
+				doc = getPage("genitori/pagelle/F");
+
+			Elements elements = doc.getElementsByTag("tr");
+			elements.remove(0);
+
+			for(Element e: elements){
+				String subject = e.child(0).text();
+				String vote = e.child(0).text();
+				String absentTime = e.child(0).text();
+				List<String> pairValue = new Vector<>();
+				pairValue.add(vote);
+				pairValue.add(absentTime);
+
+				returnReportCardValue.put(subject, pairValue);
+			}
+
+			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue);
+
+			if(cacheable)
+				reportCardCache = returnReportCard;
+
+			return returnReportCard;
+		} else
+			return reportCardCache;
+
+	}
 
 	/**
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
@@ -99,14 +138,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 	 * @param page La pagina da cui prendere gli avvisi
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
-	 * @throws IndexOutOfBoundsException
 	 */
 	public List<Alert> getAllAlerts(int page, boolean forceRefresh) {
 		if(allAlertsCache == null || forceRefresh) {
 			if (page < 0) {
 				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
 			}
-			List<Alert> allAvvisi = new Vector<Alert>();
+			List<Alert> allAvvisi = new Vector<>();
 			Document doc = getPage("genitori/avvisi/" + page);
 			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
@@ -611,9 +649,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 			// --- Ottieni tipo account
 			final Document doc = res.parse();
 			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			String text = elm.text().split(".+\\(|\\)")[1];
-			userType = text;
-
+			userType = elm.text().split(".+\\(|\\)")[1];
 
 		} catch (Exception e) {
 			if(!isSiteWorking()){
@@ -662,14 +698,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable
 
 				System.out.println("login: get csrf token");
 
-				CSRFToken = res2.body().split(".+\":\"|\".")[1];		//prende solo il valore del csrf
+				String CSRFToken = res2.body().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
 				//System.out.println("Page content: " + res2.body());
 				System.out.println("login: CSRF Token: " + CSRFToken);
 
 				//System.out.println("login: Third connection (login form)");
 				Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
-						.data("_username", this.user, "_password", this.password, "_csrf_token", this.CSRFToken, "login", "")
+						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 						.cookie("PHPSESSID", PHPSESSID)
 						.method(Method.POST)
 						.execute();

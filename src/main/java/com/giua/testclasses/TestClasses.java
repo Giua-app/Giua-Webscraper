@@ -99,6 +99,13 @@ class TestClasses {
 			System.out.println(a.toString());
 		}
         System.out.println(lessons.get(2).activities);
+
+        System.out.println("--------PAGELLA--------");
+        System.out.println("Get report card");
+        ReportCard reportCard = gS.getReportCard(false, true);
+        for(String a: reportCard.allVotes.keySet()){
+            System.out.println(a);
+        }
         t2 = System.currentTimeMillis();
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));
@@ -250,6 +257,14 @@ class TestClasses {
             System.out.println(a.toString());
         }
         System.out.println(lessons2.get(2).activities);
+
+        System.out.println("--------PAGELLA--------");
+
+        System.out.println("Get report card");
+        ReportCard reportCard2 = gS.getReportCard(false, false);
+        for(String a: reportCard.allVotes.keySet()){
+            System.out.println(a);
+        }
         t2 = System.currentTimeMillis();
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + (t2-t1));

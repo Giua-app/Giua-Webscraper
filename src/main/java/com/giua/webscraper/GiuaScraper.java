@@ -116,11 +116,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni per ottenere dati dal registro
 
 	/**
-	 * Ti da una {@code ReportCard} del quadrimestre indicato
+	 * Permette di ottenere tutte le note presenti
 	 *
 	 *
 	 * @param forceRefresh
-	 * @return La pagella del quadrimestre indicato
+	 * @return Una lista di DisciplNotice
 	 */
 	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
 		if(allDisciplNoticesCache == null || forceRefresh) {
@@ -129,7 +129,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
 			//Elements allDisciplNoticeRowHTML = allDisciplNoticeTBodyHTML.;
 			//allDisciplNoticeRowHTML.remove(0);
-			logln(allDisciplNoticeTBodyHTML.toString());
+			//logln(allDisciplNoticeTBodyHTML.toString());
 
 			for (Element el : allDisciplNoticeTBodyHTML) {
 
@@ -137,11 +137,19 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				for (Element el2 : el.children()){
 					//logln(" -------\n" + el2.toString());
 					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
+					String author1 = el2.child(2).child(1).text();
+					String author2;
+					try{ author2 = el2.child(3).child(1).text(); }
+					catch (IndexOutOfBoundsException e){
+						author2 = ""; }
+
+					el2.child(2).child(1).remove();
 					allDisciplNotices.add(new DisciplNotice(el2.child(0).text(),
 							el2.child(1).text(),
 							el2.child(2).text(),
 							el2.child(3).text(),
-							""));
+							author1,
+							author2));
 				}
 			}
 
@@ -805,8 +813,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		} catch (Exception e){
 			if(!isSiteWorking()){
 				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
+			} else {
+				throw new UnableToLogin("Something unexpected happened", e);
 			}
-			throw new UnableToLogin("Something unexpected happened", e);
 		}
 	}
 

@@ -7,17 +7,19 @@ public class DisciplNotice implements Serializable {
     public String type;
     public String details;
     public String countermeasures;
-    public String author;
+    public String authorOfDetails;
+    public String authorOfCountermeasures;
 
-    public DisciplNotice(String date, String type, String details, String countermeasures, String author) {
+    public DisciplNotice(String date, String type, String details, String countermeasures, String authorOfDetails, String authorOfCountermeasures) {
         this.date = date;
         this.type = type;
         this.details = details;
         this.countermeasures = countermeasures;
-        this.author = author;
+        this.authorOfDetails = authorOfDetails;
+        this.authorOfCountermeasures = authorOfCountermeasures;
     }
 
     public String toString() {
-        return this.date + "; " + this.type + "; " + this.author + "; " + this.details + "; " + this.countermeasures;
+        return this.date + " ; " + this.type + " ; " + this.authorOfDetails + ": " + this.details + " ; " + this.authorOfCountermeasures + ": " + this.countermeasures;
     }
 }

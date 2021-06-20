@@ -1,5 +1,5 @@
 # Giua-Webscraper
-ver 0.7.x Alpha
+ver 0.8.x Alpha
 
 questo readme è una bozza
 

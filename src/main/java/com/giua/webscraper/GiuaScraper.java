@@ -34,6 +34,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<Lesson> allLessonsCache = null;
 	private ReportCard reportCardCache = null;
 	private List<DisciplNotice> allDisciplNoticesCache = null;
+	private List<Absence> allAbsencesCache = null;
 	private List<News> allNewsFromHomeCache = null;
 	//endregion
 
@@ -115,6 +116,56 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//endregion
 
 	//region Funzioni per ottenere dati dal registro
+
+	/**
+	 * Permette di ottenere tutte le assenze presenti
+	 *
+	 *
+	 * @param forceRefresh
+	 * @return Una lista di Absence
+	 */
+	public List<Absence> getAllAbsences(boolean forceRefresh) {
+		if(allAbsencesCache == null || forceRefresh) {
+			List<Absence> allAbsences = new Vector<>();
+			Document doc = getPage("genitori/assenze/");
+			//Elements allAbsencesTables = doc.getElementsByClass("table table-bordered table-hover table-striped");
+			Elements allAbsencesTBodyHTML = doc.getElementsByTag("tbody");
+			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
+
+			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non eiste
+			try{ allAbsencesTBodyHTML.remove(0); }
+			catch (Exception e) {
+				logln("Tabella 'Da giustificare' non presente");
+			}
+
+
+			for (Element el : allAbsencesTBodyHTML) {
+
+
+				for (Element el2 : el.children()){
+					//logln(" -------\n" + el2.toString() + "\n -------\n");
+					String urlJ = "niente url";
+					//logln("Data: " + el2.child(0).text() + " Tipo: " + el2.child(1).text() + " Annotazioni: " + el2.child(2).text() + " Giustificazione: " + el2.child(3).text());
+
+					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
+
+					if(!button.isEmpty()){
+						urlJ = button.first().attr("data-href");
+					}
+
+					//el2.child(2).child(1).remove();
+					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), button.isEmpty(), urlJ));
+				}
+			}
+
+			if(cacheable) {
+				allAbsencesCache = allAbsences;
+			}
+			return allAbsences;
+		} else {
+			return allAbsencesCache;
+		}
+	}
 
 	/**
 	 * Permette di ottenere le news dalla home
@@ -889,6 +940,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		allHomeworksCache = null;
 		allLessonsCache = null;
 		reportCardCache = null;
+		allDisciplNoticesCache = null;
+		allAbsencesCache = null;
+		allNewsFromHomeCache = null;
 	}
 
 	//endregion

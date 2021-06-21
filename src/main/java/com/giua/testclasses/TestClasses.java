@@ -7,11 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import static java.lang.System.nanoTime;
+
 class TestClasses {
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
 
         GiuaScraper.setDebugMode(true);
+        //GiuaScraper.SiteURL = "http://hiemvault.ddns.net:9090";
         String user = "";
         String password = "";
 
@@ -45,7 +48,7 @@ class TestClasses {
 
         System.out.println("\n\n----------------------Phase 1 - Testing all webscraper functions-----------------------------\n\n");
 
-        t1 = System.currentTimeMillis();
+        t1 = nanoTime();
         GiuaScraper gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
 
 
@@ -132,7 +135,15 @@ class TestClasses {
             System.out.println(a.toString());
         }
 
-        t2 = System.currentTimeMillis();
+        System.out.println("--------ASSENZE--------");
+        System.out.println("Get absences");
+        List<Absence> allAbsences = gS.getAllAbsences(true);
+        for(Absence a: allAbsences){
+            System.out.println(a.toString());
+        }
+
+
+        t2 = nanoTime();
         tPhase1 = t2-t1;
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + tPhase1);
@@ -144,7 +155,7 @@ class TestClasses {
 
         System.out.println("\n\n----------------------Phase 2 - Testing cache-----------------------------\n\n");
 
-        t1 = System.currentTimeMillis();
+        t1 = nanoTime();
 
         //gS.setSiteURL("https://registroasiaiai.giua.edu.it");
 
@@ -216,6 +227,14 @@ class TestClasses {
         }
         //System.out.println(lessons2.get(2).activities);
 
+        System.out.println("--------PAGELLA--------");
+
+        System.out.println("Get report card");
+        ReportCard reportCard2 = gS.getReportCard(false, false);
+        for(String a: reportCard2.allVotes.keySet()){
+            System.out.println(a);
+        }
+
         System.out.println("--------NOTE--------");
         System.out.println("Get disciplinary notes");
         List<DisciplNotice> allDN2 = gS.getAllDisciplNotices(false);
@@ -224,10 +243,18 @@ class TestClasses {
         }
 
 
-        t2 = System.currentTimeMillis();
+
+        System.out.println("--------ASSENZE--------");
+        System.out.println("Get absences");
+        List<Absence> allAbsences2 = gS.getAllAbsences(false);
+        for(Absence a: allAbsences2){
+            System.out.println(a.toString());
+        }
+
+        t2 = nanoTime();
         tPhase2 = t2-t1;
         System.out.println("---------------------------------------------------");
-        System.out.println("Tempo: " + tPhase2);
+        System.out.println("Tempo: " + t2 + "-" + t1);
         System.out.println("---------------------------------------------------");
 
 
@@ -235,7 +262,7 @@ class TestClasses {
         System.out.println("\n\n----------------------Phase 3 - Testing login with valid session-----------------------------\n\n");
 
 
-
+        t1 = nanoTime();
         System.out.println("Logout...");
         String sessid = gS.getSessionCookie();
 
@@ -258,7 +285,7 @@ class TestClasses {
         System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
-        Map<String, List<Vote>> votes3 = gS.getAllVotes(false);
+        Map<String, List<Vote>> votes3 = gS.getAllVotes(true);
         for (String m : votes3.keySet()) {
             System.out.println(m + ": " + votes2.get(m).toString());
         }
@@ -268,7 +295,7 @@ class TestClasses {
         System.out.println("--------AVVISI---------");
 
         System.out.println("Get avvisi");
-        List<Alert> allAvvisi3 = gS.getAllAlerts(1, false);
+        List<Alert> allAvvisi3 = gS.getAllAlerts(1, true);
         for(Alert a: allAvvisi3){
             System.out.println(a.toString());
         }
@@ -277,7 +304,7 @@ class TestClasses {
         System.out.println("--------COMPITI--------");
 
         System.out.println("Get homeworks");
-        List<Homework> allHomework3 = gS.getAllHomeworks(null, false);
+        List<Homework> allHomework3 = gS.getAllHomeworks(null, true);
         for(Homework a: allHomework3){
             System.out.println(a.toString());
         }
@@ -286,7 +313,7 @@ class TestClasses {
         System.out.println("--------VERIFICHE--------");
 
         System.out.println("Get tests");
-        List<Test> allTests3 = gS.getAllTests(null, false);
+        List<Test> allTests3 = gS.getAllTests(null, true);
         for(Test a: allTests3){
             System.out.println(a.toString());
         }
@@ -295,7 +322,7 @@ class TestClasses {
         System.out.println("--------CIRCOLARI--------");
 
         System.out.println("Get tests");
-        List<Newsletter> allNewsletters3 = gS.getAllNewsletters(2, false);
+        List<Newsletter> allNewsletters3 = gS.getAllNewsletters(2, true);
         for(Newsletter a: allNewsletters3){
             System.out.println(a.toString());
         }
@@ -304,7 +331,7 @@ class TestClasses {
         System.out.println("--------LEZIONI--------");
 
         System.out.println("Get lessons");
-        List<Lesson> lessons3 = gS.getAllLessons("2021-05-22", false);
+        List<Lesson> lessons3 = gS.getAllLessons("2021-05-22", true);
         for(Lesson a: lessons3){
             System.out.println(a.toString());
         }
@@ -313,19 +340,26 @@ class TestClasses {
         System.out.println("--------PAGELLA--------");
 
         System.out.println("Get report card");
-        ReportCard reportCard3 = gS.getReportCard(false, false);
+        ReportCard reportCard3 = gS.getReportCard(false, true);
         for(String a: reportCard3.allVotes.keySet()){
             System.out.println(a);
         }
 
         System.out.println("--------NOTE--------");
         System.out.println("Get disciplinary notes");
-        List<DisciplNotice> allDN3 = gS.getAllDisciplNotices(false);
+        List<DisciplNotice> allDN3 = gS.getAllDisciplNotices(true);
         for(DisciplNotice a: allDN3){
             System.out.println(a.toString());
         }
 
-        t2 = System.currentTimeMillis();
+        System.out.println("--------ASSENZE--------");
+        System.out.println("Get absences");
+        List<Absence> allAbsences3 = gS.getAllAbsences(true);
+        for(Absence a: allAbsences3){
+            System.out.println(a.toString());
+        }
+
+        t2 = nanoTime();
         tPhase3 = t2-t1;
         System.out.println("---------------------------------------------------");
         System.out.println("Tempo: " + tPhase3);
@@ -333,9 +367,11 @@ class TestClasses {
 
         System.out.println("\n\n");
         System.out.println("/---------------------RESULTS----------------------------");
-        System.out.println("|    Fase 1 (login iniziale):        " +  tPhase1 + "ms");
-        System.out.println("|    Fase 2 (cache):                 " +  tPhase2 + "ms");
-        System.out.println("|    Fase 3 (riutilizzo sessione):   " +  tPhase3 + "ms");
+        System.out.println("|    Fase 1 (login iniziale):        " +  (tPhase1 / 1000000)  + "ms");
+        System.out.println("|    Fase 2 (cache):                 " +  (tPhase2 / 1000000) + "ms");
+        System.out.println("|    Fase 3 (riutilizzo sessione):   " +  (tPhase3 / 1000000) + "ms");
+        System.out.println("|");
+        System.out.println("|    Totale:                         " +  (tPhase1 / 1000000 + tPhase2 / 1000000 + tPhase3 / 1000000) + "ms");
         System.out.println("\\--------------------------------------------------------");
 
     }

@@ -50,7 +50,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 *
 	 * @param newurl formattato come "https://example.com"
 	 */
-	public void setSiteURL(String newurl) {
+	public static void setSiteURL(String newurl) {
 		SiteURL = newurl;
 	}
 
@@ -59,7 +59,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 *
 	 * @return l'URL del registro formattato come "https://example.com"
 	 */
-	public String getSiteURL() {
+	public static String getSiteURL() {
 		return SiteURL;
 	}
 

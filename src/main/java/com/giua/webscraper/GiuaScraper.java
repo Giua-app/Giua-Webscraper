@@ -34,6 +34,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<Lesson> allLessonsCache = null;
 	private ReportCard reportCardCache = null;
 	private List<DisciplNotice> allDisciplNoticesCache = null;
+	private List<News> allNewsFromHomeCache = null;
 	//endregion
 
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
@@ -116,14 +117,41 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni per ottenere dati dal registro
 
 	/**
-	 * Permette di ottenere tutte le note presenti
+	 * Permette di ottenere le news dalla home
 	 *
+	 * @return Una lista di stringhe contenenti le news
+	 */
+	public List<News> getAllNewsFromHome(boolean forceRefresh) {
+		if (allNewsFromHomeCache == null || forceRefresh) {
+			List<News> returnAllNews = new Vector<>();
+			Document doc = getPage("");
+			Element els = doc.getElementsByClass("panel-body").get(0);
+			Elements allNewsHTML = els.children();
+
+			for (Element news : allNewsHTML) {
+				String url = news.child(0).child(0).attr("href");
+				returnAllNews.add(new News(news.text(), url));
+			}
+
+			if (cacheable) {
+				allNewsFromHomeCache = returnAllNews;
+			}
+			return returnAllNews;
+
+		} else {
+			return allNewsFromHomeCache;
+		}
+	}
+
+
+	/**
+	 * Permette di ottenere tutte le note presenti
 	 *
 	 * @param forceRefresh
 	 * @return Una lista di DisciplNotice
 	 */
 	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
-		if(allDisciplNoticesCache == null || forceRefresh) {
+		if (allDisciplNoticesCache == null || forceRefresh) {
 			List<DisciplNotice> allDisciplNotices = new Vector<>();
 			Document doc = getPage("genitori/note/");
 			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
@@ -161,10 +189,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			return allDisciplNoticesCache;
 		}
 	}
-
-
-
-
 
 	/**
 	 * Ti da una {@code ReportCard} del quadrimestre indicato

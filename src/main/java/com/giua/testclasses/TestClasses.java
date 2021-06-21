@@ -49,19 +49,24 @@ class TestClasses {
         GiuaScraper gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
 
 
-
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 
+        System.out.println("--------NEWS--------");
 
+        System.out.println("Get news");
+        List<News> allNews = gS.getAllNewsFromHome(true);
+        for (News news : allNews) {
+            System.out.println(news.toString());
+        }
 
         System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
         Map<String, List<Vote>> votes = gS.getAllVotes(true);
-        for(String m: votes.keySet()){
+        for (String m : votes.keySet()) {
             System.out.println(m + ": " + votes.get(m).toString());
         }
         System.out.println(votes.get("Ed. civica").get(0).allToString());
@@ -148,12 +153,19 @@ class TestClasses {
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 
+        System.out.println("--------NEWS--------");
+
+        System.out.println("Get news");
+        List<News> allNews2 = gS.getAllNewsFromHome(false);
+        for (News news : allNews2) {
+            System.out.println(news.toString());
+        }
 
         System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
         Map<String, List<Vote>> votes2 = gS.getAllVotes(false);
-        for(String m: votes2.keySet()){
+        for (String m : votes2.keySet()) {
             System.out.println(m + ": " + votes2.get(m).toString());
         }
         System.out.println(votes2.get("Ed. civica").get(0).allToString());
@@ -235,12 +247,19 @@ class TestClasses {
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.SiteURL + "\n-------------------\n");
 
+        System.out.println("--------NEWS--------");
+
+        System.out.println("Get news");
+        List<News> allNews3 = gS.getAllNewsFromHome(false);
+        for (News news : allNews3) {
+            System.out.println(news.toString());
+        }
 
         System.out.println("--------VOTI--------");
 
         System.out.println("Get votes");
         Map<String, List<Vote>> votes3 = gS.getAllVotes(false);
-        for(String m: votes3.keySet()){
+        for (String m : votes3.keySet()) {
             System.out.println(m + ": " + votes2.get(m).toString());
         }
         System.out.println(votes2.get("Ed. civica").get(0).allToString());

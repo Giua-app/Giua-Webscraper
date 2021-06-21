@@ -12,3 +12,13 @@ Può raccogliere informazioni su:
 - Circolari
 - Avvisi
 - Compiti
+- e molto altro ancora
+
+## Installazione
+Vai sulle [Actions](https://github.com/Giua-app/Giua-Webscraper/actions) e clicca il workflow più recente, su Artifacts dovresti trovare un file chiamato "build-output". Una volta scaricato estrailo e dentro ci sarà il file jar del Giua webscraper
+
+## Documentazione
+coming soon
+
+## Come posso contribuire?
+Contatta HiemSword o Franck1421

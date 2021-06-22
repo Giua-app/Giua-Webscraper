@@ -14,7 +14,7 @@ class TestClasses {
     public static void main(String[] args) {
 
         GiuaScraper.setDebugMode(true);
-        //GiuaScraper.SiteURL = "http://hiemvault.ddns.net:9090";
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
         String user = "";
         String password = "";
 
@@ -29,9 +29,9 @@ class TestClasses {
         long t1;
         long t2;
 
-        long tPhase1;
-        long tPhase2;
-        long tPhase3;
+        long tPhase1 = 0;
+        long tPhase2 = 0;
+        long tPhase3 = 0;
 
         t1 = System.currentTimeMillis();
         System.out.println("My internet work: " + GiuaScraper.isMyInternetWorking());
@@ -373,6 +373,17 @@ class TestClasses {
         System.out.println("|");
         System.out.println("|    Totale:                         " +  (tPhase1 / 1000000 + tPhase2 / 1000000 + tPhase3 / 1000000) + "ms");
         System.out.println("\\--------------------------------------------------------");
+
+        /*Absence assenza = allAbsences3.get(2);
+        System.out.println(assenza.toString());
+
+        gS.justifyAbsence(assenza, "3", "perchè si");
+
+        System.out.println("Get absences");
+        List<Absence> allAbsences4 = gS.getAllAbsences(true);
+        for(Absence a: allAbsences4){
+            System.out.println(a.toString());
+        }*/
 
     }
 }

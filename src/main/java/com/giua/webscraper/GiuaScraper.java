@@ -16,14 +16,14 @@ import java.util.Map;
 import java.util.Vector;
 
 /* -- Giua Webscraper ALPHA -- */
-// Tested with version 1.2.x and 1.3.0 of giua@school
+// Tested with version 1.2.x and 1.3.2 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Variabili globali
 	private final String user;
 	private final String password;
 	private String userType = "";
-	private String PHPSESSID = null;
+	public static String PHPSESSID = null;
 
 	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
@@ -116,6 +116,26 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//endregion
 
 	//region Funzioni per ottenere dati dal registro
+
+	public void justifyAbsence(Absence ab, String type, String reason){
+		//TODO: permettere di modificare assenza gia giustificata
+		/*if(getUserType() != "Genitore"){
+			logln("Tipo account non supportato, impossibile giustificare");
+			return;
+		}*/
+		try {
+			Connection.Response res3 = Jsoup.connect(SiteURL + ab.justifyUrl)
+					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
+					.cookie("PHPSESSID", PHPSESSID)
+					.method(Method.POST)
+					.execute();
+		} catch (Exception e){
+			logln("Qualcosa è andato storto");
+			e.printStackTrace();
+		}
+	}
+
+
 
 	/**
 	 * Permette di ottenere tutte le assenze presenti

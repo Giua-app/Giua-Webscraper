@@ -23,6 +23,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private final String user;
 	private final String password;
 	private String userType = "";
+	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
+	private static boolean debugMode;
+	final public boolean cacheable;        //Indica se si possono utilizzare le cache
 	public static String PHPSESSID = null;
 
 	//region Cache
@@ -37,11 +40,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<Absence> allAbsencesCache = null;
 	private List<News> allNewsFromHomeCache = null;
 	//endregion
-
-	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-
-	public static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
-	private static boolean debugMode;
 
 	//endregion
 
@@ -707,16 +705,21 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			Document doc = getPage("genitori/lezioni/" + date);
 			List<Lesson> returnLesson = new Vector<>();
 
-			Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
+			try {
+				Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
 
-			for(Element lessonHTML: allLessonsHTML){
-				returnLesson.add(new Lesson(
-						date,
-						lessonHTML.child(0).text(),
-						lessonHTML.child(1).text(),
-						lessonHTML.child(2).text(),
-						lessonHTML.child(3).text()
-				));
+				for (Element lessonHTML : allLessonsHTML) {
+					returnLesson.add(new Lesson(
+							date,
+							lessonHTML.child(0).text(),
+							lessonHTML.child(1).text(),
+							lessonHTML.child(2).text(),
+							lessonHTML.child(3).text(),
+							true
+					));
+				}
+			} catch (IndexOutOfBoundsException iobe) {
+				returnLesson.add(new Lesson(date, "", "", "", "", false));
 			}
 
 			if (cacheable) {

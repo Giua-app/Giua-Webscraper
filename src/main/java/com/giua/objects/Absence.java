@@ -1,5 +1,9 @@
 package com.giua.objects;
 
+import com.giua.webscraper.GiuaScraper;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+
 import java.io.Serializable;
 
 public class Absence implements Serializable {
@@ -21,4 +25,5 @@ public class Absence implements Serializable {
     public String toString() {
         return this.date + " ; " + this.type + " ; " + this.notes + " ; Gia Giustificato? " + this.isJustified + " ; " + this.justifyUrl;
     }
+
 }

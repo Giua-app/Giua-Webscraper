@@ -338,12 +338,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * @return Lista di Stringa con tutti gli URL degli allegati
 	 */
 	private List<String> attachmentsUrls(Element el){
-		Elements els = el.parent().siblingElements().get(3).child(1).children();
+		Elements els = el.child(1).children();
 		List<String> r = new Vector<>();
-		if(els.size() > 2){     //Ci sono allegati
-			Elements allAttachmentsHTML = els.get(1).child(0).children();
-
-			for(Element attachment: allAttachmentsHTML){
+		if (els.size() > 2) {     //Ci sono allegati
+			Elements allAttachments = els.get(1).child(0).children();
+			for (Element attachment : allAttachments) {
 				r.add(attachment.child(1).attr("href"));
 			}
 		} else {        //Non ha allegati
@@ -363,22 +362,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		if(allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			Document doc = getPage("circolari/genitori/" + page);
-			Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
+			/*Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
 			Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
 
 			int i = 0;
-			for (Element el : allNewslettersLettiStatusHTML) {
-				allNewsletters.add(new Newsletter(el.text(),
-						el.parent().parent().child(1).text(),
-						el.parent().parent().child(2).text(),
-						el.parent().parent().child(3).text(),
-						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-						attachmentsUrls(el),
-						i,
-						page
-				));
-				i++;
-			}
+
 			for (Element el : allNewslettersDaLeggereStatusHTML) {
 				allNewsletters.add(new Newsletter(el.text(),
 						el.parent().parent().child(1).text(),
@@ -392,7 +380,33 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				i++;
 			}
 
-			if(cacheable) {
+			for (Element el : allNewslettersLettiStatusHTML) {
+				allNewsletters.add(new Newsletter(el.text(),
+						el.parent().parent().child(1).text(),
+						el.parent().parent().child(2).text(),
+						el.parent().parent().child(3).text(),
+						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						attachmentsUrls(el),
+						i,
+						page
+				));
+				i++;
+			}*/
+
+			Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
+
+			for (Element el : allNewslettersStatusHTML) {
+				allNewsletters.add(new Newsletter(
+						el.child(0).text(),
+						el.child(1).text(),
+						el.child(2).text(),
+						el.child(3).text(),
+						el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+						attachmentsUrls(el.child(4)),
+						page));
+			}
+
+			if (cacheable) {
 				allNewslettersCache = allNewsletters;
 			}
 			return allNewsletters;
@@ -885,8 +899,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			//logln("HTML: " + doc2);
 
 
-		} catch (Exception e){
-			if(!isSiteWorking()){
+		} catch (IOException e) {
+			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
 			} else {
 				throw new UnableToLogin("Something unexpected happened", e);

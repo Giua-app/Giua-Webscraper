@@ -95,27 +95,27 @@ class TestClasses {
 
 		System.out.println("--------VERIFICHE--------");
 
-		System.out.println("Get tests");
-		List<Test> allTests = gS.getAllTests(null, true);
-		for(Test a: allTests){
-			System.out.println(a.toString());
-		}
-		System.out.println(gS.getTest("2021-05-18").toString());
+        System.out.println("Get tests");
+        List<Test> allTests = gS.getAllTests(null, true);
+        for (Test a : allTests) {
+            System.out.println(a.toString());
+        }
+        System.out.println(gS.getTest("2021-05-18").toString());
 
-		System.out.println("--------CIRCOLARI--------");
+        System.out.println("--------CIRCOLARI--------");
 
-		System.out.println("Get tests");
-		List<Newsletter> allNewsletters = gS.getAllNewsletters(2, true);
-		for(Newsletter a: allNewsletters){
-			System.out.println(a.toString());
-		}
-        System.out.println(allNewsletters.get(5).attachments != null);
+        System.out.println("Get tests");
+        List<Newsletter> allNewsletters = gS.getAllNewsletters(0, true);
+        for (Newsletter a : allNewsletters) {
+            System.out.println(a.toString());
+        }
+        System.out.println(allNewsletters.get(4).attachments != null);
 
         System.out.println("--------LEZIONI--------");
 
         System.out.println("Get lessons");
         List<Lesson> lessons = gS.getAllLessons("2021-05-22", true);
-		for(Lesson a: lessons){
+        for (Lesson a : lessons) {
 			System.out.println(a.toString());
 		}
         System.out.println(lessons.get(2).activities);
@@ -212,7 +212,7 @@ class TestClasses {
         System.out.println("--------CIRCOLARI--------");
 
         System.out.println("Get newsletters");
-        List<Newsletter> allNewsletters2 = gS.getAllNewsletters(2, false);
+        List<Newsletter> allNewsletters2 = gS.getAllNewsletters(0, false);
         for(Newsletter a: allNewsletters2){
             System.out.println(a.toString());
         }
@@ -322,11 +322,11 @@ class TestClasses {
         System.out.println("--------CIRCOLARI--------");
 
         System.out.println("Get tests");
-        List<Newsletter> allNewsletters3 = gS.getAllNewsletters(2, true);
+        List<Newsletter> allNewsletters3 = gS.getAllNewsletters(0, true);
         for(Newsletter a: allNewsletters3){
             System.out.println(a.toString());
         }
-        System.out.println(allNewsletters2.get(5).attachments != null);
+        System.out.println(allNewsletters3.get(4).attachments != null);
 
         System.out.println("--------LEZIONI--------");
 

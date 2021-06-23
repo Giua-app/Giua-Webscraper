@@ -12,16 +12,14 @@ public class Newsletter implements Serializable {
     public final String number;
     public final List<String> attachments;
     public final int page;
-    public final int id;        //Indica quanto e' lontano dalla prima circolare
 
-    public Newsletter(String status, String numebr, String date, String newslettersObject, String detailsUrl, List<String> attachments, int id, int page) {
+    public Newsletter(String status, String number, String date, String newslettersObject, String detailsUrl, List<String> attachments, int page) {
         this.status = status;
         this.date = date;
         this.newslettersObject = newslettersObject;
         this.detailsUrl = detailsUrl;
-        this.number = numebr;
+        this.number = number;
         this.attachments = attachments;
-        this.id = id;
         this.page = page;
     }
 

@@ -107,7 +107,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		this.PHPSESSID = phpsessid;
+		PHPSESSID = phpsessid;
 		login();
 	}
 
@@ -734,6 +734,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//endregion
 
 	//region Funzioni fondamentali
+
+	public byte[] download(String url) {
+		try {
+			Connection.Response r = Jsoup.connect(SiteURL + url).cookie("PHPSESSID", PHPSESSID).ignoreContentType(true).execute();
+			return r.bodyAsBytes();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new byte[0];
+		}
+	}
 
 	/**
 	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL}

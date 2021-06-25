@@ -3,6 +3,8 @@ package com.giua.testclasses;
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -17,6 +19,17 @@ class TestClasses {
 
     private static void makeLogin() {
         gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
+    }
+
+    private static void testDownload() {
+        try {
+            FileOutputStream out = new FileOutputStream("downloadtest.pdf");
+            out.write(gS.download("/circolari/download/393/0"));
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private static void testNews(boolean forceRefresh) {

@@ -19,6 +19,7 @@ class TestClasses {
 
     private static void makeLogin() {
         gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
+        gS.login();
     }
 
     private static void testDownload() {
@@ -83,7 +84,7 @@ class TestClasses {
         for (Newsletter a : allNewsletters) {
             System.out.println(a.toString());
         }
-        System.out.println(allNewsletters.get(4).attachments != null);
+        System.out.println(allNewsletters.get(0).attachments != null);
     }
 
     public static void testLessons(boolean forceRefresh) {
@@ -98,8 +99,10 @@ class TestClasses {
     public static void testReportCard(boolean forceRefresh) {
         System.out.println("Get report card");
         ReportCard reportCard = gS.getReportCard(false, forceRefresh);
-        for (String a : reportCard.allVotes.keySet()) {
-            System.out.println(a);
+        if (reportCard.exists) {
+            for (String a : reportCard.allVotes.keySet()) {
+                System.out.println(a);
+            }
         }
     }
 
@@ -145,7 +148,7 @@ class TestClasses {
 
         t1 = nanoTime();
         gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
-
+        gS.login();
 
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserType());
@@ -305,7 +308,7 @@ class TestClasses {
     public static void main(String[] args) {
 
         GiuaScraper.setDebugMode(true);
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         Scanner sc = new Scanner(System.in);
         if (user.equals("") && password.equals("")) {
@@ -315,6 +318,6 @@ class TestClasses {
             password= sc.nextLine();
         }
 
-        //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

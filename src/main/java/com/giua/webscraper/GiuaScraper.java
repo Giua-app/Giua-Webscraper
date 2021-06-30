@@ -26,7 +26,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
 	private static boolean debugMode;
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-	public static String PHPSESSID = null;
+	public String PHPSESSID = "";
 
 	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
@@ -51,7 +51,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * @param newurl formattato come "https://example.com"
 	 */
 	public static void setSiteURL(String newurl) {
-		SiteURL = newurl;
+		GiuaScraper.SiteURL = newurl;
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * @return l'URL del registro formattato come "https://example.com"
 	 */
 	public static String getSiteURL() {
-		return SiteURL;
+		return GiuaScraper.SiteURL;
 	}
 
 	public String getSessionCookie() {
@@ -85,14 +85,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		login();
 	}
 
 	public GiuaScraper(String user, String password, boolean cacheable){
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		login();
 	}
 
 	/**
@@ -108,21 +106,27 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.password = password;
 		this.cacheable = cacheable;
 		PHPSESSID = phpsessid;
-		login();
+	}
+
+	public GiuaScraper(String user, String password, String phpsessid) {
+		this.user = user;
+		this.password = password;
+		this.cacheable = true;
+		PHPSESSID = phpsessid;
 	}
 
 	//endregion
 
 	//region Funzioni per ottenere dati dal registro
 
-	public void justifyAbsence(Absence ab, String type, String reason){
+	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
 		/*if(getUserType() != "Genitore"){
 			logln("Tipo account non supportato, impossibile giustificare");
 			return;
 		}*/
 		try {
-			Connection.Response res3 = Jsoup.connect(SiteURL + ab.justifyUrl)
+			Connection.Response res3 = Jsoup.connect(GiuaScraper.SiteURL + ab.justifyUrl)
 					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
 					.cookie("PHPSESSID", PHPSESSID)
 					.method(Method.POST)
@@ -267,19 +271,23 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * @return La pagella del quadrimestre indicato
 	 */
 	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
-		if (reportCardCache == null || forceRefresh){
+		if (reportCardCache == null || forceRefresh) {
 			ReportCard returnReportCard;
 			Map<String, List<String>> returnReportCardValue = new HashMap<>();
 			Document doc;
-			if(firstQuarterly)
+			if (firstQuarterly)
 				doc = getPage("genitori/pagelle/P");
 			else
 				doc = getPage("genitori/pagelle/F");
 
 			Elements elements = doc.getElementsByTag("tr");
+
+			if (elements.size() == 0)
+				return new ReportCard(firstQuarterly, null, false);
+
 			elements.remove(0);
 
-			for(Element e: elements){
+			for (Element e : elements) {
 				String subject = e.child(0).text();
 				String vote = e.child(0).text();
 				String absentTime = e.child(0).text();
@@ -290,9 +298,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				returnReportCardValue.put(subject, pairValue);
 			}
 
-			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue);
+			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue, true);
 
-			if(cacheable)
+			if (cacheable)
 				reportCardCache = returnReportCard;
 
 			return returnReportCard;
@@ -453,8 +461,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 					details,
 					true
 			);
-		} catch (NullPointerException e){		//Non ci sono compiti in questo giorno
-			return new Homework(				//Compito vuoto
+		} catch (NullPointerException | IndexOutOfBoundsException e) {        //Non ci sono compiti in questo giorno
+			return new Homework(                //Compito vuoto
 					date.split("-")[2],
 					date,
 					"",
@@ -737,7 +745,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	public byte[] download(String url) {
 		try {
-			Connection.Response r = Jsoup.connect(SiteURL + url).cookie("PHPSESSID", PHPSESSID).ignoreContentType(true).execute();
+			Connection.Response r = Jsoup.connect(GiuaScraper.SiteURL + url).cookie("PHPSESSID", PHPSESSID).ignoreContentType(true).execute();
 			return r.bodyAsBytes();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -759,13 +767,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				throw new NotLoggedIn("Please login before requesting this page");
 			}
 
-			if (PHPSESSID == null) {
+			/*if (PHPSESSID == null) {		In teoria risolto ma non lo tolgo ancora per sicurezza
 				PHPSESSID = "";
-			} //Per risolvere errore strano che capita quando è null
+			} //Per risolvere errore strano che capita quando è null*/
 
-			log("getPage: Getting page " + SiteURL + "/" + page);
+			log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
-			Connection.Response res = Jsoup.connect(SiteURL + "/" + page)
+			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
@@ -821,7 +829,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				return false;
 			}
 
-			Connection.Response res = Jsoup.connect(SiteURL)
+			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
@@ -847,7 +855,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		//Funzione indipendente. Non usa ne getPage ne altro
 
 		try {
-			Connection.Response res = Jsoup.connect(SiteURL)
+			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
@@ -885,7 +893,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 				//logln("login: First connection (login form)");
 
-				Connection.Response res = Jsoup.connect(SiteURL + "/login/form")
+				Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/login/form")
 						.method(Method.GET)
 						.execute();
 
@@ -894,7 +902,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 
 				//logln("login: Second connection (authenticate)");
-				Connection.Response res2 = Jsoup.connect(SiteURL + "/ajax/token/authenticate")
+				Connection.Response res2 = Jsoup.connect(GiuaScraper.SiteURL + "/ajax/token/authenticate")
 						.cookie("PHPSESSID", PHPSESSID)
 						.method(Method.GET)
 						.ignoreContentType(true)
@@ -908,7 +916,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				logln("login: CSRF Token: " + CSRFToken);
 
 				//logln("login: Third connection (login form)");
-				Connection.Response res3 = Jsoup.connect(SiteURL + "/login/form/")
+				Connection.Response res3 = Jsoup.connect(GiuaScraper.SiteURL + "/login/form/")
 						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 						.cookie("PHPSESSID", PHPSESSID)
 						.method(Method.POST)
@@ -952,7 +960,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	public static boolean isSiteWorking(){
 		try {
-			Jsoup.connect(SiteURL).method(Method.GET).timeout(5000).execute();	//Se la richiesta impiega più di 5 secondi
+			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).timeout(5000).execute();    //Se la richiesta impiega più di 5 secondi
 			return true;
 		} catch (IOException io){
 			if(isMyInternetWorking()) {
@@ -1000,7 +1008,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * Stampa una stringa e va a capo.
 	 */
 	protected static void logln(Object message) {
-		if (debugMode)
+		if (GiuaScraper.debugMode)
 			System.out.println(message);
 	}
 
@@ -1008,12 +1016,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * Stampa una stringa.
 	 */
 	protected static void log(Object message) {
-		if (debugMode)
+		if (GiuaScraper.debugMode)
 			System.out.print(message);
 	}
 
-	public static void setDebugMode(boolean mode){
-		debugMode = mode;
+	public static void setDebugMode(boolean mode) {
+		GiuaScraper.debugMode = mode;
 	}
 
 	//endregion

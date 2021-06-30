@@ -28,7 +28,12 @@ public class Alert implements Serializable {
 
     public String getDetails(GiuaScraper gS) {        //carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
         Document allAvvisiHTML = gS.getPage("genitori/avvisi/" + page);
-        Document dettagliAvvisoHTML = gS.getPage("" + allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
+        Document dettagliAvvisoHTML;
+        if (isRead())
+            dettagliAvvisoHTML = gS.getPage(allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
+        else
+            dettagliAvvisoHTML = gS.getPage(allAvvisiHTML.getElementsByClass("label label-warning").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
+
         this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
         this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
         this.isDetailed = true;
@@ -36,7 +41,7 @@ public class Alert implements Serializable {
     }
 
     public boolean isRead() {
-        return this.status.equals("LETTA");
+        return this.status.equals("LETTO");
     }
 
     public String toString() {

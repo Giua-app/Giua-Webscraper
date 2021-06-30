@@ -20,7 +20,7 @@ public class Lesson implements Serializable {
     }
 
     public String toString(){
-        return this.date + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities;
+        return this.date + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists;
     }
 
 }

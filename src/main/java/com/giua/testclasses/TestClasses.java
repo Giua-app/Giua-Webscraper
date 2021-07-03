@@ -122,6 +122,15 @@ class TestClasses {
         }
     }
 
+    private static void startLogin(){
+        gS = new GiuaScraper(user, password, true);
+        gS.login();
+
+        //Document doc = gS.getPage("");
+        System.out.println("Account type: " + gS.getUserType());
+    }
+
+
     private static void testAll() {
 
         long t1;
@@ -147,11 +156,7 @@ class TestClasses {
         System.out.println("\n\n----------------------Phase 1 - Testing all webscraper functions-----------------------------\n\n");
 
         t1 = nanoTime();
-        gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
-        gS.login();
-
-        //Document doc = gS.getPage("");
-        System.out.println("Account type: " + gS.getUserType());
+        startLogin();
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
@@ -310,14 +315,25 @@ class TestClasses {
         GiuaScraper.setDebugMode(true);
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        Scanner sc = new Scanner(System.in);
+        /*Scanner sc = new Scanner(System.in);
         if (user.equals("") && password.equals("")) {
             System.out.println("Please enter username: ");
             user= sc.nextLine();
             System.out.println("Password: ");
             password= sc.nextLine();
-        }
+        }*/
 
-        testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //startLogin();
+
+        gS = new GiuaScraper("", "");
+
+        System.out.println(gS.isMaintenanceScheduled());
+        gS.getMaintenanceSchedule();
+
+
+
+
+
     }
 }

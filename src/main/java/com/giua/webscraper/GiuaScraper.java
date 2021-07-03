@@ -10,10 +10,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.2.x and 1.3.2 of giua@school
@@ -742,6 +740,68 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//endregion
 
 	//region Funzioni fondamentali
+
+	//TODO: Da completare
+	public Boolean isMaintenanceScheduled() {
+
+		Document doc = getPage("login/form");
+		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+
+		if(!els.isEmpty()){
+			logln("Manutenzione trovata");
+			return true;
+		}
+		return false;
+
+	}
+
+	//TODO: restituire un oggetto "Maintenance" con tutte le cose della manutenzione
+	public void getMaintenanceSchedule(){
+		try {
+			Document doc = getPage("login/form");
+			Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+			Elements dateEl = els.get(0).getElementsByTag("strong");
+			String dateTxt = dateEl.get(0).text();
+			String[] a = dateTxt.split("ore");
+			String start = a[1].replace("del", "").replace("alle", "");
+			String end = a[2].replace("del", "");
+
+			logln(dateTxt);
+			logln(start + "|" + end);
+
+
+			SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  "); // first example
+			//SimpleDateFormat format2 = new SimpleDateFormat("MMMMM dd,yyyy"); // second example
+
+
+			Date d1 = format1.parse(start);
+
+			logln(d1.toString());
+
+			//Date d2 = format2.parse( dateStr2 );
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+
+	}
+
+	//TODO: Da completare
+	public Boolean checkMaintenanceStatus() {
+
+		if(isMaintenanceScheduled()){
+			logln("Manutenzione programmata");
+			Document doc = getPage("login/form");
+			Elements els = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
+
+			if(els.isEmpty()){
+				logln("Manutenzione in corso");
+			}
+
+		} else {
+			logln("Manutenzione non programmata");
+		}
+		return false;
+	}
 
 	public byte[] download(String url) {
 		try {

@@ -742,7 +742,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni fondamentali
 
 	//TODO: Da completare
-	public Boolean isMaintenanceScheduled() {
+	public boolean isMaintenanceScheduled() {
 
 		Document doc = getPage("login/form");
 		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
@@ -755,38 +755,87 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	}
 
-	//TODO: restituire un oggetto "Maintenance" con tutte le cose della manutenzione
-	public void getMaintenanceSchedule(){
-		try {
+	public boolean isMaintenanceActive() {
+
+		if(isMaintenanceScheduled()){
+			logln("Manutenzione programmata");
 			Document doc = getPage("login/form");
-			Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
-			Elements dateEl = els.get(0).getElementsByTag("strong");
-			String dateTxt = dateEl.get(0).text();
-			String[] a = dateTxt.split("ore");
-			String start = a[1].replace("del", "").replace("alle", "");
-			String end = a[2].replace("del", "");
+			Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
 
-			logln(dateTxt);
-			logln(start + "|" + end);
+			if(loginForm.isEmpty()){
+				logln("Manutenzione in corso");
+				return true;
+			}
+
+			logln("Manutenzione programmata ma non ancora attiva");
+			return false;
+
+		}
+		logln("Manutenzione inesistente");
+		return false;
+	}
+
+	//TODO: da completare
+	public Maintenance getMaintenanceStatus(){
+		Maintenance maintenance;
+
+		if(!isMaintenanceScheduled()){
+			logln("getMaintenanceStatus: Manutenzione non trovata");
+			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
+			return maintenance;
+		}
+
+		Document doc = getPage("login/form");
+		Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+		Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
+
+		// Togli dalla scritta tutto tranne le date
+		String dateTxt = dateEl.get(0).text();
+		String[] a = dateTxt.split("ore");
+		String start = a[1].replace("del", "").replace("alle", "");
+		String end = a[2].replace("del", "");
 
 
-			SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  "); // first example
-			//SimpleDateFormat format2 = new SimpleDateFormat("MMMMM dd,yyyy"); // second example
+		logln(start + "|" + end);
 
+		//Crea dei format per fare il parsing di quelle stringhe
+		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
+		SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
 
-			Date d1 = format1.parse(start);
-
-			logln(d1.toString());
-
-			//Date d2 = format2.parse( dateStr2 );
+		Date startDate = null;
+		Date endDate = null;
+		try {
+			startDate = format1.parse(start);
+			endDate = format2.parse(end);
 		} catch(Exception e){
 			e.printStackTrace();
 		}
 
+		logln(startDate.toString() + " / " + endDate.toString());
+
+		Date currentDate = new Date();
+		boolean isActive = false;
+		boolean shouldBeActive = false;
+
+		if(currentDate.after(startDate) && currentDate.before(endDate)){
+			logln("Orario: manutenzione attiva");
+			shouldBeActive = true;
+		}
+
+		if(isMaintenanceActive()){
+			logln("Sito: Manutenzione attiva");
+			isActive = true;
+		}
+
+
+		 maintenance = new Maintenance(startDate, endDate, isActive, shouldBeActive, true);
+
+
+		return maintenance;
 	}
 
-	//TODO: Da completare
-	public Boolean checkMaintenanceStatus() {
+
+	public boolean checkMaintenanceStatus() {
 
 		if(isMaintenanceScheduled()){
 			logln("Manutenzione programmata");
@@ -795,10 +844,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 			if(els.isEmpty()){
 				logln("Manutenzione in corso");
+				return true;
 			}
 
 		} else {
 			logln("Manutenzione non programmata");
+			return false;
 		}
 		return false;
 	}
@@ -889,14 +940,24 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 				return false;
 			}
 
+
 			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
 
+			Document doc = res.parse();
+
+			Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
+
+			if(loginForm.isEmpty()){
+				return false;
+			}
+
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
 			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
 			//Attenzione: Il sito ritorna 200 anche quando il PHPSESSID non è valido!
+			//Attenzione 2: Il sito ritorna 200 anche quando è in manutenzione!
 			logln("Calling checklogin() the site answered with status code: " + res.statusCode());
 			return res.statusCode() != 302;
 
@@ -945,7 +1006,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	public void login() {
 		try {
 
-			if (isCookieValid(PHPSESSID)) {
+			if (isCookieValid(PHPSESSID) && !PHPSESSID.equals("")) {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
 			} else {
@@ -990,6 +1051,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 				if (PHPSESSID == null) {
 					Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
+					if(err.isEmpty()){
+						throw new UnableToLogin("Session cookie empty, login unsuccessful.\n WARNING! Site was unable to give an error message, its possible the login process is deactivated", null);
+					}
 					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
 				}
 			}

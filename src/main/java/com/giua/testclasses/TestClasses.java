@@ -315,25 +315,24 @@ class TestClasses {
         GiuaScraper.setDebugMode(true);
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        /*Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         if (user.equals("") && password.equals("")) {
             System.out.println("Please enter username: ");
             user= sc.nextLine();
             System.out.println("Password: ");
             password= sc.nextLine();
-        }*/
+        }
 
-        //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //FIXME: ATTENZIONE CI SONO ANCORA ERRORI IRRISOLTI NELLA IMPLEMENTAZIONE DELLE MANUTENZIONI
+        testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
         //startLogin();
 
-        gS = new GiuaScraper("", "");
+        //gS = new GiuaScraper("", "");
 
-        System.out.println(gS.isMaintenanceScheduled());
-        gS.getMaintenanceSchedule();
-
+        //System.out.println(gS.getMaintenanceStatus().toString());
 
 
-
+        //System.out.println(gS.checkLogin());
 
     }
 }

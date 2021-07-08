@@ -39,6 +39,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<News> allNewsFromHomeCache = null;
 	//endregion
 
+	//region Variabili di stato
+	private int maintenanceStatus = 0;
+	/* 0 = Nessuna manutenzione programmata/attiva
+	 * 1 = Manutenzione programmata
+	 * 2 = Manutenzione attiva, login disattivato
+	 * 3 = Sconosciuto/Errore
+	 */
+
 	//endregion
 
 	//region Metodi getter e setter
@@ -741,6 +749,22 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Funzioni fondamentali
 
+
+	public void updateMaintenanceStatus() {
+		maintenanceStatus = 3;
+
+		if(isMaintenanceActive()){
+			maintenanceStatus = 2;
+		}
+
+		if(isMaintenanceScheduled()){
+			maintenanceStatus = 1;
+		} else {
+			maintenanceStatus = 0;
+		}
+	}
+
+
 	//TODO: Da completare
 	public boolean isMaintenanceScheduled() {
 
@@ -776,11 +800,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	}
 
 	//TODO: da completare
-	public Maintenance getMaintenanceStatus(){
+	public Maintenance getMaintenanceInfo(){
 		Maintenance maintenance;
 
 		if(!isMaintenanceScheduled()){
-			logln("getMaintenanceStatus: Manutenzione non trovata");
+			logln("getMaintenanceInfo: Manutenzione non trovata");
 			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
 			return maintenance;
 		}
@@ -808,7 +832,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			startDate = format1.parse(start);
 			endDate = format2.parse(end);
 		} catch(Exception e){
-			e.printStackTrace();
+			//throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
 		}
 
 		logln(startDate.toString() + " / " + endDate.toString());
@@ -835,7 +859,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	}
 
 
-	public boolean checkMaintenanceStatus() {
+
+
+
+	/*public boolean checkMaintenanceStatus() {
 
 		if(isMaintenanceScheduled()){
 			logln("Manutenzione programmata");
@@ -852,7 +879,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			return false;
 		}
 		return false;
-	}
+	}*/
+
+
+
 
 	public byte[] download(String url) {
 		try {
@@ -951,7 +981,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
 
 			if(loginForm.isEmpty()){
-				return false;
+				throw new MaintenanceIsActiveException("Can't log in because the site is in maintenance mode");
 			}
 
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it

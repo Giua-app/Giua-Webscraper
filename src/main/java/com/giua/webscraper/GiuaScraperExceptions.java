@@ -40,4 +40,19 @@ public class GiuaScraperExceptions {
             e.printStackTrace();
         }
     }
+
+    public static class UnableToGetMaintenanceInfo extends RuntimeException {
+        public UnableToGetMaintenanceInfo(String errorMessage, Exception e) {
+            super(errorMessage);
+            e.printStackTrace();
+        }
+    }
+
+    public static class MaintenanceIsActiveException extends RuntimeException {
+        public MaintenanceIsActiveException(String errorMessage) {
+            super(errorMessage);
+            //e.printStackTrace();
+        }
+    }
+
 }

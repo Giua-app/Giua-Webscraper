@@ -39,14 +39,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private List<News> allNewsFromHomeCache = null;
 	//endregion
 
-	//region Variabili di stato
-	private int maintenanceStatus = 0;
-	/* 0 = Nessuna manutenzione programmata/attiva
-	 * 1 = Manutenzione programmata
-	 * 2 = Manutenzione attiva, login disattivato
-	 * 3 = Sconosciuto/Errore
-	 */
-
 	//endregion
 
 	//region Metodi getter e setter
@@ -749,62 +741,36 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Funzioni fondamentali
 
-
-	public void updateMaintenanceStatus() {
-		maintenanceStatus = 3;
-
-		if(isMaintenanceActive()){
-			maintenanceStatus = 2;
-		}
-
-		if(isMaintenanceScheduled()){
-			maintenanceStatus = 1;
-		} else {
-			maintenanceStatus = 0;
-		}
-	}
-
-
-	//TODO: Da completare
 	public boolean isMaintenanceScheduled() {
-
 		Document doc = getPage("login/form");
 		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
 
-		if(!els.isEmpty()){
-			logln("Manutenzione trovata");
+		if (!els.isEmpty()) {
+			logln("isMaintenanceScheduled: Manutenzione programmata trovata");
 			return true;
 		}
+		logln("getMaintenanceInfo: Manutenzione non trovata");
 		return false;
 
 	}
 
 	public boolean isMaintenanceActive() {
+		Document doc = getPage("login/form");
+		Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
 
-		if(isMaintenanceScheduled()){
-			logln("Manutenzione programmata");
-			Document doc = getPage("login/form");
-			Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
-
-			if(loginForm.isEmpty()){
-				logln("Manutenzione in corso");
-				return true;
-			}
-
-			logln("Manutenzione programmata ma non ancora attiva");
-			return false;
-
+		if (loginForm.isEmpty()) {
+			logln("isMaintenanceActive: Manutenzione attiva");
+			return true;
 		}
-		logln("Manutenzione inesistente");
+
+		logln("isMaintenanceActive: Manutenzione non attiva");
 		return false;
 	}
 
-	//TODO: da completare
 	public Maintenance getMaintenanceInfo(){
 		Maintenance maintenance;
 
 		if(!isMaintenanceScheduled()){
-			logln("getMaintenanceInfo: Manutenzione non trovata");
 			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
 			return maintenance;
 		}
@@ -820,7 +786,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		String end = a[2].replace("del", "");
 
 
-		logln(start + "|" + end);
+		logln("getMaintenanceInfo: " + start + "|" + end);
 
 		//Crea dei format per fare il parsing di quelle stringhe
 		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
@@ -831,59 +797,37 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		try {
 			startDate = format1.parse(start);
 			endDate = format2.parse(end);
-		} catch(Exception e){
+		} catch (Exception e) {
 			//throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
+			return null;
 		}
 
-		logln(startDate.toString() + " / " + endDate.toString());
+		logln("getMaintenanceInfo: " + startDate.toString() + " / " + endDate.toString());
 
 		Date currentDate = new Date();
 		boolean isActive = false;
 		boolean shouldBeActive = false;
 
-		if(currentDate.after(startDate) && currentDate.before(endDate)){
-			logln("Orario: manutenzione attiva");
+		if (currentDate.after(startDate) && currentDate.before(endDate)) {
+			logln("getMaintenanceInfo: Secondo l'orario la manutenzione dovrebbe essere attiva");
 			shouldBeActive = true;
 		}
 
-		if(isMaintenanceActive()){
-			logln("Sito: Manutenzione attiva");
+		if (isMaintenanceActive()) {
 			isActive = true;
 		}
 
-
-		 maintenance = new Maintenance(startDate, endDate, isActive, shouldBeActive, true);
-
+		maintenance = new Maintenance(startDate, endDate, isActive, shouldBeActive, true);
 
 		return maintenance;
 	}
 
-
-
-
-
-	/*public boolean checkMaintenanceStatus() {
-
-		if(isMaintenanceScheduled()){
-			logln("Manutenzione programmata");
-			Document doc = getPage("login/form");
-			Elements els = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
-
-			if(els.isEmpty()){
-				logln("Manutenzione in corso");
-				return true;
-			}
-
-		} else {
-			logln("Manutenzione non programmata");
-			return false;
-		}
-		return false;
-	}*/
-
-
-
-
+	/**
+	 * Effettua il download di una risorsa di qualunque tipo dal registro
+	 *
+	 * @param url
+	 * @return La risorsa scaricata come un array di byte
+	 */
 	public byte[] download(String url) {
 		try {
 			Connection.Response r = Jsoup.connect(GiuaScraper.SiteURL + url).cookie("PHPSESSID", PHPSESSID).ignoreContentType(true).execute();
@@ -904,19 +848,50 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	public Document getPage(String page) {
 		try {
 
-			if (!checkLogin() && !page.equals("") && !page.equals("login/form")) {
-				throw new NotLoggedIn("Please login before requesting this page");
+			if (page.equals("") || page.equals("login/form")) {
+				return getPageNoCookie(page);
+			} else {
+				if (!checkLogin()) {
+					throw new NotLoggedIn("Please login before requesting this page");
+				} else if (isMaintenanceActive()) {
+					throw new MaintenanceIsActiveException("The website is in maintenance");
+				}
+
+				log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
+
+				Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+						.method(Method.GET)
+						.cookie("PHPSESSID", PHPSESSID)
+						.execute();
+
+				Document doc = res.parse();
+
+				logln("\t Done!");
+				return doc;
 			}
 
-			/*if (PHPSESSID == null) {		In teoria risolto ma non lo tolgo ancora per sicurezza
-				PHPSESSID = "";
-			} //Per risolvere errore strano che capita quando è null*/
+		} catch (Exception e) {
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+			}
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-			log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
+	/**
+	 * Ottiene una pagina del registro senza usare il cookie quindi non controlla nemmeno se si è loggati
+	 *
+	 * @param page
+	 * @return La pagina che cercata
+	 */
+	public Document getPageNoCookie(String page) {
+		try {
+
+			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
 			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.method(Method.GET)
-					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
 
 			Document doc = res.parse();
@@ -924,9 +899,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			logln("\t Done!");
 			return doc;
 
-
 		} catch (Exception e) {
-			if(!isSiteWorking()){
+			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
 			}
 			e.printStackTrace();
@@ -936,6 +910,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	/**
 	 * Ottiene la pagina HTML specificata da un URL esterna al sito del Giua
+	 *
 	 * @param url
 	 * @return Una pagina HTML come {@link Document}
 	 */
@@ -966,23 +941,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 */
 	public Boolean checkLogin() {
 		try {
-			if (PHPSESSID == null) {        //Non e loggato
+			if (PHPSESSID.equals("")) {        //Non e loggato
 				return false;
 			}
-
 
 			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
 					.method(Method.GET)
 					.cookie("PHPSESSID", PHPSESSID)
 					.execute();
-
-			Document doc = res.parse();
-
-			Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
-
-			if(loginForm.isEmpty()){
-				throw new MaintenanceIsActiveException("Can't log in because the site is in maintenance mode");
-			}
 
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
 			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
@@ -1172,6 +1138,22 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	protected static void log(Object message) {
 		if (GiuaScraper.debugMode)
 			System.out.print(message);
+	}
+
+	/**
+	 * Stampa una stringa come un errore, quindi rosso.
+	 */
+	public static void logError(Object message) {
+		if (GiuaScraper.debugMode)
+			System.err.print(message);
+	}
+
+	/**
+	 * Stampa una stringa come un errore e va a capo.
+	 */
+	public static void logErrorLn(Object message) {
+		if (GiuaScraper.debugMode)
+			System.err.println(message);
 	}
 
 	public static void setDebugMode(boolean mode) {

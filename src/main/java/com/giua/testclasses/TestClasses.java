@@ -7,15 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import static java.lang.System.nanoTime;
 
 class TestClasses {
 
     private static GiuaScraper gS;
-    private static String user = "";
-    private static String password = "";
+    private static final String user = "";
+    private static final String password = "";
 
     private static void makeLogin() {
         gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
@@ -330,9 +329,7 @@ class TestClasses {
         gS = new GiuaScraper("", "");
 
         System.out.println(gS.getMaintenanceInfo().toString());
-
-
-        System.out.println(gS.checkLogin());
-
+        System.out.println(gS.isMaintenanceScheduled());
+        System.out.println(gS.getAllVotes(false));
     }
 }

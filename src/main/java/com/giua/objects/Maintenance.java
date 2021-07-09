@@ -10,8 +10,6 @@ public class Maintenance implements Serializable{
     public Boolean shouldBeActive;
     public Boolean exist;
 
-
-
     public Maintenance(Date start, Date end, Boolean isActive, Boolean shouldBeActive, Boolean exist) {
         this.start = start;
         this.end = end;
@@ -22,11 +20,11 @@ public class Maintenance implements Serializable{
 
     public String toString() {
         if(this.exist == false){
-            return "Esiste? " + this.exist +" Inizio:" + "null" + " Fine: " + "null" +
+            return "Esiste? " + this.exist + " Inizio: " + "null" + " Fine: " + "null " +
                     " In corso? " + this.isActive + " Dovrebbe essere in corso? " + this.shouldBeActive;
         }
 
-        return "Esiste? " + this.exist +" Inizio:" + this.start.toString() + " Fine: " + this.end.toString() +
+        return "Esiste? " + this.exist + " Inizio: " + this.start.toString() + " Fine: " + this.end.toString() +
                 " In corso? " + this.isActive + " Dovrebbe essere in corso? " + this.shouldBeActive;
     }
 }

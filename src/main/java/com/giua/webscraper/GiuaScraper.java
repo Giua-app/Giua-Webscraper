@@ -742,7 +742,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni fondamentali
 
 	public boolean isMaintenanceScheduled() {
-		Document doc = getPage("login/form");
+		Document doc = getPage("login/form/");
 		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
 
 		if (!els.isEmpty()) {
@@ -755,8 +755,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	}
 
 	public boolean isMaintenanceActive() {
-		Document doc = getPage("login/form");
-		Elements loginForm = doc.getElementsByClass("col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2 gs-mt-4");
+		Document doc = getPage("login/form/");
+		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
 
 		if (loginForm.isEmpty()) {
 			logln("isMaintenanceActive: Manutenzione attiva");
@@ -767,15 +767,15 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		return false;
 	}
 
-	public Maintenance getMaintenanceInfo(){
+	public Maintenance getMaintenanceInfo() {
 		Maintenance maintenance;
 
-		if(!isMaintenanceScheduled()){
+		if (!isMaintenanceScheduled()) {
 			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
 			return maintenance;
 		}
 
-		Document doc = getPage("login/form");
+		Document doc = getPage("login/form/");
 		Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
 		Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
 
@@ -848,7 +848,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	public Document getPage(String page) {
 		try {
 
-			if (page.equals("login/form")) {
+			if (page.equals("login/form/")) {
 				return getPageNoCookie(page);
 			} else {
 				if (!checkLogin()) {

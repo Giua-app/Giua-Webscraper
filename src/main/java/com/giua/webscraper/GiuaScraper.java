@@ -848,7 +848,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	public Document getPage(String page) {
 		try {
 
-			if (page.equals("") || page.equals("login/form")) {
+			if (page.equals("login/form")) {
 				return getPageNoCookie(page);
 			} else {
 				if (!checkLogin()) {

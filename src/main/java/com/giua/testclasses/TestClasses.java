@@ -7,14 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import static java.lang.System.nanoTime;
 
 class TestClasses {
 
     private static GiuaScraper gS;
-    private static final String user = "";
-    private static final String password = "";
+    private static String user = "";
+    private static String password = "";
 
     private static void makeLogin() {
         gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
@@ -255,6 +256,7 @@ class TestClasses {
         String sessid = gS.getSessionCookie();
 
         gS = new GiuaScraper(user, password, sessid, true);
+        gS.login();
         System.out.println("Created new gS variable");
 
 
@@ -314,22 +316,22 @@ class TestClasses {
         GiuaScraper.setDebugMode(true);
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        /*Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         if (user.equals("") && password.equals("")) {
             System.out.println("Please enter username: ");
-            user= sc.nextLine();
+            user = sc.nextLine();
             System.out.println("Password: ");
-            password= sc.nextLine();
-        }*/
+            password = sc.nextLine();
+        }
 
         //FIXME: ATTENZIONE CI SONO ANCORA ERRORI IRRISOLTI NELLA IMPLEMENTAZIONE DELLE MANUTENZIONI
-        //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
         //startLogin();
 
-        gS = new GiuaScraper("", "");
+        /*gS = new GiuaScraper("", "");
 
         System.out.println(gS.getMaintenanceInfo().toString());
         System.out.println(gS.isMaintenanceScheduled());
-        System.out.println(gS.getAllVotes(false));
+        System.out.println(gS.getAllVotes(false));*/
     }
 }

@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /* -- Giua Webscraper ALPHA -- */
-// Tested with version 1.2.x and 1.3.2 of giua@school
+// Tested with version 1.2.x and 1.3.3 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Variabili globali
@@ -61,10 +61,20 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		return GiuaScraper.SiteURL;
 	}
 
+    /**
+     * Permette di ottenere il cookie della sessione "PHPSESSID"
+     *
+     * @return il cookie "PHPSESSID"
+     */
 	public String getSessionCookie() {
 		return PHPSESSID;
 	}
 
+    /**
+     * Permette di ottenere il nome utente
+     *
+     * @return user
+     */
 	public String getUser() {
 		return user;
 	}
@@ -76,7 +86,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
 	 *
-	 * @param user
+	 * @param user es. nome.utente.f1
 	 * @param password
 	 */
 	public GiuaScraper(String user, String password) {
@@ -94,10 +104,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	/**
 	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
 	 * effettuato con le credenziali
-	 * @param user
+	 * @param user es. nome.utente.f1
 	 * @param password
-	 * @param phpsessid
-	 * @param cacheable
+	 * @param phpsessid il cookie della sessione
+	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
 	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable) {
 		this.user = user;
@@ -117,6 +127,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Funzioni per ottenere dati dal registro
 
+
+    /**
+     * Permette di giustificare una assenza da un account genitore.
+     * @param ab l'assenza da giustificare
+     * @param type il tipo di assenza (numerico, per ora metti solo "1")
+     * @param reason la motivazione dell'assenza
+     */
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
 		/*if(getUserType() != "Genitore"){
@@ -124,7 +141,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			return;
 		}*/
 		try {
-			Connection.Response res3 = Jsoup.connect(GiuaScraper.SiteURL + ab.justifyUrl)
+			Jsoup.connect(GiuaScraper.SiteURL + ab.justifyUrl)
 					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
 					.cookie("PHPSESSID", PHPSESSID)
 					.method(Method.POST)
@@ -226,9 +243,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			List<DisciplNotice> allDisciplNotices = new Vector<>();
 			Document doc = getPage("genitori/note/");
 			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
-			//Elements allDisciplNoticeRowHTML = allDisciplNoticeTBodyHTML.;
-			//allDisciplNoticeRowHTML.remove(0);
-			//logln(allDisciplNoticeTBodyHTML.toString());
 
 			for (Element el : allDisciplNoticeTBodyHTML) {
 
@@ -386,36 +400,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		if(allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			Document doc = getPage("circolari/genitori/" + page);
-			/*Elements allNewslettersLettiStatusHTML = doc.getElementsByClass("label label-default");
-			Elements allNewslettersDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
-
-			int i = 0;
-
-			for (Element el : allNewslettersDaLeggereStatusHTML) {
-				allNewsletters.add(new Newsletter(el.text(),
-						el.parent().parent().child(1).text(),
-						el.parent().parent().child(2).text(),
-						el.parent().parent().child(3).text(),
-						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-						attachmentsUrls(el),
-						i,
-						page
-				));
-				i++;
-			}
-
-			for (Element el : allNewslettersLettiStatusHTML) {
-				allNewsletters.add(new Newsletter(el.text(),
-						el.parent().parent().child(1).text(),
-						el.parent().parent().child(2).text(),
-						el.parent().parent().child(3).text(),
-						"" + el.parent().parent().child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-						attachmentsUrls(el),
-						i,
-						page
-				));
-				i++;
-			}*/
 
 			Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
 
@@ -792,13 +776,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
 		SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
 
-		Date startDate = null;
-		Date endDate = null;
+		Date startDate;
+		Date endDate;
 		try {
 			startDate = format1.parse(start);
 			endDate = format2.parse(end);
 		} catch (Exception e) {
-			//throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
+			//TODO: throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
 			return null;
 		}
 

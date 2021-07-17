@@ -1,7 +1,27 @@
+/*
+ * Giua Webscraper library
+ * A webscraper of the online school workbook giua@school
+ * Copyright (C) 2021 - 2021 Hiem, Franck1421 and contributors
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see https://www.gnu.org/licenses/.
+ */
+
 package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperExceptions;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -122,7 +142,7 @@ class TestClasses {
         }
     }
 
-    private static void startLogin(){
+    private static void startLogin() {
         gS = new GiuaScraper(user, password, true);
         gS.login();
 
@@ -316,7 +336,9 @@ class TestClasses {
         GiuaScraper.setDebugMode(true);
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        Scanner sc = new Scanner(System.in);
+        throw new GiuaScraperExceptions.UnableToLogin("a");
+
+        /*Scanner sc = new Scanner(System.in);
         if (user.equals("") && password.equals("")) {
             System.out.println("Please enter username: ");
             user = sc.nextLine();

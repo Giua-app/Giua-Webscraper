@@ -19,6 +19,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         
-    - name: Run webscraper
-      run: java src/main/java/com/giua/testclasses/TestClasses.java ${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
+    - name: Compile tests
+    #${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
+      run: javac src/main/java/com/giua/testclasses/TestClasses.java
       

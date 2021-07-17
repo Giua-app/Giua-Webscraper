@@ -19,10 +19,10 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         
-    - name: Change dir
-      run: cd src/main/java/com/giua/
-        
     - name: Compile tests
-      run: javac src/main/java/com/giua/testclasses/TestClasses.java src/main/java/com/giua/objects/*.java src/main/java/com/giua/webscraper/GiuaScraper.java
+      run: javac jsoup-1.13.1.jar src/main/java/com/giua/testclasses/TestClasses.java src/main/java/com/giua/objects/*.java src/main/java/com/giua/webscraper/GiuaScraper.java src/main/java/com/giua/webscraper/GiuaScraperExceptions.java
       #${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
+    
+    
+    
     

@@ -341,7 +341,11 @@ class TestClasses {
     public static void main(String[] args) {
         user = args[0];
         password = args[1];
-        logEnabled = Boolean.parseBoolean(args[2]);
+        try {
+            logEnabled = Boolean.parseBoolean(args[2]);
+        } catch(Exception e) {
+            logEnabled = true;
+        }
 
         GiuaScraper.setDebugMode(logEnabled);
 

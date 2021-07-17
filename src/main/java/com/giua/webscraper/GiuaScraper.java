@@ -1044,7 +1044,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 						.execute();
 
 				PHPSESSID = res3.cookie("PHPSESSID");
-				System.out.printf("login: Cookie: %s\n", PHPSESSID);
+				//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
 				Document doc2 = res3.parse();
 

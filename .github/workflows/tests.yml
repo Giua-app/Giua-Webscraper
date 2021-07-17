@@ -19,7 +19,10 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         
+    - name: Change dir
+      run: cd src/main/java/com/giua/
+        
     - name: Compile tests
-    #${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
-      run: javac src/main/java/com/giua/testclasses/TestClasses.java
-      
+      run: javac testclasses/TestClasses.java objects/*.java webscraper/GiuaScraper.java
+      #${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
+    

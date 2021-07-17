@@ -20,7 +20,7 @@ jobs:
         distribution: 'adopt'
         
     - name: Compile tests
-      run: javac "jsoup-1.13.1.jar src/main/java/com/giua/testclasses/TestClasses.java src/main/java/com/giua/objects/*.java src/main/java/com/giua/webscraper/GiuaScraper.java src/main/java/com/giua/webscraper/GiuaScraperExceptions.java"
+      run: javac "jsoup-1.13.1.jar" "src/main/java/com/giua/testclasses/TestClasses.java src/main/java/com/giua/objects/*.java" "src/main/java/com/giua/webscraper/GiuaScraper.java" "src/main/java/com/giua/webscraper/GiuaScraperExceptions.java"
       #${{ secrets.GS_USER_LOGIN }} ${{ secrets.GS_PASSWORD_LOGIN }} false
     
     

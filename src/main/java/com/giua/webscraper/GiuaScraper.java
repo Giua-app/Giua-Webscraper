@@ -45,6 +45,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private static boolean debugMode;
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
 	public String PHPSESSID = "";
+	private Connection session;
 
 	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
@@ -745,6 +746,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Funzioni fondamentali
 
+	private void initiateSession(){
+		session = null; //Per sicurezza azzeriamo la variabile
+		session = Jsoup.newSession();
+	}
+
 	public boolean isMaintenanceScheduled() {
 		Document doc = getPage("login/form/");
 		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
@@ -863,12 +869,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 				log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
-				Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+				/*Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 						.method(Method.GET)
 						.cookie("PHPSESSID", PHPSESSID)
-						.execute();
+						.execute();*/
 
-				Document doc = res.parse();
+				Document doc = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/" + page)
+						.get();
 
 				logln("\t Done!");
 				return doc;
@@ -1005,6 +1013,63 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 */
 	public void login() {
 		try {
+			initiateSession();
+			logln("login: Start");
+
+			logln("login: First connection (login form)");
+
+			Document doc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/login/form/")
+					.get();
+
+			logln("\n\nHTML: \n" + doc + "\n\n");
+
+			//Document doc = res.parse();
+			//PHPSESSID = res.cookie("PHPSESSID");
+
+
+			logln("login: Second connection (authenticate)");
+
+			doc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
+					.ignoreContentType(true)
+					.get();
+
+			logln("\n\nHTML: \n" + doc + "\n\n");
+
+			logln("login: get csrf token");
+
+			String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
+
+			//logln("Page content: " + res2.body());
+			logln("login: CSRF Token: " + CSRFToken);
+
+			logln("login: Third connection (login form)");
+
+			doc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/login/form/")
+					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
+					.post();
+
+			//PHPSESSID = res3.cookie("PHPSESSID");
+			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
+
+			//Document doc2 = res3.parse();
+
+			logln("login: Logged in as " + this.user + " with account type NO");
+
+
+			logln("\n\nHTML: \n" + doc + "\n\n");
+
+
+		} catch (IOException e) {
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
+			} else {
+				throw new UnableToLogin("Something unexpected happened", e);
+			}
+		}
+		/*try {
 
 			if (isCookieValid(PHPSESSID) && !PHPSESSID.equals("")) {
 				//Il cookie esistente è ancora valido, niente login.
@@ -1070,7 +1135,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			} else {
 				throw new UnableToLogin("Something unexpected happened", e);
 			}
-		}
+		}*/
 	}
 
 	public static boolean isMyInternetWorking(){

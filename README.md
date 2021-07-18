@@ -1,4 +1,7 @@
 # Giua-Webscraper
+[![](https://jitpack.io/v/Giua-app/Giua-Webscraper.svg)](https://jitpack.io/#Giua-app/Giua-Webscraper)
+[![Java CI with Maven](https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml/badge.svg)](https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml)
+
 ver 0.9.x Alpha
 
 questo readme è una bozza

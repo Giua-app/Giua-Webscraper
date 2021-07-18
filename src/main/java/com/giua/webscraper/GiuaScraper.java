@@ -114,12 +114,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
+		initiateSession();
 	}
 
 	public GiuaScraper(String user, String password, boolean cacheable){
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
+		initiateSession();
 	}
 
 	/**
@@ -135,6 +137,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.password = password;
 		this.cacheable = cacheable;
 		PHPSESSID = phpsessid;
+		initiateSession();
 	}
 
 	public GiuaScraper(String user, String password, String phpsessid) {
@@ -142,6 +145,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.password = password;
 		this.cacheable = true;
 		PHPSESSID = phpsessid;
+		initiateSession();
 	}
 
 	//endregion
@@ -747,7 +751,9 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni fondamentali
 
 	private void initiateSession(){
+		logln("initSession: deleting old session");
 		session = null; //Per sicurezza azzeriamo la variabile
+		logln("initSession: creating new session");
 		session = Jsoup.newSession();
 	}
 
@@ -953,13 +959,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 */
 	public Boolean checkLogin() {
 		try {
-			if (PHPSESSID.equals("")) {        //Non e loggato
-				return false;
-			}
-
-			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
-					.method(Method.GET)
-					.cookie("PHPSESSID", PHPSESSID)
+			Connection.Response res = session.newRequest()
+					.url(GiuaScraper.SiteURL)
 					.execute();
 
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
@@ -969,7 +970,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			logln("Calling checklogin() the site answered with status code: " + res.statusCode());
 			return res.statusCode() != 302;
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			if(!isSiteWorking()){
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later");
 			}
@@ -978,19 +979,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		}
 	}
 
-	public boolean isCookieValid(String phpsessid){
-		PHPSESSID = phpsessid;
+	public boolean isSessionValid(){
 
 		//Funzione indipendente. Non usa ne getPage ne altro
 
 		try {
-			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL)
-					.method(Method.GET)
-					.cookie("PHPSESSID", PHPSESSID)
-					.execute();
+			Document doc = session.newRequest()
+					.url(GiuaScraper.SiteURL)
+					.get();
 
 			// --- Ottieni tipo account
-			final Document doc = res.parse();
 			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
 			userType = elm.text().split(".+\\(|\\)")[1];
 
@@ -1000,11 +998,10 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			}
 
 			//Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
-			// e quindi, il cookie non è valido
+			// e quindi, la sessione non è valida
 			return false;
 		}
-
-		//return checkLogin();
+		// Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
 		return true;
 	}
 
@@ -1013,109 +1010,56 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 */
 	public void login() {
 		try {
-			initiateSession();
-			logln("login: Start");
 
-			logln("login: First connection (login form)");
-
-			Document doc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/login/form/")
-					.get();
-
-			logln("\n\nHTML: \n" + doc + "\n\n");
-
-			//Document doc = res.parse();
-			//PHPSESSID = res.cookie("PHPSESSID");
-
-
-			logln("login: Second connection (authenticate)");
-
-			doc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
-					.ignoreContentType(true)
-					.get();
-
-			logln("\n\nHTML: \n" + doc + "\n\n");
-
-			logln("login: get csrf token");
-
-			String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
-
-			//logln("Page content: " + res2.body());
-			logln("login: CSRF Token: " + CSRFToken);
-
-			logln("login: Third connection (login form)");
-
-			doc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/login/form/")
-					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-					.post();
-
-			//PHPSESSID = res3.cookie("PHPSESSID");
-			//System.out.printf("login: Cookie: %s\n", PHPSESSID);
-
-			//Document doc2 = res3.parse();
-
-			logln("login: Logged in as " + this.user + " with account type NO");
-
-
-			logln("\n\nHTML: \n" + doc + "\n\n");
-
-
-		} catch (IOException e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
-			} else {
-				throw new UnableToLogin("Something unexpected happened", e);
-			}
-		}
-		/*try {
-
-			if (isCookieValid(PHPSESSID) && !PHPSESSID.equals("")) {
+			if (isSessionValid()) {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
 			} else {
-				logln("login: Session invalid, logging in...");
+				logln("login: Session expired, creating a new one");
+				initiateSession();
 
 				//logln("login: First connection (login form)");
 
-				Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/login/form")
-						.method(Method.GET)
-						.execute();
+				session.newRequest()
+						.url(GiuaScraper.SiteURL + "/login/form/")
+						.get();
+
+				//logln("\n\nHTML: \n" + doc + "\n\n");
 
 				//Document doc = res.parse();
-				PHPSESSID = res.cookie("PHPSESSID");
+				//PHPSESSID = res.cookie("PHPSESSID");
 
 
 				//logln("login: Second connection (authenticate)");
-				Connection.Response res2 = Jsoup.connect(GiuaScraper.SiteURL + "/ajax/token/authenticate")
-						.cookie("PHPSESSID", PHPSESSID)
-						.method(Method.GET)
+
+				Document doc = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
 						.ignoreContentType(true)
-						.execute();
+						.get();
+
+				//logln("\n\nHTML: \n" + doc + "\n\n");
 
 				logln("login: get csrf token");
 
-				String CSRFToken = res2.body().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
+				String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
 				//logln("Page content: " + res2.body());
 				logln("login: CSRF Token: " + CSRFToken);
 
 				//logln("login: Third connection (login form)");
-				Connection.Response res3 = Jsoup.connect(GiuaScraper.SiteURL + "/login/form/")
-						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-						.cookie("PHPSESSID", PHPSESSID)
-						.method(Method.POST)
-						.execute();
 
-				PHPSESSID = res3.cookie("PHPSESSID");
+				doc = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/login/form/")
+						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
+						.post();
+
+				//PHPSESSID = res3.cookie("PHPSESSID");
 				//System.out.printf("login: Cookie: %s\n", PHPSESSID);
 
-				Document doc2 = res3.parse();
-
+				//Document doc2 = res3.parse();
 
 				if (PHPSESSID == null) {
-					Elements err = doc2.getElementsByClass("alert alert-danger"); //prendi errore dal sito
+					Elements err = doc.getElementsByClass("alert alert-danger"); //prendi errore dal sito
 					if(err.isEmpty()){
 						throw new UnableToLogin("Session cookie empty, login unsuccessful.\n WARNING! Site was unable to give an error message, its possible the login process is deactivated", null);
 					}
@@ -1135,7 +1079,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			} else {
 				throw new UnableToLogin("Something unexpected happened", e);
 			}
-		}*/
+		}
 	}
 
 	public static boolean isMyInternetWorking(){

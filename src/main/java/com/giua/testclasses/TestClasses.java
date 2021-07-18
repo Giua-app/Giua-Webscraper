@@ -44,11 +44,6 @@ class TestClasses {
         }
     }
 
-    private static void makeLogin() {
-        gS = new GiuaScraper(user, password, true);    //togliere "phpsessid" per fare il login con username e password e lasciarlo per usare direttamente quel cookie
-        //gS.login();
-    }
-
     private static void testDownload() {
         try {
             FileOutputStream out = new FileOutputStream("downloadtest.pdf");
@@ -362,12 +357,14 @@ class TestClasses {
         //FIXME: ATTENZIONE CI SONO ANCORA ERRORI IRRISOLTI NELLA IMPLEMENTAZIONE DELLE MANUTENZIONI
         //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        makeLogin();
+        /*
         gS.getPage("login/form/");
+        System.out.println(gS.isSessionValid());
         gS.login();
+        System.out.println(gS.isSessionValid());*/
 
-
-        //startLogin();
+        startLogin();
+        testAll();
 
         /*gS = new GiuaScraper("", "");
 

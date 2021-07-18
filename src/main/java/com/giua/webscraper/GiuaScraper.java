@@ -44,7 +44,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
 	private static boolean debugMode;
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-	public String PHPSESSID = "";
+	//public String PHPSESSID = "";
 	private Connection session;
 
 	//region Cache
@@ -87,8 +87,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
      *
      * @return il cookie "PHPSESSID"
      */
-	public String getSessionCookie() {
-		return PHPSESSID;
+	public Connection getSession() {
+		return session;
 	}
 
     /**
@@ -129,23 +129,21 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * effettuato con le credenziali
 	 * @param user es. nome.utente.f1
 	 * @param password
-	 * @param phpsessid il cookie della sessione
+	 * @param newSession il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable) {
+	public GiuaScraper(String user, String password, Connection newSession, boolean cacheable) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		PHPSESSID = phpsessid;
-		initiateSession();
+		session = newSession;
 	}
 
-	public GiuaScraper(String user, String password, String phpsessid) {
+	public GiuaScraper(String user, String password, Connection newSession) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		PHPSESSID = phpsessid;
-		initiateSession();
+		session = newSession;
 	}
 
 	//endregion
@@ -166,13 +164,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 			return;
 		}*/
 		try {
-			Jsoup.connect(GiuaScraper.SiteURL + ab.justifyUrl)
+			session.newRequest()
+					.url(GiuaScraper.SiteURL + ab.justifyUrl)
 					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
-					.cookie("PHPSESSID", PHPSESSID)
-					.method(Method.POST)
-					.execute();
+					.post();
 		} catch (Exception e){
-			logln("Qualcosa è andato storto");
+			logErrorLn("Qualcosa è andato storto");
 			e.printStackTrace();
 		}
 	}
@@ -751,7 +748,6 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	//region Funzioni fondamentali
 
 	private void initiateSession(){
-		logln("initSession: deleting old session");
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
 		session = Jsoup.newSession();
@@ -846,7 +842,11 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 */
 	public byte[] download(String url) {
 		try {
-			Connection.Response r = Jsoup.connect(GiuaScraper.SiteURL + url).cookie("PHPSESSID", PHPSESSID).ignoreContentType(true).execute();
+			Connection.Response r = session.newRequest()
+					.url(GiuaScraper.SiteURL + url)
+					.ignoreContentType(true)
+					.execute();
+
 			return r.bodyAsBytes();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1048,13 +1048,14 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 				//logln("login: Third connection (login form)");
 
-				doc = session.newRequest()
+				Connection.Response res3 = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/login/form/")
 						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-						.post();
+						.method(Method.POST)
+						.execute();
 
-				//PHPSESSID = res3.cookie("PHPSESSID");
-				//System.out.printf("login: Cookie: %s\n", PHPSESSID);
+				String PHPSESSID = res3.cookie("PHPSESSID");
+				logln("login: Cookie: " + PHPSESSID);
 
 				//Document doc2 = res3.parse();
 

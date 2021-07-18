@@ -21,7 +21,7 @@ package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
-import com.giua.webscraper.GiuaScraperExceptions;
+import org.jsoup.Connection;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -275,9 +275,9 @@ class TestClasses {
 
         t1 = nanoTime();
         System.out.println("Logout...");
-        String sessid = gS.getSessionCookie();
+        Connection session = gS.getSession();
 
-        gS = new GiuaScraper(user, password, sessid, true);
+        gS = new GiuaScraper(user, password, session, true);
         gS.login();
         System.out.println("Created new gS variable");
 

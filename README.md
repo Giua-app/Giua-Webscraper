@@ -20,5 +20,6 @@ Vai sulle [Actions](https://github.com/Giua-app/Giua-Webscraper/actions) e clicc
 ## Documentazione
 coming soon
 
+
 ## Come posso contribuire?
 Contatta HiemSword o Franck1421

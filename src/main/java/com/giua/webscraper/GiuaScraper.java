@@ -44,7 +44,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
 	private static boolean debugMode;
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-	//public String PHPSESSID = "";
+	public String PHPSESSID = "";
 	private Connection session;
 
 	//region Cache
@@ -87,8 +87,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
      *
      * @return il cookie "PHPSESSID"
      */
-	public Connection getSession() {
-		return session;
+	public String getCookie() {
+		return session.cookieStore().getCookies().get(0).getValue();
 	}
 
     /**
@@ -114,6 +114,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
+		logln("GiuaScraper started");
 		initiateSession();
 	}
 
@@ -121,6 +122,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
+		logln("GiuaScraper started");
 		initiateSession();
 	}
 
@@ -129,21 +131,25 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * effettuato con le credenziali
 	 * @param user es. nome.utente.f1
 	 * @param password
-	 * @param newSession il cookie della sessione
+	 * @param newCookie il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, Connection newSession, boolean cacheable) {
+	public GiuaScraper(String user, String password, String newCookie, boolean cacheable) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		session = newSession;
+		logln("GiuaScraper started");
+		PHPSESSID = newCookie;
+		initiateSessionWithCookie(newCookie);
 	}
 
-	public GiuaScraper(String user, String password, Connection newSession) {
+	public GiuaScraper(String user, String password, String newCookie) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		session = newSession;
+		logln("GiuaScraper started");
+		PHPSESSID = newCookie;
+		initiateSessionWithCookie(newCookie);
 	}
 
 	//endregion
@@ -753,6 +759,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		session = Jsoup.newSession();
 	}
 
+	private void initiateSessionWithCookie(String cookie){
+		session = null; //Per sicurezza azzeriamo la variabile
+		logln("initSession: creating new session from cookie");
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
+	}
+
 	public boolean isMaintenanceScheduled() {
 		Document doc = getPage("login/form/");
 		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
@@ -1054,7 +1066,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 						.method(Method.POST)
 						.execute();
 
-				String PHPSESSID = res3.cookie("PHPSESSID");
+				PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
 				logln("login: Cookie: " + PHPSESSID);
 
 				//Document doc2 = res3.parse();

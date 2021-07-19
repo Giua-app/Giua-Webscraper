@@ -275,7 +275,7 @@ class TestClasses {
 
         t1 = nanoTime();
         System.out.println("Logout...");
-        Connection session = gS.getSession();
+        String session = gS.getCookie();
 
         gS = new GiuaScraper(user, password, session, true);
         gS.login();

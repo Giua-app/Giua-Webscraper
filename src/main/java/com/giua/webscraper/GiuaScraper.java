@@ -88,7 +88,7 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
      * @return il cookie "PHPSESSID"
      */
 	public String getCookie() {
-		return PHPSESSID;
+		return session.cookieStore().getCookies().get(0).getValue();
 	}
 
     /**
@@ -114,12 +114,16 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
+		logln("GiuaScraper started");
+		initiateSession();
 	}
 
 	public GiuaScraper(String user, String password, boolean cacheable){
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
+		logln("GiuaScraper started");
+		initiateSession();
 	}
 
 	/**
@@ -127,21 +131,25 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 	 * effettuato con le credenziali
 	 * @param user es. nome.utente.f1
 	 * @param password
-	 * @param phpsessid il cookie della sessione
+	 * @param newCookie il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, String phpsessid, boolean cacheable) {
+	public GiuaScraper(String user, String password, String newCookie, boolean cacheable) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		this.PHPSESSID = phpsessid;
+		logln("GiuaScraper started");
+		PHPSESSID = newCookie;
+		initiateSessionWithCookie(newCookie);
 	}
 
-	public GiuaScraper(String user, String password, String phpsessid) {
+	public GiuaScraper(String user, String password, String newCookie) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		this.PHPSESSID = phpsessid;
+		logln("GiuaScraper started");
+		PHPSESSID = newCookie;
+		initiateSessionWithCookie(newCookie);
 	}
 
 	//endregion
@@ -749,6 +757,12 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
 		session = Jsoup.newSession();
+	}
+
+	private void initiateSessionWithCookie(String cookie){
+		session = null; //Per sicurezza azzeriamo la variabile
+		logln("initSession: creating new session from cookie");
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
 	}
 
 	public boolean isMaintenanceScheduled() {

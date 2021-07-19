@@ -21,7 +21,7 @@ package com.giua.objects;
 
 import java.io.Serializable;
 
-public class Homework implements Serializable {
+public class Homework{
     public final String day;        //usato per trovare quale compito interessa
     public final String date;
     public final String subject;

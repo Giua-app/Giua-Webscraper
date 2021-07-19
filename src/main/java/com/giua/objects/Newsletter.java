@@ -22,7 +22,7 @@ package com.giua.objects;
 import java.io.Serializable;
 import java.util.List;
 
-public class Newsletter implements Serializable {
+public class Newsletter{
 
     public final String status;
     public final String date;

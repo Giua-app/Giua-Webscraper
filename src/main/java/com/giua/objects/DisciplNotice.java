@@ -21,7 +21,7 @@ package com.giua.objects;
 
 import java.io.Serializable;
 
-public class DisciplNotice implements Serializable {
+public class DisciplNotice{
     public String date;
     public String type;
     public String details;

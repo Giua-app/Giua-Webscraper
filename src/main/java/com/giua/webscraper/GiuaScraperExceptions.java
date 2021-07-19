@@ -18,10 +18,13 @@
  */
 
 package com.giua.webscraper;
+
+import java.io.Serializable;
+
 /*
  * Raccolta degli errori custom
  */
-public class GiuaScraperExceptions {
+public class GiuaScraperExceptions implements Serializable {
 
     public static class UnableToLogin extends RuntimeException {
         public UnableToLogin(String errorMessage, Throwable err) {

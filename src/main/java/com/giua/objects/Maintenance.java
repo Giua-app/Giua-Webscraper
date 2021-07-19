@@ -22,7 +22,7 @@ package com.giua.objects;
 import java.io.Serializable;
 import java.util.Date;
 
-public class Maintenance implements Serializable{
+public class Maintenance{
     public Date start;
     public Date end;
     public Boolean isActive;

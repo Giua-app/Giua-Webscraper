@@ -24,7 +24,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.Serializable;
 
-public class Alert implements Serializable {
+public class Alert{
     public final String status;
     public final String date;
     public final String receivers;

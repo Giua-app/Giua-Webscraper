@@ -21,7 +21,7 @@ package com.giua.objects;
 
 import java.io.Serializable;
 
-public class Vote implements Serializable {
+public class Vote{
     public final String value;
     public final boolean isFirstQuarterly;
     public final boolean isAsterisk;

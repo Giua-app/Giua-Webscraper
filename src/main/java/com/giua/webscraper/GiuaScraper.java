@@ -29,13 +29,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.2.x and 1.3.3 of giua@school
-public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
+public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
 	private final String user;
@@ -753,6 +752,8 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 
 	//region Funzioni fondamentali
 
+	
+
 	private void initiateSession(){
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
@@ -863,7 +864,13 @@ public class GiuaScraper extends GiuaScraperExceptions implements Serializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return new byte[0];
+		} catch (Exception e) {
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+			}
+			e.printStackTrace();
 		}
+		return null;
 	}
 
 	/**

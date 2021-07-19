@@ -25,7 +25,7 @@ import org.jsoup.Jsoup;
 
 import java.io.Serializable;
 
-public class Absence implements Serializable {
+public class Absence{
     public String date;
     public String type;
     public String notes;

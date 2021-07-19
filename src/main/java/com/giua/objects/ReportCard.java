@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class ReportCard implements Serializable {
+public class ReportCard{
     public final boolean isFirstQuarterly;
     public final Map<String, List<String>> allVotes;
     public final boolean exists;

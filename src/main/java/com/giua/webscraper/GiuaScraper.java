@@ -1057,22 +1057,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 						.post();
 
-				PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
-				logln("login: Cookie: " + PHPSESSID);
-
-				if (PHPSESSID == null) {
-					Elements err = doc.getElementsByClass("alert alert-danger"); //prendi errore dal sito
-					if(err.isEmpty()){
-						throw new UnableToLogin("Session cookie empty, login unsuccessful.\n WARNING! Site was unable to give an error message, its possible the login process is deactivated", null);
-					}
+				Elements err = doc.getElementsByClass("alert alert-danger"); //prendi errore dal sito
+				if (!err.isEmpty()) {
 					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
+				} else {
+					PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
+					if(isSessionValid(PHPSESSID)) {
+						logln("login: Cookie: " + PHPSESSID);
+						logln("login: Logged in as " + this.user);
+					} else {
+						throw new UnableToLogin("Login unsuccesful, i don't know why");
+					}
 				}
 			}
 
-			logln("login: Logged in as " + this.user + " with account type " + getUserType());
-
-
-			//logln("HTML: " + doc2);
 
 
 		} catch (IOException e) {

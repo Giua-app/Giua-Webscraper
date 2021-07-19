@@ -275,9 +275,9 @@ class TestClasses {
 
         t1 = nanoTime();
         System.out.println("Logout...");
-        String session = gS.getCookie();
+        String phpsessid = gS.getCookie();
 
-        gS = new GiuaScraper(user, password, session, true);
+        gS = new GiuaScraper(user, password, phpsessid, true);
         gS.login();
         System.out.println("Created new gS variable");
 

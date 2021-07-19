@@ -87,7 +87,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
      * @return il cookie "PHPSESSID"
      */
 	public String getCookie() {
-		return session.cookieStore().getCookies().get(0).getValue();
+		//FIXME: quando viene usata nell app è come se la sessione non avesse cookie salvati, comunque funziona bene anche ritornando il PHPSESSID
+		//return session.cookieStore().getCookies().get(0).getValue();
+		return PHPSESSID;
 	}
 
     /**
@@ -752,8 +754,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
-	
-
 	private void initiateSession(){
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
@@ -861,9 +861,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.execute();
 
 			return r.bodyAsBytes();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return new byte[0];
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
@@ -1028,7 +1025,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if (isSessionValid(PHPSESSID)) {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
-				session = Jsoup.newSession().cookie("PHPSESSID", PHPSESSID);
 			} else {
 				logln("login: Session expired, creating a new one");
 				initiateSession();

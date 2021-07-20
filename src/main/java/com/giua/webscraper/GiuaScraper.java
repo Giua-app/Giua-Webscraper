@@ -757,13 +757,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private void initiateSession(){
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
-		session = Jsoup.newSession();
+		session = Jsoup.newSession().timeout(5000);
 	}
 
 	private void initiateSessionWithCookie(String cookie){
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie).timeout(5000);
 	}
 
 	public boolean isMaintenanceScheduled() {

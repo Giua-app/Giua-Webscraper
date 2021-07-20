@@ -737,7 +737,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 							true
 					));
 				}
-			} catch (IndexOutOfBoundsException iobe) {
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
 				returnLesson.add(new Lesson(date, "", "", "", "", false));
 			}
 
@@ -754,16 +754,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
-	private void initiateSession(){
+	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
-		session = Jsoup.newSession().timeout(5000);
+		session = Jsoup.newSession();
 	}
 
-	private void initiateSessionWithCookie(String cookie){
+	private void initiateSessionWithCookie(String cookie) {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie).timeout(5000);
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
 	}
 
 	public boolean isMaintenanceScheduled() {

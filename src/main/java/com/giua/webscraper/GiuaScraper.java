@@ -757,13 +757,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
-		session = Jsoup.newSession();
+		session = Jsoup.newSession().timeout(5000);
 	}
 
 	private void initiateSessionWithCookie(String cookie) {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie).timeout(5000);
 	}
 
 	public boolean isMaintenanceScheduled() {
@@ -867,7 +867,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 			e.printStackTrace();
 		}
-		return null;
+		return new byte[0];
 	}
 
 	/**
@@ -896,6 +896,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						.get();
 
 				logln("\t Done!");
+				if (doc == null)
+					return new Document(GiuaScraper.SiteURL + "/" + page);
 				return doc;
 			}
 
@@ -919,13 +921,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
-			Connection.Response res = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
-					.method(Method.GET)
-					.execute();
-
-			Document doc = res.parse();
+			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+					.timeout(5000)
+					.get();
 
 			logln("\t Done!");
+
+			if (doc == null)
+				return new Document(GiuaScraper.SiteURL + "/" + page);
 			return doc;
 
 		} catch (Exception e) {
@@ -947,13 +950,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		try {
 			log("getExtPage: Getting external page " + url);
 
-			Connection.Response res = Jsoup.connect(url)
-					.method(Method.GET)
-					.execute();
-
-			Document doc = res.parse();
+			Document doc = Jsoup.connect(url)
+					.timeout(5000)
+					.get();
 
 			logln("\t Done!");
+			if (doc == null)
+				return new Document(url);
 			return doc;
 
 		} catch (IOException e) {
@@ -997,6 +1000,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		try {
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
+					.timeout(5000)
 					.get();
 
 			// --- Ottieni tipo account

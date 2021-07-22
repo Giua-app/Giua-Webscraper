@@ -757,13 +757,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");
-		session = Jsoup.newSession().timeout(5000);
+		session = Jsoup.newSession();
 	}
 
 	private void initiateSessionWithCookie(String cookie) {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie).timeout(5000);
+		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
 	}
 
 	public boolean isMaintenanceScheduled() {
@@ -922,7 +922,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
-					.timeout(5000)
 					.get();
 
 			logln("\t Done!");
@@ -951,7 +950,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			log("getExtPage: Getting external page " + url);
 
 			Document doc = Jsoup.connect(url)
-					.timeout(5000)
 					.get();
 
 			logln("\t Done!");
@@ -1000,7 +998,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		try {
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
-					.timeout(5000)
 					.get();
 
 			// --- Ottieni tipo account
@@ -1087,8 +1084,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public static boolean isMyInternetWorking(){
-		try{
-			Jsoup.connect("https://www.google.it").method(Method.GET).timeout(5000).execute();
+		try {
+			Jsoup.connect("https://www.google.it").method(Method.GET).execute();
 			return true;
 		} catch (IOException io){
 			return false;
@@ -1097,7 +1094,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static boolean isSiteWorking(){
 		try {
-			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).timeout(5000).execute();    //Se la richiesta impiega più di 5 secondi
+			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).execute();    //Se la richiesta impiega più di 5 secondi
 			return true;
 		} catch (IOException io){
 			if(isMyInternetWorking()) {

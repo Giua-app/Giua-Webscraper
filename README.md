@@ -1,10 +1,11 @@
 # Giua-Webscraper
-[![](https://jitpack.io/v/Giua-app/Giua-Webscraper.svg)](https://jitpack.io/#Giua-app/Giua-Webscraper)
-[![Java CI with Maven](https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml/badge.svg)](https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml)
 
-ver 0.9.x Alpha
+<p align='center'>
+  <a href='https://github.com/Giua-app/Giua-Webscraper/blob/master/LICENSE'><img src='https://img.shields.io/github/license/Giua-app/Giua-Webscraper'/></a>
+  <img src='https://img.shields.io/github/v/tag/Giua-app/Giua-Webscraper?label=version&include_prereleases&color=success'/>
+  <a href='https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml'><img src='https://github.com/Giua-app/Giua-Webscraper/actions/workflows/maven.yml/badge.svg'/></a>
+</p>
 
-questo readme è una bozza
 
 ## Che cos'è?
 Giua-webscraper è una libreria per ottenere informazioni dai registri elettronici [giua@school](https://github.com/trinko/giuaschool) 

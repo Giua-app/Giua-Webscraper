@@ -157,25 +157,27 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
+	//region Absence
 
-    /**
-     * Permette di giustificare una assenza da un account genitore.
-     * @param ab l'assenza da giustificare
-     * @param type il tipo di assenza (numerico, per ora metti solo "1")
-     * @param reason la motivazione dell'assenza
-     */
+	/**
+	 * Permette di giustificare una assenza da un account genitore.
+	 *
+	 * @param ab     l'assenza da giustificare
+	 * @param type   il tipo di assenza (numerico, per ora metti solo "1")
+	 * @param reason la motivazione dell'assenza
+	 */
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
-		/*if(getUserType() != "Genitore"){
+		if (!getUserType().equals("Genitore")) {
 			logln("Tipo account non supportato, impossibile giustificare");
-			return;
-		}*/
+			throw new UnsupportedAccount("Può giustificare solo il genitore!");
+		}
 		try {
 			session.newRequest()
 					.url(GiuaScraper.SiteURL + ab.justifyUrl)
 					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
 					.post();
-		} catch (Exception e){
+		} catch (Exception e) {
 			logErrorLn("Qualcosa è andato storto");
 			e.printStackTrace();
 		}
@@ -185,7 +187,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Permette di ottenere tutte le assenze presenti
-	 *
 	 *
 	 * @param forceRefresh
 	 * @return Una lista di Absence
@@ -224,7 +225,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allAbsencesCache = allAbsences;
 			}
 			return allAbsences;
@@ -232,6 +233,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allAbsencesCache;
 		}
 	}
+
+	//#endregione
+
+	//region News From Home
 
 	/**
 	 * Permette di ottenere le news dalla home
@@ -260,6 +265,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
+	//endregion
+
+	//region DisciplNotices
 
 	/**
 	 * Permette di ottenere tutte le note presenti
@@ -281,8 +289,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
 					String author1 = el2.child(2).child(1).text();
 					String author2;
-					try{ author2 = el2.child(3).child(1).text(); }
-					catch (IndexOutOfBoundsException e){
+					try{ author2 = el2.child(3).child(1).text(); } catch (IndexOutOfBoundsException e){
 						author2 = ""; }
 
 					el2.child(2).child(1).remove();
@@ -295,7 +302,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allDisciplNoticesCache = allDisciplNotices;
 			}
 			return allDisciplNotices;
@@ -303,6 +310,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allDisciplNoticesCache;
 		}
 	}
+
+	//#endregion
+
+	//region ReportCard
 
 	/**
 	 * Ti da una {@code ReportCard} del quadrimestre indicato
@@ -350,11 +361,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
+	//#endregion
+
+	//region Alerts
 
 	/**
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
 	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
-	 * @param page La pagina da cui prendere gli avvisi
+	 *
+	 * @param page         La pagina da cui prendere gli avvisi
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
 	 */
@@ -370,6 +385,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			int i = 0;
 			for (Element el : allAvvisiLettiStatusHTML) {
+				assert el.parent() != null;
+				assert el.parent().parent() != null;
 				allAvvisi.add(new Alert(el.text(),
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
@@ -380,6 +397,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				i++;
 			}
 			for (Element el : allAvvisiDaLeggereStatusHTML) {
+				assert el.parent() != null;
+				assert el.parent().parent() != null;
 				allAvvisi.add(new Alert(el.text(),
 						el.parent().parent().child(1).text(),
 						el.parent().parent().child(2).text(),
@@ -390,7 +409,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				i++;
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allAlertsCache = allAvvisi;
 			}
 			return allAvvisi;
@@ -399,12 +418,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
+	//#endregion
+
+	//region Newsletter
+
 	/**
 	 * Serve solo a {@code #getAllNewsletters} per prendere gli allegati dalle circolari
+	 *
 	 * @param el
 	 * @return Lista di Stringa con tutti gli URL degli allegati
 	 */
-	private List<String> attachmentsUrls(Element el){
+	private List<String> attachmentsUrls(Element el) {
 		Elements els = el.child(1).children();
 		List<String> r = new Vector<>();
 		if (els.size() > 2) {     //Ci sono allegati
@@ -419,14 +443,19 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return r;
 	}
 
+	private String getNewsletterFilterToken() {
+		return Objects.requireNonNull(getPage("circolari/genitori").getElementById("circolari_genitori__token")).attr("value");
+	}
+
 	/**
 	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
+	 *
 	 * @param page
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 */
 	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) {
-		if(allNewslettersCache == null || forceRefresh) {
+		if (allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			Document doc = getPage("circolari/genitori/" + page);
 
@@ -453,11 +482,71 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
+	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata con i filtri specificati.
+	 * Le stringhe possono anche essere lasciate vuote.
+	 *
+	 * @param onlyNotRead  {@code true} per avere solo le circolari non lette
+	 * @param date         Mettere la data del mese nel formato: anno-mese
+	 * @param text         Il testo da cercare tra le circolari
+	 * @param page         Indica a quale pagina andare. Le pagine partono da 1
+	 * @param forceRefresh Ricarica effettivamente tutti i voti
+	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
+	 */
+	public List<Newsletter> getAllNewslettersWhitFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
+		if (allNewslettersCache == null || forceRefresh) {
+			List<Newsletter> allNewsletters = new Vector<>();
+			try {
+
+				Document doc = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/circolari/genitori/" + page)
+						.data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
+						.data("circolari_genitori[mese]", date)
+						.data("circolari_genitori[oggetto]", text)
+						.data("circolari_genitori[submit]", "")
+						.data("circolari_genitori[_token]", getNewsletterFilterToken())
+						.post();
+
+				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
+
+				for (Element el : allNewslettersStatusHTML) {
+					allNewsletters.add(new Newsletter(
+							el.child(0).text(),
+							el.child(1).text(),
+							el.child(2).text(),
+							el.child(3).text(),
+							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+							attachmentsUrls(el.child(4)),
+							page));
+				}
+
+				if (cacheable) {
+					allNewslettersCache = allNewsletters;
+				}
+				return allNewsletters;
+
+			} catch (Exception e) {
+				if (!isSiteWorking()) {
+					throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+				}
+				e.printStackTrace();
+			}
+			return new Vector<>();
+		} else {
+			return allNewslettersCache;
+		}
+	}
+
+	//#endregion
+
+	//region Homework
+
+	/**
 	 * Restituisce il {@link Homework} di una determinata data. Data deve essere cosi: anno-mese-giorno
+	 *
 	 * @param date Formato: anno-mese-giorno
 	 * @return Il compito della data specificata se esiste, altrimenti un compito vuoto
 	 */
-	public Homework getHomework(String date){
+	public Homework getHomework(String date) {
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
 		try {
 			String subject = doc.getElementsByClass("gs-big").get(0).text();
@@ -501,6 +590,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
 
+				assert homeworkHTML.parent() != null;
+				assert homeworkHTML.parent().parent() != null;
 				allHomeworks.add(new Homework(
 						homeworkHTML.parent().parent().text(),
 						homeworkHTML.attributes().get("data-href").split("/")[4],
@@ -531,6 +622,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
 			for (Element homeworkHTML : homeworksHTML) {
+				assert homeworkHTML.parent() != null;
+				assert homeworkHTML.parent().parent() != null;
 				allHomeworks.add(new Homework(
 						homeworkHTML.parent().parent().text(),
 						homeworkHTML.attributes().get("data-href").split("/")[4],
@@ -541,7 +634,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				));
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allHomeworksCache = allHomeworks;
 			}
 			return allHomeworks;
@@ -549,6 +642,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allHomeworksCache;
 		}
 	}
+
+	//#endregion
+
+	//region Test
 
 	/**
 	 * Ottiene il {@link Homework} di una determinata data.
@@ -595,6 +692,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
 			for (Element testHTML : testsHTML) {
 
+				assert testHTML.parent() != null;
+				assert testHTML.parent().parent() != null;
 				allTests.add(new Test(
 						testHTML.parent().parent().text(),
 						testHTML.attributes().get("data-href").split("/")[4],
@@ -632,6 +731,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
 				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
 
+				assert testHTML.parent() != null;
+				assert testHTML.parent().parent() != null;
 				allTests.add(new Test(
 						testHTML.parent().parent().text(),
 						testHTML.attributes().get("data-href").split("/")[4],
@@ -641,7 +742,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						true
 				));
 			}
-			if(cacheable) {
+			if (cacheable) {
 				allTestsCache = allTests;
 			}
 			return allTests;
@@ -649,6 +750,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allTestsCache;
 		}
 	}
+
+	//#endregion
+
+	//region Vote
 
 	/**
 	 * Deve essere usata solo da {@link #getAllVotes(boolean)} e serve a gestire quei voti che non hanno alcuni dettagli
@@ -676,6 +781,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
 
 			for (final Element voteHTML : votesHTML) {
+				assert voteHTML.parent() != null;
+				assert voteHTML.parent().parent() != null;
+				assert voteHTML.parent().parent().parent() != null;
+				assert voteHTML.parent().parent().parent().parent() != null;
+
 				final String voteAsString = voteHTML.text(); //prende il voto
 				final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
 				final String voteDate = getDetailOfVote(voteHTML, 0);
@@ -704,7 +814,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 			}
 
-			if(cacheable) {
+			if (cacheable) {
 				allVotesCache = returnVotes;
 			}
 			return returnVotes;
@@ -712,6 +822,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allVotesCache;
 		}
 	}
+
+	//endregion
+
+	//#region Lesson
 
 	/**
 	 * Ottiene tutte le lezioni di un dato giorno
@@ -749,6 +863,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allLessonsCache;
 		}
 	}
+
+	//endregion
 
 	//endregion
 
@@ -959,7 +1075,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (IOException e) {
 			if(!isMyInternetWorking()){
-				throw new InternetProblems("Your internet may not work properly");
+				throw new YourConnectionProblems("Your internet may not work properly");
 			}
 		}
 		return null;
@@ -1100,7 +1216,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if(isMyInternetWorking()) {
 				return false;
 			} else {
-				throw new InternetProblems("Your internet may not work properly");
+				throw new YourConnectionProblems("Your internet may not work properly");
 			}
 		}
 	}

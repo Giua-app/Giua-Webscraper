@@ -21,7 +21,6 @@ package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
-import org.jsoup.Connection;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -107,6 +106,7 @@ class TestClasses {
             logln(a.toString());
         }
         logln(String.valueOf(allNewsletters.get(0).attachments != null));
+        logln(gS.getAllNewslettersWhitFilter(false, "2020-09", "Comunicazione", 1, true).toString());
     }
 
     public static void testLessons(boolean forceRefresh) {

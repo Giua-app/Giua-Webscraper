@@ -39,9 +39,16 @@ public class GiuaScraperExceptions implements Serializable {
         public SessionCookieEmpty(String errorMessage) {
             super(errorMessage);
         }
+
         public SessionCookieEmpty(String errorMessage, Exception e) {
             super(errorMessage);
             e.printStackTrace();
+        }
+    }
+
+    public static class UnsupportedAccount extends RuntimeException {
+        public UnsupportedAccount(String errorMessage) {
+            super(errorMessage);
         }
     }
 
@@ -51,8 +58,8 @@ public class GiuaScraperExceptions implements Serializable {
         }
     }
 
-    public static class InternetProblems extends RuntimeException {
-        public InternetProblems(String errorMessage) {
+    public static class YourConnectionProblems extends RuntimeException {
+        public YourConnectionProblems(String errorMessage) {
             super(errorMessage);
         }
     }

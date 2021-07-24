@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Vector;
 
 import static java.lang.System.nanoTime;
 
@@ -36,6 +37,8 @@ class TestClasses {
     private static String user = "";
     private static String password = "";
     public static boolean logEnabled = true;
+    public static boolean speedTest = false;
+    public static int speedTestAmount = 5;
 
     private static void logln(String msg){
         if (logEnabled) {
@@ -43,6 +46,13 @@ class TestClasses {
         }
     }
 
+    private static void println(String msg){
+        if (!speedTest) {
+            System.out.println(msg);
+        }
+    }
+    
+    //region Funzioni
     private static void testDownload() {
         try {
             FileOutputStream out = new FileOutputStream("downloadtest.pdf");
@@ -151,12 +161,239 @@ class TestClasses {
         //Document doc = gS.getPage("");
         logln("Account type: " + gS.getUserType());
     }
+    //endregion
+    
+    
+    
+    
+    private static void testSpeed(){
 
+        logEnabled = false;
+        List<Long> tSite = new Vector<>();
+        List<Long> tInternet = new Vector<>();
+        List<Long> tPhase1 = new Vector<>();
+        List<Long> tPhase2 = new Vector<>();
+        List<Long> tPhase3 = new Vector<>();
+        List<Long> tPhasesTot = new Vector<>();
+
+
+        int i = 0;
+
+        while(i < speedTestAmount) {
+
+            long t1;
+            long t2;
+
+            System.out.println("Test " + (i+1) + "/" + speedTestAmount);
+            System.out.print("Progress: [");
+
+
+            t1 = nanoTime();
+            GiuaScraper.isMyInternetWorking();
+            System.out.print("#");
+            t2 = nanoTime();
+
+            tInternet.add((t2 / 1000000) - (t1 / 1000000));
+
+            t1 = nanoTime();
+            GiuaScraper.isSiteWorking();
+            System.out.print("#");
+            t2 = nanoTime();
+
+            tSite.add((t2 / 1000000) - (t1 / 1000000));
+
+            /////////////////////////////////////////////////////////////////////
+            //NO CACHE
+            //In questa prima parte vengono generate tutte le cose mentre nella seconda viene usata la cache
+
+
+            t1 = nanoTime();
+            startLogin();
+
+            testNews(true);
+            System.out.print("#");
+            testVotes(true);
+            System.out.print("#");
+            testAlerts(true);
+            System.out.print("#");
+            testHomeworks(true);
+            System.out.print("#");
+            testTests(true);
+            System.out.print("#");
+            testNewsletters(true);
+            System.out.print("#");
+            testLessons(true);
+            System.out.print("#");
+            testReportCard(true);
+            System.out.print("#");
+            testNotes(true);
+            System.out.print("#");
+            testAbsences(true);
+            System.out.print("#");
+
+            t2 = nanoTime();
+            tPhase1.add((t2 / 1000000) - (t1 / 1000000));
+
+
+            ////////////////////////////////////////////////////////////
+            //CACHE
+
+
+            t1 = nanoTime();
+
+            System.out.print("|");
+            testNews(false);
+            System.out.print("#");
+            testVotes(false);
+            System.out.print("#");
+            testAlerts(false);
+            System.out.print("#");
+            testHomeworks(false);
+            System.out.print("#");
+            testTests(false);
+            System.out.print("#");
+            testNewsletters(false);
+            System.out.print("#");
+            testLessons(false);
+            System.out.print("#");
+            testReportCard(false);
+            System.out.print("#");
+            testNotes(false);
+            System.out.print("#");
+            testAbsences(false);
+            System.out.print("#");
+
+            t2 = nanoTime();
+            tPhase2.add((t2 / 1000000) - (t1 / 1000000));
+
+
+
+            t1 = nanoTime();
+            String phpsessid = gS.getCookie();
+
+            gS = new GiuaScraper(user, password, phpsessid, true);
+            gS.login();
+
+            System.out.print("|");
+            testNews(true);
+            System.out.print("#");
+            testVotes(true);
+            System.out.print("#");
+            testAlerts(true);
+            System.out.print("#");
+            testHomeworks(true);
+            System.out.print("#");
+            testTests(true);
+            System.out.print("#");
+            testNewsletters(true);
+            System.out.print("#");
+            testLessons(true);
+            System.out.print("#");
+            testReportCard(true);
+            System.out.print("#");
+            testNotes(true);
+            System.out.print("#");
+            testAbsences(true);
+            System.out.print("#");
+
+            t2 = nanoTime();
+            tPhase3.add((t2 / 1000000) - (t1 / 1000000));
+
+            tPhasesTot.add(tPhase1.get(i) + tPhase2.get(i) + tPhase3.get(i));
+
+            i++;
+            System.out.println("]");
+        }
+
+        System.out.println("\n\n/---------------------LISTS----------------------------");
+
+
+        Long tInternetAdd = 0L;
+        System.out.print("|    Check Internet:                 ");
+        for( Long value : tInternet){
+            tInternetAdd += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+
+        Long tSiteAdd = 0L;
+        System.out.print("|    Check Site:                     ");
+        for( Long value : tSite){
+            tSiteAdd += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+
+        Long tPhase1Add = 0L;
+        System.out.print("|    Fase 1 (login iniziale):        ");
+        for( Long value : tPhase1){
+            tPhase1Add += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+
+        Long tPhase2Add = 0L;
+        System.out.print("|    Fase 2 (cache):                 ");
+        for( Long value : tPhase2){
+            tPhase2Add += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+
+        Long tPhase3Add = 0L;
+        System.out.print("|    Fase 3 (riutilizzo sessione):   ");
+        for( Long value : tPhase3){
+            tPhase3Add += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+
+        Long tPhasesTotAdd = 0L;
+        System.out.print("|    Tempo Totale impiegato:         ");
+        for( Long value : tPhasesTot){
+            tPhasesTotAdd += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+        System.out.println("\\--------------------------------------------------------");
+
+
+
+        System.out.println("\n\n");
+        System.out.println("/---------------------FINAL RESULTS-----------------------");
+        System.out.println("|    Check Internet:                 " + tInternetAdd / speedTestAmount + "ms");
+        System.out.println("|    Check Site:                     " + tSiteAdd / speedTestAmount + "ms");
+        System.out.println("|    Fase 1 (login iniziale):        " + tPhase1Add / speedTestAmount + "ms");
+        System.out.println("|    Fase 2 (cache):                 " + tPhase2Add / speedTestAmount + "ms");
+        System.out.println("|    Fase 3 (riutilizzo sessione):   " + tPhase3Add / speedTestAmount + "ms");
+        System.out.println("|");
+        System.out.println("|    Tempo impiegato mediamente:     " + tPhasesTotAdd / speedTestAmount + "ms");
+        System.out.println("|    Tempo impiegato totalmente:     " + tPhasesTotAdd + "ms");
+        System.out.println("\\--------------------------------------------------------");
+
+
+
+    }
+    
+    
 
     private static void testAll() {
+        
+        if(speedTest){
+            System.out.println("--------STARTING SPEED TEST-----");
+            testSpeed();
+            return;
+        }
 
         long t1;
         long t2;
+        long tSite;
 
         long tPhase1 = 0;
         long tPhase2 = 0;
@@ -170,6 +407,7 @@ class TestClasses {
         logln("The site work: " + GiuaScraper.isSiteWorking());
         t2 = System.currentTimeMillis();
         logln("Tempo: " + (t2 - t1));
+        tSite = t2 - t1;
 
         /////////////////////////////////////////////////////////////////////
         //NO CACHE
@@ -334,42 +572,32 @@ class TestClasses {
 
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
-        user = args[0];
-        password = args[1];
         try {
-            logEnabled = Boolean.parseBoolean(args[2]);
+            user = args[0];
+            password = args[1];
         } catch(Exception e) {
-            logEnabled = true;
+
+            Scanner sc = new Scanner(System.in);
+
+            if (user.equals("") && password.equals("")) {
+                logln("Please enter username: ");
+                user = sc.nextLine();
+                logln("Password: ");
+                password = sc.nextLine();
+            }
         }
+
+        try { logEnabled = Boolean.parseBoolean(args[2]); } catch(Exception ignored) {}
+
+        try { speedTest = Boolean.parseBoolean(args[3]); } catch(Exception ignored) {}
+
+        try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
 
         GiuaScraper.setDebugMode(logEnabled);
-
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        Scanner sc = new Scanner(System.in);
-        if (user.equals("") && password.equals("")) {
-            logln("Please enter username: ");
-            user = sc.nextLine();
-            logln("Password: ");
-            password = sc.nextLine();
-        }
-
-        //FIXME: ATTENZIONE CI SONO ANCORA ERRORI IRRISOLTI NELLA IMPLEMENTAZIONE DELLE MANUTENZIONI
-        //testAll();        //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-
-        /*
-        gS.getPage("login/form/");
-        System.out.println(gS.isSessionValid());
-        gS.login();
-        System.out.println(gS.isSessionValid());*/
 
         startLogin();
-        testAll();
-
-        /*gS = new GiuaScraper("", "");
-
-        logln(gS.getMaintenanceInfo().toString());
-        logln(gS.isMaintenanceScheduled());
-        logln(gS.getAllVotes(false));*/
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

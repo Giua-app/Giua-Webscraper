@@ -40,9 +40,8 @@ public class GiuaScraperExceptions implements Serializable {
             super(errorMessage);
         }
 
-        public SessionCookieEmpty(String errorMessage, Exception e) {
-            super(errorMessage);
-            e.printStackTrace();
+        public SessionCookieEmpty(String errorMessage, Throwable err) {
+            super(errorMessage, err);
         }
     }
 
@@ -50,16 +49,28 @@ public class GiuaScraperExceptions implements Serializable {
         public UnsupportedAccount(String errorMessage) {
             super(errorMessage);
         }
+
+        public UnsupportedAccount(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
     }
 
     public static class NotLoggedIn extends RuntimeException {
         public NotLoggedIn(String errorMessage) {
             super(errorMessage);
         }
+
+        public NotLoggedIn(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
     }
 
     public static class YourConnectionProblems extends RuntimeException {
         public YourConnectionProblems(String errorMessage) {
+            super(errorMessage);
+        }
+
+        public YourConnectionProblems(String errorMessage, Throwable err) {
             super(errorMessage);
         }
     }
@@ -68,26 +79,39 @@ public class GiuaScraperExceptions implements Serializable {
         public SiteConnectionProblems(String errorMessage) {
             super(errorMessage);
         }
+
+        public SiteConnectionProblems(String errorMessage, Throwable err) {
+            super(errorMessage);
+        }
     }
 
     public static class UnableToGetUserType extends RuntimeException {
-        public UnableToGetUserType(String errorMessage, Exception e) {
+        public UnableToGetUserType(String errorMessage) {
             super(errorMessage);
-            e.printStackTrace();
+        }
+
+        public UnableToGetUserType(String errorMessage, Throwable err) {
+            super(errorMessage, err);
         }
     }
 
     public static class UnableToGetMaintenanceInfo extends RuntimeException {
-        public UnableToGetMaintenanceInfo(String errorMessage, Exception e) {
+        public UnableToGetMaintenanceInfo(String errorMessage) {
             super(errorMessage);
-            e.printStackTrace();
+        }
+
+        public UnableToGetMaintenanceInfo(String errorMessage, Throwable err) {
+            super(errorMessage, err);
         }
     }
 
     public static class MaintenanceIsActiveException extends RuntimeException {
         public MaintenanceIsActiveException(String errorMessage) {
             super(errorMessage);
-            //e.printStackTrace();
+        }
+
+        public MaintenanceIsActiveException(String errorMessage, Throwable err) {
+            super(errorMessage, err);
         }
     }
 

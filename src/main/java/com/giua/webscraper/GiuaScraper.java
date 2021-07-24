@@ -115,7 +115,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		logln("GiuaScraper started");
+		logln("GiuaScraper: started");
 		initiateSession();
 	}
 
@@ -123,7 +123,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		logln("GiuaScraper started");
+		logln("GiuaScraper: started");
 		initiateSession();
 	}
 
@@ -139,7 +139,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
-		logln("GiuaScraper started");
+		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
 		initiateSessionWithCookie(newCookie);
 	}
@@ -148,7 +148,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
-		logln("GiuaScraper started");
+		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
 		initiateSessionWithCookie(newCookie);
 	}
@@ -169,7 +169,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
 		if (!getUserType().equals("Genitore")) {
-			logln("Tipo account non supportato, impossibile giustificare");
+			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}
 		try {
@@ -202,7 +202,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non eiste
 			try{ allAbsencesTBodyHTML.remove(0); }
 			catch (Exception e) {
-				logln("Tabella 'Da giustificare' non presente");
+				logln("getAllAbsences: Tabella 'Da giustificare' non presente. Le assenze sono tutte giustificate");
 			}
 
 
@@ -526,7 +526,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			} catch (Exception e) {
 				if (!isSiteWorking()) {
-					throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
 				}
 				e.printStackTrace();
 			}
@@ -890,7 +890,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			logln("isMaintenanceScheduled: Manutenzione programmata trovata");
 			return true;
 		}
-		logln("getMaintenanceInfo: Manutenzione non trovata");
+		logln("isMaintenanceScheduled: Manutenzione non trovata");
 		return false;
 
 	}
@@ -927,7 +927,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		String end = a[2].replace("del", "");
 
 
-		logln("getMaintenanceInfo: " + start + "|" + end);
+		logln("getMaintenanceInfo: Non formattate: Inizio " + start + " | Fine " + end);
 
 		//Crea dei format per fare il parsing di quelle stringhe
 		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
@@ -943,7 +943,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return null;
 		}
 
-		logln("getMaintenanceInfo: " + startDate.toString() + " / " + endDate.toString());
+		logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());
 
 		Date currentDate = new Date();
 		boolean isActive = false;
@@ -1019,7 +1019,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
 			}
 			e.printStackTrace();
 		}
@@ -1048,7 +1048,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
 			}
 			e.printStackTrace();
 		}
@@ -1075,7 +1075,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (IOException e) {
 			if(!isMyInternetWorking()){
-				throw new YourConnectionProblems("Your internet may not work properly");
+				throw new YourConnectionProblems("Your internet may not work properly", e);
 			}
 		}
 		return null;
@@ -1087,6 +1087,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Boolean checkLogin() {
 		try {
+			log("checkLogin: the site answered with status code: ");
 			Connection.Response res = session.newRequest()
 					.url(GiuaScraper.SiteURL)
 					.execute();
@@ -1095,12 +1096,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
 			//Attenzione: Il sito ritorna 200 anche quando il PHPSESSID non è valido!
 			//Attenzione 2: Il sito ritorna 200 anche quando è in manutenzione!
-			logln("Calling checklogin() the site answered with status code: " + res.statusCode());
+			logln("\t" + res.statusCode());
 			return res.statusCode() != 302;
 
 		} catch (Exception e) {
 			if(!isSiteWorking()){
-				throw new SiteConnectionProblems("Can't check login because the site is down, retry later");
+				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
 			return null;
@@ -1122,7 +1123,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (Exception e) {
 			if(!isSiteWorking()){
-				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later");
+				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
 			}
 
 			//Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
@@ -1183,7 +1184,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						logln("login: Cookie: " + PHPSESSID);
 						logln("login: Logged in as " + this.user);
 					} else {
-						throw new UnableToLogin("Login unsuccesful, i don't know why");
+						throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
 					}
 				}
 			}
@@ -1192,7 +1193,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 		} catch (IOException e) {
 			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't log in because the site is down, retry later");
+				throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
 			} else {
 				throw new UnableToLogin("Something unexpected happened", e);
 			}
@@ -1216,7 +1217,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if(isMyInternetWorking()) {
 				return false;
 			} else {
-				throw new YourConnectionProblems("Your internet may not work properly");
+				throw new YourConnectionProblems("Your internet may not work properly", io);
 			}
 		}
 	}

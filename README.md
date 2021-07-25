@@ -16,6 +16,8 @@ Può raccogliere informazioni su:
 - Circolari
 - Avvisi
 - Compiti
+- Assenze
+- Pagelle
 - e molto altro ancora
 
 ## Installazione

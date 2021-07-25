@@ -492,7 +492,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 */
-	public List<Newsletter> getAllNewslettersWhitFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
+	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
 		if (allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			try {

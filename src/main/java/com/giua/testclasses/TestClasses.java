@@ -22,6 +22,7 @@ package com.giua.testclasses;
 import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
 
+import javax.swing.tree.ExpandVetoException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -175,11 +176,14 @@ class TestClasses {
         List<Long> tPhase2 = new Vector<>();
         List<Long> tPhase3 = new Vector<>();
         List<Long> tPhasesTot = new Vector<>();
+        int errors = 0;
 
 
         int i = 0;
 
         while(i < speedTestAmount) {
+
+
 
             long t1;
             long t2;
@@ -187,122 +191,133 @@ class TestClasses {
             System.out.println("Test " + (i+1) + "/" + speedTestAmount);
             System.out.print("Progress: [");
 
+            try {
 
-            t1 = nanoTime();
-            GiuaScraper.isMyInternetWorking();
-            System.out.print("#");
-            t2 = nanoTime();
+                t1 = nanoTime();
+                GiuaScraper.isMyInternetWorking();
+                System.out.print("#");
+                t2 = nanoTime();
 
-            tInternet.add((t2 / 1000000) - (t1 / 1000000));
+                tInternet.add((t2 / 1000000) - (t1 / 1000000));
 
-            t1 = nanoTime();
-            GiuaScraper.isSiteWorking();
-            System.out.print("#");
-            t2 = nanoTime();
+                t1 = nanoTime();
+                GiuaScraper.isSiteWorking();
+                System.out.print("#");
+                t2 = nanoTime();
 
-            tSite.add((t2 / 1000000) - (t1 / 1000000));
+                tSite.add((t2 / 1000000) - (t1 / 1000000));
 
-            /////////////////////////////////////////////////////////////////////
-            //NO CACHE
-            //In questa prima parte vengono generate tutte le cose mentre nella seconda viene usata la cache
-
-
-            t1 = nanoTime();
-            startLogin();
-
-            testNews(true);
-            System.out.print("#");
-            testVotes(true);
-            System.out.print("#");
-            testAlerts(true);
-            System.out.print("#");
-            testHomeworks(true);
-            System.out.print("#");
-            testTests(true);
-            System.out.print("#");
-            testNewsletters(true);
-            System.out.print("#");
-            testLessons(true);
-            System.out.print("#");
-            testReportCard(true);
-            System.out.print("#");
-            testNotes(true);
-            System.out.print("#");
-            testAbsences(true);
-            System.out.print("#");
-
-            t2 = nanoTime();
-            tPhase1.add((t2 / 1000000) - (t1 / 1000000));
+                /////////////////////////////////////////////////////////////////////
+                //NO CACHE
+                //In questa prima parte vengono generate tutte le cose mentre nella seconda viene usata la cache
 
 
-            ////////////////////////////////////////////////////////////
-            //CACHE
+                t1 = nanoTime();
+                startLogin();
+
+                testNews(true);
+                System.out.print("#");
+                testVotes(true);
+                System.out.print("#");
+                testAlerts(true);
+                System.out.print("#");
+                testHomeworks(true);
+                System.out.print("#");
+                testTests(true);
+                System.out.print("#");
+                testNewsletters(true);
+                System.out.print("#");
+                testLessons(true);
+                System.out.print("#");
+                testReportCard(true);
+                System.out.print("#");
+                testNotes(true);
+                System.out.print("#");
+                testAbsences(true);
+                System.out.print("#");
+
+                t2 = nanoTime();
+                tPhase1.add((t2 / 1000000) - (t1 / 1000000));
 
 
-            t1 = nanoTime();
-
-            System.out.print("|");
-            testNews(false);
-            System.out.print("#");
-            testVotes(false);
-            System.out.print("#");
-            testAlerts(false);
-            System.out.print("#");
-            testHomeworks(false);
-            System.out.print("#");
-            testTests(false);
-            System.out.print("#");
-            testNewsletters(false);
-            System.out.print("#");
-            testLessons(false);
-            System.out.print("#");
-            testReportCard(false);
-            System.out.print("#");
-            testNotes(false);
-            System.out.print("#");
-            testAbsences(false);
-            System.out.print("#");
-
-            t2 = nanoTime();
-            tPhase2.add((t2 / 1000000) - (t1 / 1000000));
+                ////////////////////////////////////////////////////////////
+                //CACHE
 
 
+                t1 = nanoTime();
 
-            t1 = nanoTime();
-            String phpsessid = gS.getCookie();
+                System.out.print("|");
+                testNews(false);
+                System.out.print("#");
+                testVotes(false);
+                System.out.print("#");
+                testAlerts(false);
+                System.out.print("#");
+                testHomeworks(false);
+                System.out.print("#");
+                testTests(false);
+                System.out.print("#");
+                testNewsletters(false);
+                System.out.print("#");
+                testLessons(false);
+                System.out.print("#");
+                testReportCard(false);
+                System.out.print("#");
+                testNotes(false);
+                System.out.print("#");
+                testAbsences(false);
+                System.out.print("#");
 
-            gS = new GiuaScraper(user, password, phpsessid, true);
-            gS.login();
+                t2 = nanoTime();
+                tPhase2.add((t2 / 1000000) - (t1 / 1000000));
 
-            System.out.print("|");
-            testNews(true);
-            System.out.print("#");
-            testVotes(true);
-            System.out.print("#");
-            testAlerts(true);
-            System.out.print("#");
-            testHomeworks(true);
-            System.out.print("#");
-            testTests(true);
-            System.out.print("#");
-            testNewsletters(true);
-            System.out.print("#");
-            testLessons(true);
-            System.out.print("#");
-            testReportCard(true);
-            System.out.print("#");
-            testNotes(true);
-            System.out.print("#");
-            testAbsences(true);
-            System.out.print("#");
 
-            t2 = nanoTime();
-            tPhase3.add((t2 / 1000000) - (t1 / 1000000));
+                t1 = nanoTime();
+                String phpsessid = gS.getCookie();
 
-            tPhasesTot.add(tPhase1.get(i) + tPhase2.get(i) + tPhase3.get(i));
+                gS = new GiuaScraper(user, password, phpsessid, true);
+                gS.login();
+
+                System.out.print("|");
+                testNews(true);
+                System.out.print("#");
+                testVotes(true);
+                System.out.print("#");
+                testAlerts(true);
+                System.out.print("#");
+                testHomeworks(true);
+                System.out.print("#");
+                testTests(true);
+                System.out.print("#");
+                testNewsletters(true);
+                System.out.print("#");
+                testLessons(true);
+                System.out.print("#");
+                testReportCard(true);
+                System.out.print("#");
+                testNotes(true);
+                System.out.print("#");
+                testAbsences(true);
+                System.out.print("#");
+
+                t2 = nanoTime();
+                tPhase3.add((t2 / 1000000) - (t1 / 1000000));
+
+                tPhasesTot.add(tPhase1.get(i) + tPhase2.get(i) + tPhase3.get(i));
+                System.out.println("]");
+            } catch (Exception e){
+                System.out.println("/!\\]");
+                System.out.println("Error: " + e.getMessage());
+                tInternet.add(-1L);
+                tSite.add(-1L);
+                tPhase1.add(-1L);
+                tPhase2.add(-1L);
+                tPhase3.add(-1L);
+                tPhasesTot.add(-1L);
+                errors += 1;
+            }
 
             i++;
-            System.out.println("]");
         }
 
         System.out.println("\n\n/---------------------LISTS----------------------------");
@@ -366,7 +381,7 @@ class TestClasses {
 
 
         System.out.println("\n\n");
-        System.out.println("/---------------------FINAL RESULTS-----------------------");
+        System.out.println("/---------------------FINAL RESULTS " + speedTestAmount + " TESTS-----------------------");
         System.out.println("|    Check Internet:                 " + tInternetAdd / speedTestAmount + "ms");
         System.out.println("|    Check Site:                     " + tSiteAdd / speedTestAmount + "ms");
         System.out.println("|    Fase 1 (login iniziale):        " + tPhase1Add / speedTestAmount + "ms");
@@ -374,8 +389,11 @@ class TestClasses {
         System.out.println("|    Fase 3 (riutilizzo sessione):   " + tPhase3Add / speedTestAmount + "ms");
         System.out.println("|");
         System.out.println("|    Tempo impiegato mediamente:     " + tPhasesTotAdd / speedTestAmount + "ms");
-        System.out.println("|    Tempo impiegato totalmente:     " + tPhasesTotAdd + "ms");
+        System.out.println("|    Tempo impiegato totalmente:     " + tPhasesTotAdd / 1000 + "s");
         System.out.println("\\--------------------------------------------------------");
+        if(errors != 0) {
+            System.err.println("Attenzione! " + errors + " su " + speedTestAmount + " hanno fallito con errore");
+        }
 
 
 
@@ -597,7 +615,7 @@ class TestClasses {
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
-        startLogin();
+        //startLogin();
         testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

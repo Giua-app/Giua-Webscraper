@@ -18,6 +18,7 @@ Può raccogliere informazioni su:
 - Compiti
 - Assenze
 - Pagelle
+- Lezioni
 - e molto altro ancora
 
 ## Installazione

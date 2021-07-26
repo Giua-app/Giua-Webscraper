@@ -457,25 +457,29 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) {
 		if (allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
-			Document doc = getPage("circolari/genitori/" + page);
+			try {
+				Document doc = getPage("circolari/genitori/" + page);
 
-			Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
+				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
 
-			for (Element el : allNewslettersStatusHTML) {
-				allNewsletters.add(new Newsletter(
-						el.child(0).text(),
-						el.child(1).text(),
-						el.child(2).text(),
-						el.child(3).text(),
-						el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-						attachmentsUrls(el.child(4)),
-						page));
+				for (Element el : allNewslettersStatusHTML) {
+					allNewsletters.add(new Newsletter(
+							el.child(0).text(),
+							el.child(1).text(),
+							el.child(2).text(),
+							el.child(3).text(),
+							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+							attachmentsUrls(el.child(4)),
+							page));
+				}
+
+				if (cacheable) {
+					allNewslettersCache = allNewsletters;
+				}
+				return allNewsletters;
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				return allNewsletters;
 			}
-
-			if (cacheable) {
-				allNewslettersCache = allNewsletters;
-			}
-			return allNewsletters;
 		} else {
 			return allNewslettersCache;
 		}
@@ -524,6 +528,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 				return allNewsletters;
 
+			} catch (NullPointerException | IndexOutOfBoundsException e) {
+				return new Vector<>();
 			} catch (Exception e) {
 				if (!isSiteWorking()) {
 					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);

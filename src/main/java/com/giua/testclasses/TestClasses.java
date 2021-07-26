@@ -126,6 +126,7 @@ class TestClasses {
             logln(a.toString());
         }
         logln(lessons.get(2).activities);
+        logln(gS.getAllLessonsOfSubject("Informatica", true).get(0).toString());
     }
 
     public static void testReportCard(boolean forceRefresh) {

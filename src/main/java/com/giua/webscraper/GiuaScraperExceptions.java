@@ -45,6 +45,16 @@ public class GiuaScraperExceptions implements Serializable {
         }
     }
 
+    public static class SubjectNameInvalid extends RuntimeException {
+        public SubjectNameInvalid(String errorMessage) {
+            super(errorMessage);
+        }
+
+        public SubjectNameInvalid(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
+    }
+
     public static class UnsupportedAccount extends RuntimeException {
         public UnsupportedAccount(String errorMessage) {
             super(errorMessage);

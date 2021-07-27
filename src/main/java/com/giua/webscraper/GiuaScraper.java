@@ -45,6 +45,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	final public boolean cacheable;        //Indica se si possono utilizzare le cache
 	private String PHPSESSID = "";
 	private Connection session;
+	private long lastGetPageTime = 0;
 
 	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
@@ -57,6 +58,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private List<DisciplNotice> allDisciplNoticesCache = null;
 	private List<Absence> allAbsencesCache = null;
 	private List<News> allNewsFromHomeCache = null;
+	private Document getPageCache = null;
 	//endregion
 
 	//endregion
@@ -1058,7 +1060,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Document getPage(String page) {
 		try {
-
+			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
+				return getPageCache;
 			if (page.equals("login/form/")) {
 				return getPageNoCookie(page);
 			} else {
@@ -1077,6 +1081,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				logln("\t Done!");
 				if (doc == null)
 					return new Document(GiuaScraper.SiteURL + "/" + page);
+
+				getPageCache = doc;
+				lastGetPageTime = System.nanoTime();
 				return doc;
 			}
 

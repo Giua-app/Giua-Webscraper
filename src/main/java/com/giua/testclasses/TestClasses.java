@@ -398,8 +398,7 @@ class TestClasses {
 
 
     }
-    
-    
+
 
     private static void testAll() {
         
@@ -613,7 +612,6 @@ class TestClasses {
 
         GiuaScraper.setDebugMode(logEnabled);
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
-
 
         //startLogin();
         testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria

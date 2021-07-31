@@ -47,6 +47,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private Connection session;
 	private long lastGetPageTime = 0;
 
+	public enum userTypes{
+		STUDENT,
+		PARENT,
+		TEACHER,
+		ADMIN,
+		PRINCIPAL,
+		ATA
+	}
+
+
 	//region Cache
 	private Map<String, List<Vote>> allVotesCache = null;
 	private List<Newsletter> allNewslettersCache = null;
@@ -121,6 +131,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		initiateSession();
 	}
 
+
+	/**
+	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+	 *
+	 * @param user es. nome.utente.f1
+	 * @param password
+	 * @param cacheable true se deve usare la cache, false altrimenti
+	 */
 	public GiuaScraper(String user, String password, boolean cacheable){
 		this.user = user;
 		this.password = password;
@@ -143,16 +161,24 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.cacheable = cacheable;
 		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
-		initiateSessionWithCookie(newCookie);
+		initiateSession(newCookie);
 	}
 
+
+	/**
+	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+	 * effettuato con le credenziali
+	 * @param user es. nome.utente.f1
+	 * @param password
+	 * @param newCookie il cookie della sessione
+	 */
 	public GiuaScraper(String user, String password, String newCookie) {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
 		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
-		initiateSessionWithCookie(newCookie);
+		initiateSession(newCookie);
 	}
 
 	//endregion
@@ -197,11 +223,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		if(allAbsencesCache == null || forceRefresh) {
 			List<Absence> allAbsences = new Vector<>();
 			Document doc = getPage("genitori/assenze/");
-			//Elements allAbsencesTables = doc.getElementsByClass("table table-bordered table-hover table-striped");
+
 			Elements allAbsencesTBodyHTML = doc.getElementsByTag("tbody");
 			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
 
-			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non eiste
+			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non esiste
 			try{ allAbsencesTBodyHTML.remove(0); }
 			catch (Exception e) {
 				logln("getAllAbsences: Tabella 'Da giustificare' non presente. Le assenze sono tutte giustificate");
@@ -212,9 +238,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 				for (Element el2 : el.children()){
-					//logln(" -------\n" + el2.toString() + "\n -------\n");
 					String urlJ = "niente url";
-					//logln("Data: " + el2.child(0).text() + " Tipo: " + el2.child(1).text() + " Annotazioni: " + el2.child(2).text() + " Giustificazione: " + el2.child(3).text());
 
 					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
 
@@ -222,7 +246,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						urlJ = button.first().attr("data-href");
 					}
 
-					//el2.child(2).child(1).remove();
 					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), button.isEmpty(), urlJ));
 				}
 			}
@@ -833,7 +856,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//endregion
 
-	//#region Lesson
+	//region Lesson
 
 	/**
 	 * Ottiene tutte le lezioni di una determinata materia
@@ -941,7 +964,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		session = Jsoup.newSession();
 	}
 
-	private void initiateSessionWithCookie(String cookie) {
+	private void initiateSession(String cookie) {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session from cookie");
 		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
@@ -957,7 +980,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 		logln("isMaintenanceScheduled: Manutenzione non trovata");
 		return false;
-
 	}
 
 	public boolean isMaintenanceActive() {
@@ -1292,20 +1314,37 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
-	public String getUserType(){
+	public userTypes getUserType(){
+		String text;
 		try{
 			if(userType.equals("")){
 				final Document doc = getPage("");
 				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-				String text = elm.text().split(".+\\(|\\)")[1];
+				text = elm.text().split(".+\\(|\\)")[1];
 				userType = text;
-				return text;
+				//return text;
 			} else {
-				return userType;
+				//return userType;
 			}
 		} catch (Exception e) {
 			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);
 		}
+
+		if(userType.equals("Genitore")){
+			return userTypes.PARENT;
+		}
+		if(userType.equals("Studente")){
+			return userTypes.STUDENT;
+		}
+		if(userType.equals("Dirigente")){
+			return userTypes.PRINCIPAL;
+		}
+		if(userType.equals("Amministratore")){
+			return userTypes.ADMIN;
+		}
+
+		//non dovrebbe mai accadere
+		throw new UnableToGetUserType("unable to parse userType to userTypes enum because it's unknown");
 	}
 
 	public void clearCache() {

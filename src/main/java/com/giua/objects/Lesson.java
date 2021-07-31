@@ -19,8 +19,6 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
-
 public class Lesson{
     public final String date;
     public final String time;

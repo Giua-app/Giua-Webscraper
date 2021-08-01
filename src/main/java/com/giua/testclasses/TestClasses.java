@@ -93,20 +93,20 @@ class TestClasses {
 
     private static void testHomeworks(boolean forceRefresh) {
         logln("Get homeworks");
-        List<Homework> allHomework = gS.getAllHomeworks(null, forceRefresh);
+        List<Homework> allHomework = gS.getAllHomeworksWithoutDetails(null, forceRefresh);
         for (Homework a : allHomework) {
             logln(a.toString());
         }
-        logln(gS.getHomework("2021-05-28").toString());
+        logln(gS.getHomework("2021-03-07").toString());
     }
 
     private static void testTests(boolean forceRefresh) {
         logln("Get tests");
-        List<Test> allTests = gS.getAllTests(null, forceRefresh);
+        List<Test> allTests = gS.getAllTestsWithoutDetails(null, forceRefresh);
         for (Test a : allTests) {
             logln(a.toString());
         }
-        logln(gS.getTest("2021-05-18").toString());
+        logln(gS.getTest("2021-03-07").toString());
     }
 
     private static void testNewsletters(boolean forceRefresh) {

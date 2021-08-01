@@ -572,79 +572,42 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	//region Homework
 
 	/**
-	 * Restituisce il {@link Homework} di una determinata data. Data deve essere cosi: anno-mese-giorno
+	 * Restituisce una lista di tutti gli {@link Homework} di una determinata data con anche i loro dettagli
 	 *
 	 * @param date Formato: anno-mese-giorno
-	 * @return Il compito della data specificata se esiste, altrimenti un compito vuoto
+	 * @return Una lista di tutti gli {@link Homework} della data specificata se esiste, altrimenti una lista vuota
 	 */
-	public Homework getHomework(String date) {
+	public List<Homework> getHomework(String date) {
+		List<Homework> allHomeworksInThisDate = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
+		Elements homeworkGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
 		try {
-			String subject = doc.getElementsByClass("gs-big").get(0).text();
-			String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-			String details = doc.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+			for (Element homeworkGroupHTML : homeworkGroupsHTML) {
+				String subject = homeworkGroupHTML.child(0).text();
+				String creator = homeworkGroupHTML.child(1).text().split(": ")[1];
+				String details = homeworkGroupHTML.child(2).text();
 
-			return new Homework(
-					date.split("-")[2],
-					date,
-					subject,
-					creator,
-					details,
-					true
-			);
-		} catch (NullPointerException | IndexOutOfBoundsException e) {        //Non ci sono compiti in questo giorno
-			return new Homework(                //Compito vuoto
-					date.split("-")[2],
-					date,
-					"",
-					"",
-					"No compiti",
-					false
-			);
-		}
-	}
-
-	/**
-	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale
-	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di Homework del mese specificato oppure del mese attuale
-	 */
-	public List<Homework> getAllHomeworks(String date, boolean forceRefresh){
-		if(allHomeworksCache == null || forceRefresh) {
-			List<Homework> allHomeworks = new Vector<>();
-			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
-			for (Element homeworkHTML : homeworksHTML) {
-				Document detailsHTML = getPage("" + homeworkHTML.attributes().get("data-href").substring(1));
-				String subject = detailsHTML.getElementsByClass("gs-big").get(0).text();
-				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
-
-				assert homeworkHTML.parent() != null;
-				assert homeworkHTML.parent().parent() != null;
-				allHomeworks.add(new Homework(
-						homeworkHTML.parent().parent().text(),
-						homeworkHTML.attributes().get("data-href").split("/")[4],
+				allHomeworksInThisDate.add(new Homework(
+						date.split("-")[2],
+						date,
 						subject,
 						creator,
 						details,
 						true
 				));
 			}
-			if(cacheable) {
-				allHomeworksCache = allHomeworks;
-			}
-			return allHomeworks;
-		} else {
-			return allHomeworksCache;
+
+			return allHomeworksInThisDate;
+		} catch (NullPointerException | IndexOutOfBoundsException e) {        //Non ci sono compiti in questo giorno
+			return new Vector<>();
 		}
 	}
 
 	/**
-	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti del mese attuale senza dettagli
+	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
+	 * Serve solo a capire in quali giorni ci sono compiti.
 	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
+	 * @param forceRefresh Ricarica effettivamente tutti i compiti
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
 	 */
 	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
@@ -679,42 +642,43 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	//region Test
 
 	/**
-	 * Ottiene il {@link Homework} di una determinata data.
+	 * Restituisce una lista di tutti i {@link Test} di una determinata data con anche i loro dettagli
+	 *
 	 * @param date Formato: anno-mese-giorno
-	 * @return Test di un determinato giorno
+	 * @return Una lista di tutti i {@link Test} della data specificata se esiste, altrimenti una lista vuota
 	 */
-	public Test getTest(String date){
+	public List<Test> getTest(String date) {
+		List<Test> allTests = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/V");
+		Elements testGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
 		try {
-			String subject = doc.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
-			String creator = doc.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-			String details = doc.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
+			for (Element testGroupHTML : testGroupsHTML) {
+				String subject = testGroupHTML.child(0).text().split(": ")[1];
+				String creator = testGroupHTML.child(1).text().split(": ")[1];
+				String details = testGroupHTML.child(2).text();
 
-			return new Test(
-					date.split("-")[2],
-					date,
-					subject,
-					creator,
-					details,
-					true
-			);
-		} catch (IndexOutOfBoundsException e){		//Non ci sono verifiche in questo giorno
-			return new Test(						//Ritorna una verifica che non esiste
-					date.split("-")[2],
-					date,
-					"",
-					"",
-					"No verifiche",
-					false
-			);
+				allTests.add(new Test(
+						date.split("-")[2],
+						date,
+						subject,
+						creator,
+						details,
+						true
+				));
+			}
+
+			return allTests;
+		} catch (IndexOutOfBoundsException e) {        //Non ci sono verifiche in questo giorno
+			return new Vector<>();
 		}
 	}
 
 	/**
-	 * Ottiene tutti i {@link Test} di una determinata data senza i dettagli
-	 * @param date puo essere {@code null}
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista dei Test della data specificata o del mese attuale
+	 * Ottiene tutti i {@link Test} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
+	 * Serve solo a capire in quali giorni ci sono verifiche.
+	 * @param date puo essere {@code null}. Formato: anno-mese
+	 * @param forceRefresh Ricarica effettivamente tutti le verifiche
+	 * @return Lista di {@link Test} del mese specificato oppure del mese attuale
 	 */
 	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh){
 		if(allTestsCache == null || forceRefresh) {
@@ -736,44 +700,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 
 			if(cacheable) {
-				allTestsCache = allTests;
-			}
-			return allTests;
-		} else {
-			return allTestsCache;
-		}
-	}
-
-	/**
-	 * Se ci sono molti elementi e quindi link potrebbe dare connection timed out.
-	 * Meglio utilizzare prima {@link #getAllTestsWithoutDetails(String, boolean)} e poi andare a prendere la verifica singolarmente con {@link #getTest(String)}
-	 * @param date puo essere {@code null}
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di Test con tutti i dettagli
-	 */
-	public List<Test> getAllTests(String date, boolean forceRefresh){
-		if(allTestsCache == null || forceRefresh) {
-			List<Test> allTests = new Vector<>();
-			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
-			for (Element testHTML : testsHTML) {
-				Document detailsHTML = getPage("" + testHTML.attributes().get("data-href").substring(1));
-				String subject = detailsHTML.getElementsByClass("gs-text-normal").get(0).text().split(": ")[1];
-				String creator = detailsHTML.getElementsByClass("gs-text-normal").get(1).text().split(": ")[1];
-				String details = detailsHTML.getElementsByClass("gs-text-normal gs-pt-3 gs-pb-3").get(0).text();
-
-				assert testHTML.parent() != null;
-				assert testHTML.parent().parent() != null;
-				allTests.add(new Test(
-						testHTML.parent().parent().text(),
-						testHTML.attributes().get("data-href").split("/")[4],
-						subject,
-						creator,
-						details,
-						true
-				));
-			}
-			if (cacheable) {
 				allTestsCache = allTests;
 			}
 			return allTests;
@@ -1086,21 +1012,26 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
 				return getPageCache;
 			if (page.equals("login/form/")) {
-				return getPageNoCookie(page);
+				return getPageNoCookie("login/form/");
 			} else {
-				if (!checkLogin()) {
-					throw new NotLoggedIn("Please login before requesting this page");
-				} else if (isMaintenanceActive()) {
+				if (isMaintenanceActive()) {
 					throw new MaintenanceIsActiveException("The website is in maintenance");
 				}
 
 				log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
 
-				Document doc = session.newRequest()
+				Connection.Response response = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/" + page)
-						.get();
+						.method(Method.GET)
+						.execute();
+
+				Document doc = response.parse();
 
 				logln("\t Done!");
+
+				if (response.statusCode() == 302)
+					throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");
+
 				if (doc == null)
 					return new Document(GiuaScraper.SiteURL + "/" + page);
 

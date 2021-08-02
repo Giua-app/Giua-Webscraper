@@ -93,7 +93,7 @@ class TestClasses {
 
     private static void testHomeworks(boolean forceRefresh) {
         logln("Get homeworks");
-        List<Homework> allHomework = gS.getAllHomeworksWithoutDetails(null, forceRefresh);
+        List<Homework> allHomework = gS.getAllHomeworksWithoutDetails("2021-03", forceRefresh);
         for (Homework a : allHomework) {
             logln(a.toString());
         }
@@ -102,7 +102,7 @@ class TestClasses {
 
     private static void testTests(boolean forceRefresh) {
         logln("Get tests");
-        List<Test> allTests = gS.getAllTestsWithoutDetails(null, forceRefresh);
+        List<Test> allTests = gS.getAllTestsWithoutDetails("2021-03", forceRefresh);
         for (Test a : allTests) {
             logln(a.toString());
         }

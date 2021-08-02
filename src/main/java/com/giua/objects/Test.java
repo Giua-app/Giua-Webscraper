@@ -19,18 +19,20 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
-
-public class Test{
+public class Test {
     public final String day;        //usato per trovare quale verifica interessa
+    public final String month;
+    public final String year;
     public final String date;
     public final String subject;
     public final String creator;
     public final String details;
     public final boolean exists;
 
-    public Test(String day, String date, String subject, String creator, String details, boolean exists) {
+    public Test(String day, String month, String year, String date, String subject, String creator, String details, boolean exists) {
         this.day = day;
+        this.month = month;
+        this.year = year;
         this.date = date;
         this.subject = subject;
         this.creator = creator;

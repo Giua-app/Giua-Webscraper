@@ -589,6 +589,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				allHomeworksInThisDate.add(new Homework(
 						date.split("-")[2],
+						date.split("-")[1],
+						date.split("-")[0],
 						date,
 						subject,
 						creator,
@@ -618,9 +620,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			for (Element homeworkHTML : homeworksHTML) {
 				assert homeworkHTML.parent() != null;
 				assert homeworkHTML.parent().parent() != null;
+				String[] hrefSplit = homeworkHTML.attributes().get("data-href").split("/");
+				String dateFromhref = hrefSplit[4];
 				allHomeworks.add(new Homework(
-						homeworkHTML.parent().parent().text().split(" ")[0],
-						homeworkHTML.attributes().get("data-href").split("/")[4],
+						dateFromhref.split("-")[2],
+						dateFromhref.split("-")[1],
+						dateFromhref.split("-")[0],
+						dateFromhref,
 						"",
 						"",
 						"",
@@ -659,6 +665,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				allTests.add(new Test(
 						date.split("-")[2],
+						date.split("-")[1],
+						date.split("-")[0],
 						date,
 						subject,
 						creator,
@@ -689,9 +697,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				assert testHTML.parent() != null;
 				assert testHTML.parent().parent() != null;
+				String[] hrefSplit = testHTML.attributes().get("data-href").split("/");
+				String dateFromhref = hrefSplit[4];
 				allTests.add(new Test(
-						testHTML.parent().parent().text().split(" ")[0],
-						testHTML.attributes().get("data-href").split("/")[4],
+						dateFromhref.split("-")[2],
+						dateFromhref.split("-")[1],
+						dateFromhref.split("-")[0],
+						dateFromhref,
 						"",
 						"",
 						"",

@@ -619,7 +619,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				assert homeworkHTML.parent() != null;
 				assert homeworkHTML.parent().parent() != null;
 				allHomeworks.add(new Homework(
-						homeworkHTML.parent().parent().text(),
+						homeworkHTML.parent().parent().text().split(" ")[0],
 						homeworkHTML.attributes().get("data-href").split("/")[4],
 						"",
 						"",
@@ -690,7 +690,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				assert testHTML.parent() != null;
 				assert testHTML.parent().parent() != null;
 				allTests.add(new Test(
-						testHTML.parent().parent().text(),
+						testHTML.parent().parent().text().split(" ")[0],
 						testHTML.attributes().get("data-href").split("/")[4],
 						"",
 						"",

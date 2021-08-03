@@ -22,10 +22,7 @@ Può raccogliere informazioni su:
 - e molto altro ancora
 
 ## Installazione
-Vai sulle [Actions](https://github.com/Giua-app/Giua-Webscraper/actions) e clicca il workflow più recente, su Artifacts dovresti trovare un file chiamato "build-output". Una volta scaricato estrailo e dentro ci sarà il file jar del Giua webscraper
-
-## Documentazione
-coming soon
+Vai sulle [Actions](https://github.com/Giua-app/Giua-Webscraper/actions?query=is%3Asuccess+branch%3Amain+event%3Apush++) e clicca il workflow più recente, su Artifacts dovresti trovare un file chiamato "build-output". Una volta scaricato estrailo e dentro ci sarà il file jar del Giua webscraper
 
 
 ## Come posso contribuire?

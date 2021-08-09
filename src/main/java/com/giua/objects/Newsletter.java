@@ -49,4 +49,43 @@ public class Newsletter{
     public String toString(){
         return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null) ? this.attachments.get(0) : "null");
     }
+
+    /*public String compareWith(Newsletter newsletter2) {
+        if(isEqual(newsletter2)){
+            return "è uguale";
+        }
+
+        if(!this.status.equals(newsletter2.status)){
+            return this.status;
+        }
+        if(!this.date.equals(newsletter2.date)){
+            return this.date;
+        }
+        if(!this.newslettersObject.equals(newsletter2.newslettersObject)){
+            return this.newslettersObject;
+        }
+        if(!this.detailsUrl.equals(newsletter2.detailsUrl)){
+            return this.detailsUrl;
+        }
+        if(!this.number.equals(newsletter2.number)){
+            return this.number;
+        }
+        if(this.attachments != newsletter2.attachments){
+            return "attachchhchsaca";
+        }
+        if(this.page != newsletter2.page){
+            return "page";
+        }
+
+
+        return "";
+    }*/
+
+    public boolean isEqual(Newsletter newsletter2) {
+        //true se uguale, false altrimenti
+        return this.status.equals(newsletter2.status) && this.number.equals(newsletter2.number)
+                && this.date.equals(newsletter2.date) && this.newslettersObject.equals(newsletter2.newslettersObject)
+                && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachments == newsletter2.attachments
+                && this.page == newsletter2.page;
+    }
 }

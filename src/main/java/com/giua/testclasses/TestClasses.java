@@ -613,7 +613,12 @@ class TestClasses {
         GiuaScraper.setDebugMode(logEnabled);
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        //startLogin();
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        startLogin();
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
+        /*List<Newsletter> hahahihi = gS.getAllNewsletters(0,true);
+        Newsletter dude = hahahihi.get(0);
+
+        logln(dude.compareWith(hahahihi.get(1)));*/
     }
 }

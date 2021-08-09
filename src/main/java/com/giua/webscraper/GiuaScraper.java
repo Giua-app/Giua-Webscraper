@@ -33,7 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /* -- Giua Webscraper ALPHA -- */
-// Tested with version 1.2.x and 1.3.3 of giua@school
+// Tested with version 1.2.x and 1.4.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
@@ -185,6 +185,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
+	/*public void compareWithNewsletter(List<Newsletter> newsletterList, List<Newsletter> newsletterListToCompare){
+
+		for(int i=0; i < newsletterList.size(); i++){
+			logln(newsletterList.get(i).compareWith(newsletterListToCompare.get(i)));
+		}
+
+	}*/
+
+
 	//region Absence
 
 	/**
@@ -196,7 +205,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
-		if (!getUserType().equals("Genitore")) {
+		//TODO: sistemare la stringa type
+		if (getUserType() != userTypes.PARENT) {
 			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}

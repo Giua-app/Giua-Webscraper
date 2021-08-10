@@ -19,7 +19,6 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
 import java.util.List;
 
 public class Newsletter{
@@ -42,50 +41,68 @@ public class Newsletter{
         this.page = page;
     }
 
-    public boolean isRead(){
+    public boolean isRead() {
         return this.status.equals("LETTA");
     }
 
-    public String toString(){
+    public String toString() {
         return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null) ? this.attachments.get(0) : "null");
     }
 
-    /*public String compareWith(Newsletter newsletter2) {
-        if(isEqual(newsletter2)){
-            return "è uguale";
+    /**
+     * Le differenze possibili delle {@code Newsletter} sono:
+     * status, date, object, detailsUrl, number, attachments, page
+     *
+     * @param newsletter2 Newsletter da confrontare
+     * @return Una lista delle differenze
+     */
+    /*public List<String> compareWith(Newsletter newsletter2) {
+        List<String> differences = new Vector<>();
+
+        if(this.equals(newsletter2)){
+            return differences;
         }
 
         if(!this.status.equals(newsletter2.status)){
-            return this.status;
+            differences.add("status");
         }
         if(!this.date.equals(newsletter2.date)){
-            return this.date;
+            differences.add("date");
         }
         if(!this.newslettersObject.equals(newsletter2.newslettersObject)){
-            return this.newslettersObject;
+            differences.add("object");
         }
         if(!this.detailsUrl.equals(newsletter2.detailsUrl)){
-            return this.detailsUrl;
+            differences.add("detailsUrl");
         }
         if(!this.number.equals(newsletter2.number)){
-            return this.number;
+            differences.add("number");
         }
         if(this.attachments != newsletter2.attachments){
-            return "attachchhchsaca";
+            differences.add("attachments");
         }
         if(this.page != newsletter2.page){
-            return "page";
+            differences.add("page");
         }
-
-
-        return "";
+        return differences;
     }*/
-
-    public boolean isEqual(Newsletter newsletter2) {
+    public boolean equals(Newsletter newsletter2) {
         //true se uguale, false altrimenti
         return this.status.equals(newsletter2.status) && this.number.equals(newsletter2.number)
                 && this.date.equals(newsletter2.date) && this.newslettersObject.equals(newsletter2.newslettersObject)
                 && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachments == newsletter2.attachments
                 && this.page == newsletter2.page;
     }
+
+    /*public String toJSON(){
+        return "{"+
+                "status: " + this.status +
+                ",date: " + this.date +
+                ",newslettersObject: " + this.newslettersObject +
+                ",detailsUrl: " + this.detailsUrl +
+                ",number: " + this.number +
+                ",attachments: " + this.attachments +
+                ",page: " + this.page +
+                "}";
+    }*/
 }

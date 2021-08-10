@@ -20,6 +20,7 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
+import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
 import java.io.FileOutputStream;
@@ -55,8 +56,9 @@ class TestClasses {
     //region Funzioni
     private static void testDownload() {
         try {
-            FileOutputStream out = new FileOutputStream("downloadtest.pdf");
-            out.write(gS.download("/circolari/download/393/0"));
+            DownloadedFile downloadedFile = gS.download("/circolari/download/393/0");
+            FileOutputStream out = new FileOutputStream("downloadtest." + downloadedFile.fileExtension);
+            out.write(downloadedFile.data);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();

@@ -1002,23 +1002,23 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Effettua il download di una risorsa di qualunque tipo dal registro
 	 *
 	 * @param url
-	 * @return La risorsa scaricata come un array di byte
+	 * @return Un oggetto {@code DownloadedFile}
 	 */
-	public byte[] download(String url) {
+	public DownloadedFile download(String url) {
 		try {
 			Connection.Response r = session.newRequest()
 					.url(GiuaScraper.SiteURL + url)
 					.ignoreContentType(true)
 					.execute();
 
-			return r.bodyAsBytes();
+			return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
 			}
 			e.printStackTrace();
 		}
-		return new byte[0];
+		return new DownloadedFile("", new byte[0]);
 	}
 
 	/**

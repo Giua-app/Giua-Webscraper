@@ -91,6 +91,7 @@ class TestClasses {
             logln(a.toString());
         }
         allAvvisi.get(0).getDetails(gS);
+        logln(allAvvisi.get(0).toString());
     }
 
     private static void testHomeworks(boolean forceRefresh) {

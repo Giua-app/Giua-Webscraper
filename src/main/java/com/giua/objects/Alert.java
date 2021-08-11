@@ -22,39 +22,39 @@ package com.giua.objects;
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
 
-import java.io.Serializable;
-
-public class Alert{
+public class Alert {
     public final String status;
     public final String date;
     public final String receivers;
-    public final String objectAvviso;
+    public final String object;
+    public final int page;  //La pagina in cui si trova questo avviso
+    public final String detailsUrl;
     public String details;
     public String creator;
-    public final int page;
-    public final int id;        //Indica quanto e' lontano dal primo avviso partendo dall'alto
-    public boolean isDetailed;
+    public String alertType;
+    public boolean isDetailed;  //Indica se per questo avviso sono stati caricati i dettagli
 
-    public Alert(String status, String data, String destinatari, String oggetto, int id, int page) {
+    public Alert(String status, String date, String receivers, String object, String detailsUrl, int page) {
         this.status = status;
-        this.date = data;
-        this.receivers = destinatari;
-        this.objectAvviso = oggetto;
-        this.id = id;
+        this.date = date;
+        this.receivers = receivers;
+        this.object = object;
         this.page = page;
+        this.detailsUrl = detailsUrl;
         this.isDetailed = false;
     }
 
-    public String getDetails(GiuaScraper gS) {        //carica i dettagli e l'autore dell'avviso simulando il click su Visualizza
-        Document allAvvisiHTML = gS.getPage("genitori/avvisi/" + page);
-        Document dettagliAvvisoHTML;
-        if (isRead())
-            dettagliAvvisoHTML = gS.getPage(allAvvisiHTML.getElementsByClass("label label-default").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
-        else
-            dettagliAvvisoHTML = gS.getPage(allAvvisiHTML.getElementsByClass("label label-warning").get(this.id).parent().parent().child(4).child(0).attributes().get("data-href").substring(1));
-
-        this.details = dettagliAvvisoHTML.getElementsByClass("gs-text-normal").get(0).text();
-        this.creator = dettagliAvvisoHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+    /**
+     * Ottiene i dettagli, il tipo e il creatore dell'avviso con una richiesta HTTP
+     *
+     * @param gS
+     * @return Una Stringa contenente i dettagli dell'avviso
+     */
+    public String getDetails(GiuaScraper gS) {
+        Document detailsHTML = gS.getPage(detailsUrl);
+        this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
+        this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+        this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(1).text().split(": ")[1];
         this.isDetailed = true;
         return this.details;
     }
@@ -65,8 +65,8 @@ public class Alert{
 
     public String toString() {
         if (!this.isDetailed)
-            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso;
+            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object;
         else
-            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.objectAvviso + "; " + this.creator + "; " + this.details;
+            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.alertType;
     }
 }

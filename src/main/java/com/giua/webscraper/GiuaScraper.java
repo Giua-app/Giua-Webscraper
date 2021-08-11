@@ -404,50 +404,35 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
 	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
 	 *
-	 * @param page         La pagina da cui prendere gli avvisi
+	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
+	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
 	 */
-	public List<Alert> getAllAlerts(int page, boolean forceRefresh) {
-		if(allAlertsCache == null || forceRefresh) {
+	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
+		if (allAlertsCache == null || forceRefresh) {
 			if (page < 0) {
 				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
 			}
-			List<Alert> allAvvisi = new Vector<>();
+			List<Alert> allAlerts = new Vector<>();
 			Document doc = getPage("genitori/avvisi/" + page);
-			Elements allAvvisiLettiStatusHTML = doc.getElementsByClass("label label-default");
-			Elements allAvvisiDaLeggereStatusHTML = doc.getElementsByClass("label label-warning");
+			Elements allAlertsHTML = doc.getElementsByTag("tbody").get(0).children();
 
-			int i = 0;
-			for (Element el : allAvvisiLettiStatusHTML) {
-				assert el.parent() != null;
-				assert el.parent().parent() != null;
-				allAvvisi.add(new Alert(el.text(),
-						el.parent().parent().child(1).text(),
-						el.parent().parent().child(2).text(),
-						el.parent().parent().child(3).text(),
-						i,
+			for (Element alertHTML : allAlertsHTML) {
+				allAlerts.add(new Alert(
+						alertHTML.child(0).text(),
+						alertHTML.child(1).text(),
+						alertHTML.child(2).text(),
+						alertHTML.child(3).text(),
+						alertHTML.child(4).child(0).attr("data-href"),
 						page
 				));
-				i++;
-			}
-			for (Element el : allAvvisiDaLeggereStatusHTML) {
-				assert el.parent() != null;
-				assert el.parent().parent() != null;
-				allAvvisi.add(new Alert(el.text(),
-						el.parent().parent().child(1).text(),
-						el.parent().parent().child(2).text(),
-						el.parent().parent().child(3).text(),
-						i,
-						page
-				));
-				i++;
 			}
 
 			if (cacheable) {
-				allAlertsCache = allAvvisi;
+				allAlertsCache = allAlerts;
 			}
-			return allAvvisi;
+			return allAlerts;
 		} else {
 			return allAlertsCache;
 		}
@@ -485,12 +470,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
 	 *
-	 * @param page
+	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
+	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
 	 */
-	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) {
+	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
 		if (allNewslettersCache == null || forceRefresh) {
+			if (page < 0) {
+				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
+			}
 			List<Newsletter> allNewsletters = new Vector<>();
 			try {
 				Document doc = getPage("circolari/genitori/" + page);
@@ -1031,6 +1020,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public Document getPage(String page) {
 		try {
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+			if (page.startsWith("/"))
+				page = page.substring(1);
 			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
 				return getPageCache;
 			if (page.equals("login/form/")) {

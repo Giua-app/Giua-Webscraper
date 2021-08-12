@@ -185,13 +185,34 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
-	/*public void compareWithNewsletter(List<Newsletter> newsletterList, List<Newsletter> newsletterListToCompare){
+	public List<Homework> checkForHomeworksUpdate(String month) {
+		List<Homework> cache = allHomeworksCache;
+		List<Homework> homework = getAllHomeworksWithoutDetails(month,true);
 
-		for(int i=0; i < newsletterList.size(); i++){
-			logln(newsletterList.get(i).compareWith(newsletterListToCompare.get(i)));
+		return compareHomeworks(cache, homework);
+
+	}
+
+	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
+		List<Homework> homeworkDiff = new Vector<>();
+
+		if(!oldHomework.get(0).month.equals(newHomework.get(0).month) && !oldHomework.get(1).month.equals(newHomework.get(1).month)){
+			logln("Il mese dei compiti è diverso!");
 		}
 
-	}*/
+
+		for(int i = 0; i < newHomework.size(); i++){
+			try {
+				if (!newHomework.get(i).day.equals(oldHomework.get(i).day) && !newHomework.get(i).date.equals(oldHomework.get(i).date)) {
+					homeworkDiff.add(newHomework.get(i));
+				}
+			} catch (ArrayIndexOutOfBoundsException e){
+				homeworkDiff.add(newHomework.get(i));
+			}
+		}
+
+		return homeworkDiff;
+	}
 
 
 	//region Absence

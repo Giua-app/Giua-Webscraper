@@ -616,12 +616,73 @@ class TestClasses {
         GiuaScraper.setDebugMode(logEnabled);
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        startLogin();
+        //startLogin();
+        gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        /*List<Newsletter> hahahihi = gS.getAllNewsletters(0,true);
-        Newsletter dude = hahahihi.get(0);
 
-        logln(dude.compareWith(hahahihi.get(1)));*/
+        /*
+        //------Test manuale
+        Homework hw1 = new Homework("01","01","2000","01/01/2000","Tecnologia","Creatore","Primo compito", true);
+        Homework hw2 = new Homework("10","01","2000","10/01/2000","Motoria","Creatore","Secondo compito che ho aggiunto dopo ", true);
+        Homework hw3 = new Homework("02","01","2000","01/01/2000","Laconi","Creatore","Questi sono dei dettagli", true);
+        Homework hw4 = new Homework("02","01","2000","02/01/2000","Che ne so","Creatore","Questi sono dei dettagli", true);
+        logln(" - " + hw1.toString());
+        logln(" - " + hw2.toString());
+        logln(" - " + hw3.toString());
+        logln(" - " + hw4.toString());
+
+        List<Homework> hwList1 = new Vector<>();
+        hwList1.add(hw1);
+
+        List<Homework> hwList2 = new Vector<>();
+        hwList2.add(hw2);
+
+
+        List<Homework> cose = gS.compareHomeworks(hwList1, hwList2);
+
+        for(Homework hw : cose){
+            logln(hw.toString());
+            hwList1.add(hw);
+        }
+
+
+        logln("----");
+
+
+        List<Homework> hwList3 = new Vector<>();
+        hwList3.add(hw2);
+        hwList3.add(hw1);
+        hwList3.add(hw4);
+
+        List<Homework> robe = gS.compareHomeworks(hwList1, hwList3);
+
+        for(Homework hw : robe){
+            logln(hw.toString());
+        }
+
+        //------Test con registro
+        List<Homework> uno = gS.getAllHomeworksWithoutDetails("2021-08", true);
+
+        logln("Compiti attuali");
+        for(Homework hw : uno){
+            logln(hw.toString());
+        }
+
+        List<Homework> diff = gS.checkForHomeworksUpdate("2021-08");
+        logln("Compiti nuovi");
+        for(Homework hw : diff){
+            logln(hw.toString());
+        }
+
+        logln("Aggiungo nuovi compiti alla lista totale");
+        uno.addAll(diff);
+
+        logln("Comiti finali");
+        for(Homework hw : uno){
+            logln(hw.toString());
+        }*/
+
+
     }
 }

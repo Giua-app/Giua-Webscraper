@@ -19,6 +19,9 @@
 
 package com.giua.objects;
 
+import java.util.List;
+import java.util.Vector;
+
 public class Homework {
     public final String day;        //usato per trovare quale compito interessa
     public final String month;
@@ -43,4 +46,46 @@ public class Homework {
     public String toString() {
         return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details + "; " + this.exists;
     }
+
+    public boolean equals(Homework homework) {
+        return this.day.equals(homework.day) && this.month.equals(homework.month)
+                && this.year.equals(homework.year) && this.date.equals(homework.date)
+                && this.subject.equals(homework.subject) && this.creator.equals(homework.creator)
+                && this.details.equals(homework.details) && this.exists == homework.exists;
+    }
+
+    public List<String> compareTo(Homework homework) {
+        List<String> differences = new Vector<>();
+
+        if(this.equals(homework)){
+            return differences;
+        }
+
+        if(!this.day.equals(homework.day)){
+            differences.add("day");
+        }
+        if(!this.month.equals(homework.month)){
+            differences.add("month");
+        }
+        if(!this.year.equals(homework.year)){
+            differences.add("year");
+        }
+        if(!this.date.equals(homework.date)){
+            differences.add("date");
+        }
+        if(!this.subject.equals(homework.subject)){
+            differences.add("subject");
+        }
+        if(!this.creator.equals(homework.creator)){
+            differences.add("creator");
+        }
+        if(!this.details.equals(homework.details)){
+            differences.add("details");
+        }
+        if(this.exists != homework.exists){
+            differences.add("exists");
+        }
+        return differences;
+    }
+
 }

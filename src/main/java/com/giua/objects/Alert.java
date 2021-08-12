@@ -21,6 +21,11 @@ package com.giua.objects;
 
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.util.List;
+import java.util.Vector;
 
 public class Alert {
     public final String status;
@@ -32,6 +37,7 @@ public class Alert {
     public String details;
     public String creator;
     public String alertType;
+    public List<String> attachmentUrls;
     public boolean isDetailed;  //Indica se per questo avviso sono stati caricati i dettagli
 
     public Alert(String status, String date, String receivers, String object, String detailsUrl, int page) {
@@ -52,9 +58,15 @@ public class Alert {
      */
     public String getDetails(GiuaScraper gS) {
         Document detailsHTML = gS.getPage(detailsUrl);
+        this.attachmentUrls = new Vector<>();
         this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
         this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
         this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(1).text().split(": ")[1];
+
+        Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
+        for (Element attachmentHTML : attachmentsHTML)
+            this.attachmentUrls.add(attachmentHTML.attr("href"));
+
         this.isDetailed = true;
         return this.details;
     }

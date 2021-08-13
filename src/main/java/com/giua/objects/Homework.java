@@ -54,7 +54,7 @@ public class Homework {
                 && this.details.equals(homework.details) && this.exists == homework.exists;
     }
 
-    public List<String> compareTo(Homework homework) {
+    /*public List<String> compare(Homework homework) {
         List<String> differences = new Vector<>();
 
         if(this.equals(homework)){
@@ -86,6 +86,6 @@ public class Homework {
             differences.add("exists");
         }
         return differences;
-    }
+    }*/
 
 }

@@ -185,9 +185,74 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
-	public List<Homework> checkForHomeworksUpdate(String month) {
+	//TODO: robe notifiche da fare
+	//Assenze - da news (impossibile ricreare per ora)
+	//DisciplNotice - manuale (no notifiche)
+	//Lesson - manuale (no notifiche)
+	//News - manuale (notifiche??)
+	//Reportcard - manuale (notifiche??)
+	//Vote - manuale (notifiche??)
+
+	/**
+	 * Restituisce il numero di circolari da leggere preso dalle notizie
+	 * nella home
+	 *
+	 * Per ottenere il numero di circolari nuove basta memorizzare il risultato
+	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
+	 * e fare la differenza valore2 - valore1.
+	 *
+	 * @return numero di circolari da leggere
+	 */
+	public int checkForNewsletterUpdate(){
+		List<News> news = getAllNewsFromHome(true);
+		String text;
+		int num = 0;
+
+		for(News nw : news){
+			if(nw.newsText.contains("circolari")){
+				text = nw.newsText;
+				text = text.split("nuove")[0].split("presenti")[1].charAt(1) + "";
+
+				num = Integer.parseInt(text);
+			} else if(nw.newsText.contains("circolare")){
+				num = 1;
+			}
+		}
+
+		return num;
+	}
+
+	public int checkForAlertsUpdate(){
+		List<News> news = getAllNewsFromHome(true);
+		String text;
+		int num = 0;
+
+		for(News nw : news){
+			if(nw.newsText.contains("avvisi")){
+				text = nw.newsText;
+				text = text.split("nuovi")[0].split("presenti")[1].charAt(1) + "";
+
+				num = Integer.parseInt(text);
+			} else if(nw.newsText.contains("avviso")){
+				num = 1;
+			}
+		}
+
+		return num;
+	}
+
+
+	public List<Test> checkForTestsUpdate(String yearmonth) {
+		List<Test> cache = allTestsCache;
+		List<Test> test = getAllTestsWithoutDetails(yearmonth,true);
+
+		return compareTests(cache, test);
+
+	}
+
+	public List<Homework> checkForHomeworksUpdate(String yearmonth) {
 		List<Homework> cache = allHomeworksCache;
-		List<Homework> homework = getAllHomeworksWithoutDetails(month,true);
+		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth,true);
 
 		return compareHomeworks(cache, homework);
 
@@ -212,6 +277,27 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 
 		return homeworkDiff;
+	}
+
+	public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
+		List<Test> testDiff = new Vector<>();
+
+		if(!oldTest.get(0).month.equals(newTest.get(0).month) && !oldTest.get(1).month.equals(newTest.get(1).month)){
+			logln("Il mese delle verifiche è diverso!");
+		}
+
+
+		for(int i = 0; i < newTest.size(); i++){
+			try {
+				if (!newTest.get(i).day.equals(oldTest.get(i).day) && !newTest.get(i).date.equals(oldTest.get(i).date)) {
+					testDiff.add(newTest.get(i));
+				}
+			} catch (ArrayIndexOutOfBoundsException e){
+				testDiff.add(newTest.get(i));
+			}
+		}
+
+		return testDiff;
 	}
 
 

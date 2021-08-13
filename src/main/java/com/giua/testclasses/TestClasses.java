@@ -614,10 +614,10 @@ class TestClasses {
         try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("http://localhost");
 
-        //startLogin();
-        gS = new GiuaScraper(user, password, true);
+        startLogin();
+        //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
@@ -681,8 +681,43 @@ class TestClasses {
         logln("Comiti finali");
         for(Homework hw : uno){
             logln(hw.toString());
+        }
+
+
+
+        List<Test> tests = gS.getAllTestsWithoutDetails("2021-08", true);
+
+        logln("Verifiche attuali");
+        for(Test hw : tests){
+            logln(hw.toString());
+        }
+
+        List<Test> diffT = gS.checkForTestsUpdate("2021-08");
+        logln("Verifiche nuovi");
+        for(Test hw : diffT){
+            logln(hw.toString());
+        }
+
+        logln("Aggiungo nuovi Verifiche alla lista totale");
+        tests.addAll(diffT);
+
+        logln("Verifiche finali");
+        for(Test hw : tests){
+            logln(hw.toString());
         }*/
 
+
+        int i = gS.checkForAlertsUpdate();
+
+        int ii = gS.checkForAlertsUpdate();
+
+        println("Hai " + (ii - i) + " nuovi avvisi da leggere");
+
+        i = gS.checkForNewsletterUpdate();
+
+        ii = gS.checkForNewsletterUpdate();
+
+        println("Hai " + (ii - i) + " circolari nuove da leggere");
 
     }
 }

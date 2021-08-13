@@ -57,17 +57,23 @@ public class Alert {
      * @return Una Stringa contenente i dettagli dell'avviso
      */
     public String getDetails(GiuaScraper gS) {
-        Document detailsHTML = gS.getPage(detailsUrl);
-        this.attachmentUrls = new Vector<>();
-        this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
-        this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
-        this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(1).text().split(": ")[1];
+        if (!this.isDetailed) {
+            Document detailsHTML = gS.getPage(detailsUrl);
+            this.attachmentUrls = new Vector<>();
+            this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
+            this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+            Elements els = detailsHTML.getElementsByClass("gs-mt-2");
+            if (els.size() == 3)
+                this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(2).text().split(": ")[1];
+            else
+                this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(1).text().split(": ")[1];
 
-        Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
-        for (Element attachmentHTML : attachmentsHTML)
-            this.attachmentUrls.add(attachmentHTML.attr("href"));
+            Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
+            for (Element attachmentHTML : attachmentsHTML)
+                this.attachmentUrls.add(attachmentHTML.attr("href"));
 
-        this.isDetailed = true;
+            this.isDetailed = true;
+        }
         return this.details;
     }
 

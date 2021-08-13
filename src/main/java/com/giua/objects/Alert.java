@@ -62,11 +62,14 @@ public class Alert {
             this.attachmentUrls = new Vector<>();
             this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
             this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+
             Elements els = detailsHTML.getElementsByClass("gs-mt-2");
+            this.alertType = "";        //Se nessuna delle prossime condizioni viene rispettata allora alertType vale una stringa vuota
             if (els.size() == 3)
-                this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(2).text().split(": ")[1];
-            else
-                this.alertType = detailsHTML.getElementsByClass("gs-mt-2").get(1).text().split(": ")[1];
+                if (els.get(2).text().split(": ").length > 1)
+                    this.alertType = els.get(2).text().split(": ")[1];
+                else if (els.get(1).text().split(": ").length > 1)
+                    this.alertType = els.get(1).text().split(": ")[1];
 
             Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
             for (Element attachmentHTML : attachmentsHTML)

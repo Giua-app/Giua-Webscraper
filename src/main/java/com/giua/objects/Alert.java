@@ -36,7 +36,7 @@ public class Alert {
     public final String detailsUrl;
     public String details;
     public String creator;
-    public String alertType;
+    public String type;
     public List<String> attachmentUrls;
     public boolean isDetailed;  //Indica se per questo avviso sono stati caricati i dettagli
 
@@ -64,12 +64,11 @@ public class Alert {
             this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
 
             Elements els = detailsHTML.getElementsByClass("gs-mt-2");
-            this.alertType = "";        //Se nessuna delle prossime condizioni viene rispettata allora alertType vale una stringa vuota
-            if (els.size() == 3)
-                if (els.get(2).text().split(": ").length > 1)
-                    this.alertType = els.get(2).text().split(": ")[1];
-                else if (els.get(1).text().split(": ").length > 1)
-                    this.alertType = els.get(1).text().split(": ")[1];
+            this.type = "";        //Se nessuna delle prossime condizioni viene rispettata allora alertType vale una stringa vuota
+            if (els.size() == 3 && els.get(2).text().split(": ").length > 1)
+                this.type = els.get(2).text().split(": ")[1];
+            else if (els.size() == 2 && els.get(1).text().split(": ").length > 1)
+                this.type = els.get(1).text().split(": ")[1];
 
             Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
             for (Element attachmentHTML : attachmentsHTML)
@@ -88,6 +87,6 @@ public class Alert {
         if (!this.isDetailed)
             return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object;
         else
-            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.alertType;
+            return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
     }
 }

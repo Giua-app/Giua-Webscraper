@@ -94,15 +94,32 @@ public class Newsletter{
                 && this.page == newsletter2.page;
     }
 
-    /*public String toJSON(){
-        return "{"+
-                "status: " + this.status +
-                ",date: " + this.date +
-                ",newslettersObject: " + this.newslettersObject +
-                ",detailsUrl: " + this.detailsUrl +
-                ",number: " + this.number +
-                ",attachments: " + this.attachments +
-                ",page: " + this.page +
-                "}";
-    }*/
+    public String toJSON(){
+
+        StringBuilder ris = new StringBuilder("[{" +
+                "\"status\":\"" + this.status + "\"" +
+                ",\"date\":\"" + this.date + "\"" +
+                ",\"object\":\"" + this.newslettersObject + "\"" +
+                ",\"detailsUrl\":\"" + this.detailsUrl + "\"" +
+                ",\"number\":" + this.number +
+                ",\"page\":" + this.page +
+                ",\"attachments\":[");
+
+        if(this.attachments != null){
+            //aggiungi attachments
+
+            ris.append("\"").append(this.attachments.get(0)).append("\"");
+
+            for(int i=1;i < this.attachments.size();i++){
+                ris.append(",\"")
+                        .append(this.attachments.get(i))
+                        .append("\"");
+            }
+        }
+
+
+        ris.append("]}]");
+
+        return ris.toString();
+    }
 }

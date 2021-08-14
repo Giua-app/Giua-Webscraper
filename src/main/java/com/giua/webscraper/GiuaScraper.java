@@ -1002,6 +1002,51 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
+	public void saveDataToJSON(){
+
+		StringBuilder json = new StringBuilder("{\"version\":1,");
+
+		List<Newsletter> newsletters = getAllNewsletters(0, true);
+		Map<String, List<Vote>> votes = getAllVotes(true);
+
+		//---START OF NEWSLETTERS
+		json.append("\"newsletters\":[{")
+				.append("\"0\":")
+				.append(newsletters.get(0).toJSON());
+
+		for(int i=1;i < newsletters.size();i++){
+			json.append(",\"").append(i).append("\":")
+					.append(newsletters.get(i).toJSON());
+		}
+		//---END OF NEWSLETTERS
+		json.append("}],");
+
+		//---START OF VOTES
+		json.append("\"votes\":[{");
+		for(String str : votes.keySet()){
+			//Materia
+			json.append("\"").append(str).append("\":[{")
+					.append("\"0\":")
+					.append(votes.get(str).get(0).toJSON());
+
+			for(int i=1;i < votes.get(str).size();i++){
+				//Voto
+				json.append(",\"").append(i).append("\":")
+						.append(votes.get(str).get(i).toJSON());
+			}
+			//Fine di una materia
+			json.append(",");
+		}
+		json.deleteCharAt(json.length()-1); //Cancella la virgola dell'ultima materia
+
+		json.append("}]");
+		//---END OF VOTES
+
+
+		json.append("}");
+		logln(json.toString());
+	}
+
 	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");

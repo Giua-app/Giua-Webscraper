@@ -52,4 +52,18 @@ public class Vote{
     public String toString(){
         return (this.isAsterisk) ? "*" : this.value;
     }
+
+
+
+
+    public String toJSON(){
+        return "[{" +
+                "\"value\":\"" + this.value + "\"" +
+                ",\"isFirstQuarterly\":" + this.isFirstQuarterly +
+                ",\"isAsterisk\":" + this.isAsterisk +
+                ",\"date\":\"" + this.date + "\"" +
+                ",\"judgement\":\"" + this.judgement + "\"" +
+                ",\"type\":\"" + this.testType + "\"" +
+                ",\"arguments\":\"" + this.arguments + "\"";
+    }
 }

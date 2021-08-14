@@ -614,110 +614,21 @@ class TestClasses {
         try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("http://localhost");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
-        /*
-        //------Test manuale
-        Homework hw1 = new Homework("01","01","2000","01/01/2000","Tecnologia","Creatore","Primo compito", true);
-        Homework hw2 = new Homework("10","01","2000","10/01/2000","Motoria","Creatore","Secondo compito che ho aggiunto dopo ", true);
-        Homework hw3 = new Homework("02","01","2000","01/01/2000","Laconi","Creatore","Questi sono dei dettagli", true);
-        Homework hw4 = new Homework("02","01","2000","02/01/2000","Che ne so","Creatore","Questi sono dei dettagli", true);
-        logln(" - " + hw1.toString());
-        logln(" - " + hw2.toString());
-        logln(" - " + hw3.toString());
-        logln(" - " + hw4.toString());
+        Newsletter nl = gS.getAllNewsletters(0, false).get(0);
 
-        List<Homework> hwList1 = new Vector<>();
-        hwList1.add(hw1);
+        //logln(nl.toJSON());
+        //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
 
-        List<Homework> hwList2 = new Vector<>();
-        hwList2.add(hw2);
+        gS.saveDataToJSON();
 
 
-        List<Homework> cose = gS.compareHomeworks(hwList1, hwList2);
-
-        for(Homework hw : cose){
-            logln(hw.toString());
-            hwList1.add(hw);
-        }
-
-
-        logln("----");
-
-
-        List<Homework> hwList3 = new Vector<>();
-        hwList3.add(hw2);
-        hwList3.add(hw1);
-        hwList3.add(hw4);
-
-        List<Homework> robe = gS.compareHomeworks(hwList1, hwList3);
-
-        for(Homework hw : robe){
-            logln(hw.toString());
-        }
-
-        //------Test con registro
-        List<Homework> uno = gS.getAllHomeworksWithoutDetails("2021-08", true);
-
-        logln("Compiti attuali");
-        for(Homework hw : uno){
-            logln(hw.toString());
-        }
-
-        List<Homework> diff = gS.checkForHomeworksUpdate("2021-08");
-        logln("Compiti nuovi");
-        for(Homework hw : diff){
-            logln(hw.toString());
-        }
-
-        logln("Aggiungo nuovi compiti alla lista totale");
-        uno.addAll(diff);
-
-        logln("Comiti finali");
-        for(Homework hw : uno){
-            logln(hw.toString());
-        }
-
-
-
-        List<Test> tests = gS.getAllTestsWithoutDetails("2021-08", true);
-
-        logln("Verifiche attuali");
-        for(Test hw : tests){
-            logln(hw.toString());
-        }
-
-        List<Test> diffT = gS.checkForTestsUpdate("2021-08");
-        logln("Verifiche nuovi");
-        for(Test hw : diffT){
-            logln(hw.toString());
-        }
-
-        logln("Aggiungo nuovi Verifiche alla lista totale");
-        tests.addAll(diffT);
-
-        logln("Verifiche finali");
-        for(Test hw : tests){
-            logln(hw.toString());
-        }*/
-
-
-        int i = gS.checkForAlertsUpdate();
-
-        int ii = gS.checkForAlertsUpdate();
-
-        println("Hai " + (ii - i) + " nuovi avvisi da leggere");
-
-        i = gS.checkForNewsletterUpdate();
-
-        ii = gS.checkForNewsletterUpdate();
-
-        println("Hai " + (ii - i) + " circolari nuove da leggere");
 
     }
 }

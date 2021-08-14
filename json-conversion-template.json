@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "newsletters": [
+    {
+      "0": [
+        {
+          "status":"LETTA",
+          "date":"04/08/2021",
+          "object":"Webinar disturbi dell'Alimentazione e Nutrizione",
+          "detailsUrl":"/circolari/download/416/0",
+          "number":389,
+          "page":0,
+
+          "attachments": [
+            "/circolari/download/416/1",
+            "/circolari/download/416/2"
+          ]
+
+        }
+      ],
+      "1": "..."
+    }
+  ],
+
+  "votes": [
+    {
+      "Italiano": [
+        {
+          "0": [
+            {
+              "value": "7",
+              "isFirstQuarterly": false,
+              "isAsterisk": false,
+              "date": "20 Maggio",
+              "judgement": "uhhhh robe",
+              "testType": "Scritto",
+              "arguments": "Restituzione voti prova di italiano del 13.05.21 su Ludovico Ariosto"
+            }
+          ],
+
+          "1": "..."
+        }
+      ],
+
+      "Informatica": "..."
+    }
+  ]
+}

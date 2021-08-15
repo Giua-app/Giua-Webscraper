@@ -1002,26 +1002,28 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
-	public void saveDataToJSON(){
 
-		StringBuilder json = new StringBuilder("{\"version\":1,");
+
+	public void saveDataToJSON(){
+		StringBuilder json = new StringBuilder("{\"version\":1,"); //Versione del json: 1 (aumentare se si cambia qualcosa)
+		Date calendar = Calendar.getInstance().getTime();
+		json.append("\"create_date\":\"").append(calendar).append("\",");
 
 		List<Newsletter> newsletters = getAllNewsletters(0, true);
 		Map<String, List<Vote>> votes = getAllVotes(true);
 
-		//---START OF NEWSLETTERS
+		//region Newsletters json
 		json.append("\"newsletters\":[{")
 				.append("\"0\":")
 				.append(newsletters.get(0).toJSON());
-
 		for(int i=1;i < newsletters.size();i++){
 			json.append(",\"").append(i).append("\":")
 					.append(newsletters.get(i).toJSON());
 		}
-		//---END OF NEWSLETTERS
 		json.append("}],");
+		//endregion
 
-		//---START OF VOTES
+		//region Votes json
 		json.append("\"votes\":[{");
 		for(String str : votes.keySet()){
 			//Materia
@@ -1035,16 +1037,29 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						.append(votes.get(str).get(i).toJSON());
 			}
 			//Fine di una materia
-			json.append(",");
+			json.append("}],");
 		}
 		json.deleteCharAt(json.length()-1); //Cancella la virgola dell'ultima materia
 
 		json.append("}]");
-		//---END OF VOTES
+		//endregion
 
 
 		json.append("}");
 		logln(json.toString());
+	}
+
+	public static String escape(String raw) {
+		String escaped = raw;
+		escaped = escaped.replace("\\", "\\\\");
+		escaped = escaped.replace("\"", "\\\"");
+		escaped = escaped.replace("\b", "\\b");
+		escaped = escaped.replace("\f", "\\f");
+		escaped = escaped.replace("\n", "\\n");
+		escaped = escaped.replace("\r", "\\r");
+		escaped = escaped.replace("\t", "\\t");
+		//escaped = escaped.replace("\"", "\\u0022");
+		return escaped;
 	}
 
 	private void initiateSession() {

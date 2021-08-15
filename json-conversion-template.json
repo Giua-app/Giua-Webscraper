@@ -1,48 +1,44 @@
 {
   "version": 1,
+  "create_date": "Sun Aug 15 12:39:35 CEST 2021",
   "newsletters": [
     {
       "0": [
         {
-          "status":"LETTA",
-          "date":"04/08/2021",
-          "object":"Webinar disturbi dell'Alimentazione e Nutrizione",
-          "detailsUrl":"/circolari/download/416/0",
-          "number":389,
-          "page":0,
-
+          "status": "LETTA",
+          "date": "04/08/2021",
+          "object": "Webinar disturbi dell'Alimentazione e Nutrizione",
+          "detailsUrl": "/circolari/download/416/0",
+          "number": 389,
+          "page": 0,
           "attachments": [
             "/circolari/download/416/1",
             "/circolari/download/416/2"
           ]
-
         }
       ],
       "1": "..."
     }
   ],
-
   "votes": [
     {
-      "Italiano": [
+      "Tecn. prog. sis.": [
         {
           "0": [
             {
-              "value": "7",
+              "value": "10",
               "isFirstQuarterly": false,
               "isAsterisk": false,
-              "date": "20 Maggio",
-              "judgement": "uhhhh robe",
-              "testType": "Scritto",
-              "arguments": "Restituzione voti prova di italiano del 13.05.21 su Ludovico Ariosto"
+              "date": "13 Maggio",
+              "judgement": "corretto e commentato",
+              "type": "Pratico",
+              "arguments": "Programmazione assembly"
             }
           ],
-
           "1": "..."
         }
       ],
-
-      "Informatica": "..."
+      "Italiano": "..."
     }
   ]
 }

@@ -19,6 +19,8 @@
 
 package com.giua.objects;
 
+import com.giua.webscraper.GiuaScraper;
+
 import java.io.Serializable;
 
 public class Vote{
@@ -54,16 +56,15 @@ public class Vote{
     }
 
 
-
-
     public String toJSON(){
         return "[{" +
                 "\"value\":\"" + this.value + "\"" +
                 ",\"isFirstQuarterly\":" + this.isFirstQuarterly +
                 ",\"isAsterisk\":" + this.isAsterisk +
                 ",\"date\":\"" + this.date + "\"" +
-                ",\"judgement\":\"" + this.judgement + "\"" +
+                ",\"judgement\":\"" + GiuaScraper.escape(this.judgement) + "\"" +
                 ",\"type\":\"" + this.testType + "\"" +
-                ",\"arguments\":\"" + this.arguments + "\"";
+                ",\"arguments\":\"" + GiuaScraper.escape(this.arguments) + "\"" +
+                "}]";
     }
 }

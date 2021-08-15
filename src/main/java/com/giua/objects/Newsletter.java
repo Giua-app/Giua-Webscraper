@@ -19,6 +19,8 @@
 
 package com.giua.objects;
 
+import com.giua.webscraper.GiuaScraper;
+
 import java.util.List;
 
 public class Newsletter{
@@ -99,7 +101,7 @@ public class Newsletter{
         StringBuilder ris = new StringBuilder("[{" +
                 "\"status\":\"" + this.status + "\"" +
                 ",\"date\":\"" + this.date + "\"" +
-                ",\"object\":\"" + this.newslettersObject + "\"" +
+                ",\"object\":\"" + GiuaScraper.escape(this.newslettersObject) + "\"" +
                 ",\"detailsUrl\":\"" + this.detailsUrl + "\"" +
                 ",\"number\":" + this.number +
                 ",\"page\":" + this.page +

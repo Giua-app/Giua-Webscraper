@@ -137,9 +137,7 @@ class TestClasses {
         logln("Get report card");
         ReportCard reportCard = gS.getReportCard(false, forceRefresh);
         if (reportCard.exists) {
-            for (String a : reportCard.allVotes.keySet()) {
-                logln(a);
-            }
+            logln(reportCard.allVotes.toString());
         }
     }
 
@@ -619,6 +617,7 @@ class TestClasses {
         //GiuaScraper.setSiteURL("http://localhost");
 
         startLogin();
+        testReportCard(false);
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 

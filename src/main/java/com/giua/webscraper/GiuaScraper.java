@@ -20,10 +20,7 @@
 
 package com.giua.webscraper;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giua.objects.*;
-import com.giua.utils.JsonHelper;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -486,8 +483,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			for (Element e : elements) {
 				String subject = e.child(0).text();
-				String vote = e.child(0).text();
-				String absentTime = e.child(0).text();
+				String absentTime = "";
+				String vote = e.child(1).text();
+				if (e.children().size() == 3)
+					absentTime = e.child(2).text();
 				List<String> pairValue = new Vector<>();
 				pairValue.add(vote);
 				pairValue.add(absentTime);

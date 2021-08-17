@@ -19,13 +19,17 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class ReportCard{
+public class ReportCard {
     public final boolean isFirstQuarterly;
+
+    /**
+     * Una map la cui chiave è la materia e come contenuto una lista di stringhe contente all'indice 0 il voto e all'indice 1 le ore di assenza
+     **/
     public final Map<String, List<String>> allVotes;
+
     public final boolean exists;
 
     public ReportCard(boolean isFirstQuarterly, Map<String, List<String>> allVotes, boolean exists) {

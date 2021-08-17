@@ -29,11 +29,11 @@ public class Newsletter{
     public final String date;
     public final String newslettersObject;
     public final String detailsUrl;
-    public final String number;
+    public final int number;
     public final List<String> attachments;
     public final int page;
 
-    public Newsletter(String status, String number, String date, String newslettersObject, String detailsUrl, List<String> attachments, int page) {
+    public Newsletter(String status, int number, String date, String newslettersObject, String detailsUrl, List<String> attachments, int page) {
         this.status = status;
         this.date = date;
         this.newslettersObject = newslettersObject;
@@ -48,7 +48,7 @@ public class Newsletter{
     }
 
     public String toString() {
-        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null) ? this.attachments.get(0) : "null");
+        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null && !this.attachments.isEmpty()) ? this.attachments.get(0) : "null");
     }
 
     /**
@@ -90,7 +90,7 @@ public class Newsletter{
     }*/
     public boolean equals(Newsletter newsletter2) {
         //true se uguale, false altrimenti
-        return this.status.equals(newsletter2.status) && this.number.equals(newsletter2.number)
+        return this.status.equals(newsletter2.status) && this.number == newsletter2.number
                 && this.date.equals(newsletter2.date) && this.newslettersObject.equals(newsletter2.newslettersObject)
                 && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachments == newsletter2.attachments
                 && this.page == newsletter2.page;

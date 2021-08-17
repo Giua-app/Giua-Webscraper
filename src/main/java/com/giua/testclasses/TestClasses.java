@@ -20,6 +20,7 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
+import com.giua.utils.JsonHelper;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
@@ -615,10 +616,12 @@ class TestClasses {
 
         GiuaScraper.setDebugMode(logEnabled);
         GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://localhost");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
 
 
         Newsletter nl = gS.getAllNewsletters(0, false).get(0);
@@ -626,7 +629,24 @@ class TestClasses {
         //logln(nl.toJSON());
         //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
 
-        gS.saveDataToJSON();
+        long t1 = nanoTime();
+        String json = gS.saveDataToJson();
+        long t2 = nanoTime();
+
+        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
+
+        t1 = nanoTime();
+        List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(json);
+        t2 = nanoTime();
+
+        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
+
+        /*for(Newsletter n : robe){
+            logln(n.toString());
+        }*/
+
+        new JsonHelper().parseJsonForVotes(json);
+
 
 
 

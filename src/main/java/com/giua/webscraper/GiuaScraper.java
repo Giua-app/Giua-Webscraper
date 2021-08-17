@@ -20,7 +20,10 @@
 
 package com.giua.webscraper;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giua.objects.*;
+import com.giua.utils.JsonHelper;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -596,7 +599,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				for (Element el : allNewslettersStatusHTML) {
 					allNewsletters.add(new Newsletter(
 							el.child(0).text(),
-							el.child(1).text(),
+							Integer.parseInt(el.child(1).text()),
 							el.child(2).text(),
 							el.child(3).text(),
 							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
@@ -646,7 +649,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				for (Element el : allNewslettersStatusHTML) {
 					allNewsletters.add(new Newsletter(
 							el.child(0).text(),
-							el.child(1).text(),
+							Integer.parseInt(el.child(1).text()),
 							el.child(2).text(),
 							el.child(3).text(),
 							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
@@ -1004,12 +1007,36 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 
-	public void saveDataToJSON(){
+
+	/*public List<Newsletter> loadDataFromJson(String jsonData){
+		//read json file data to String
+		//byte[] jsonData = Files.readAllBytes(Paths.get("employee.txt"));
+
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		JsonNode rootNode = null;
+		try {
+			rootNode = objectMapper.readTree(jsonData);
+		} catch (IOException e) {
+			logln("loadDataFromJSON: Impossibile leggere json");
+			e.printStackTrace();
+		}
+		JsonNode version = rootNode.path("version");
+
+		return new JsonHelper().parseJsonForNewsletters(rootNode);
+	}*/
+
+	public String saveDataToJson(){
+		logln("saveDataToJSON: Salvo i dati su json");
 		StringBuilder json = new StringBuilder("{\"version\":1,"); //Versione del json: 1 (aumentare se si cambia qualcosa)
 		Date calendar = Calendar.getInstance().getTime();
 		json.append("\"create_date\":\"").append(calendar).append("\",");
 
 		List<Newsletter> newsletters = getAllNewsletters(0, true);
+		List<Alert> alerts = getAllAlerts(0, true);
+		/*for (Alert a : alerts){
+			a.getDetails(GiuaScraper.this);
+		}*/
 		Map<String, List<Vote>> votes = getAllVotes(true);
 
 		//region Newsletters json
@@ -1020,8 +1047,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			json.append(",\"").append(i).append("\":")
 					.append(newsletters.get(i).toJSON());
 		}
-		json.append("}],");
+		json.append("}]");
 		//endregion
+
+		json.append(",");
 
 		//region Votes json
 		json.append("\"votes\":[{");
@@ -1044,9 +1073,23 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		json.append("}]");
 		//endregion
 
+		json.append(",");
+
+		//region Alerts json
+		json.append("\"alerts\":[{")
+				.append("\"0\":")
+				.append(alerts.get(0).toJSON());
+		for(int i=1;i < alerts.size();i++){
+			json.append(",\"").append(i).append("\":")
+					.append(alerts.get(i).toJSON());
+		}
+		json.append("}]");
+		//endregion
 
 		json.append("}");
 		logln(json.toString());
+		logln("saveDataToJSON: Salvataggio completato");
+		return json.toString();
 	}
 
 	public static String escape(String raw) {
@@ -1509,6 +1552,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static void setDebugMode(boolean mode) {
 		GiuaScraper.debugMode = mode;
+	}
+
+	public static boolean getDebugMode() {
+		return GiuaScraper.debugMode;
 	}
 
 	//endregion

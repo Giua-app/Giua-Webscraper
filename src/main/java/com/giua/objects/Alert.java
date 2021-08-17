@@ -57,6 +57,7 @@ public class Alert {
      * @return Una Stringa contenente i dettagli dell'avviso
      */
     public String getDetails(GiuaScraper gS) {
+        //TODO: togliere il parametro e trovare un altro modo per ottenere gS
         if (!this.isDetailed) {
             Document detailsHTML = gS.getPage(detailsUrl);
             this.attachmentUrls = new Vector<>();
@@ -89,4 +90,38 @@ public class Alert {
         else
             return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
     }
+
+    public String toJSON(){
+
+        StringBuilder ris = new StringBuilder("[{" +
+                "\"status\":\"" + this.status + "\"" +
+                ",\"date\":\"" + this.date + "\"" +
+                ",\"receivers\":\"" + this.receivers + "\"" +
+                ",\"object\":\"" + (!this.object.isEmpty() ? GiuaScraper.escape(this.object) : "") + "\"" +
+                ",\"page\":" + this.page +
+                ",\"detailsUrl\":\"" + this.detailsUrl + "\"" +
+                ",\"details\":\"" + (this.details != null ? GiuaScraper.escape(this.details) : "") + "\"" +
+                ",\"creator\":\"" + this.creator + "\"" +
+                ",\"type\":\"" + this.type + "\"" +
+                ",\"isDetailed\":" + this.isDetailed +
+                ",\"attachmentUrls\":[");
+
+        if(this.attachmentUrls != null && !this.attachmentUrls.isEmpty()){
+            //aggiungi attachments
+
+            ris.append("\"").append(this.attachmentUrls.get(0)).append("\"");
+
+            for(int i=1;i < this.attachmentUrls.size();i++){
+                ris.append(",\"")
+                        .append(this.attachmentUrls.get(i))
+                        .append("\"");
+            }
+        }
+
+
+        ris.append("]}]");
+
+        return ris.toString();
+    }
+
 }

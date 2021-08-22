@@ -36,8 +36,15 @@ public class GiuaScraperExceptions implements Serializable {
     }
 
     public static class SessionCookieEmpty extends RuntimeException {
+        public String siteSays = "";
+
         public SessionCookieEmpty(String errorMessage) {
             super(errorMessage);
+        }
+
+        public SessionCookieEmpty(String errorMessage, String siteSays) {
+            super(errorMessage);
+            this.siteSays = siteSays;
         }
 
         public SessionCookieEmpty(String errorMessage, Throwable err) {

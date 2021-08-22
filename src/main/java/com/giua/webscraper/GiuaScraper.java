@@ -37,7 +37,7 @@ import java.util.*;
 public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
-	private final String user;
+	private String user;
 	private final String password;
 	private String userType = "";
 	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
@@ -1422,7 +1422,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				Elements err = doc.getElementsByClass("alert alert-danger"); //prendi errore dal sito
 				if (!err.isEmpty()) {
-					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text());
+					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
 				} else {
 					PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
 					if(isSessionValid(PHPSESSID)) {
@@ -1458,8 +1458,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		try {
 			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).execute();    //Se la richiesta impiega più di 5 secondi
 			return true;
-		} catch (IOException io){
-			if(isMyInternetWorking()) {
+		} catch (IOException io) {
+			if (isMyInternetWorking()) {
 				return false;
 			} else {
 				throw new YourConnectionProblems("Your internet may not work properly", io);
@@ -1467,12 +1467,34 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
-	public userTypes getUserType(){
+	/**
+	 * Prende il nome utente dalla pagina.
+	 *
+	 * @return Il nome utente.
+	 */
+	public String loadUserFromDocument() {
+		final Document doc = getPage("");
+		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
+		return user;
+	}
+
+	/**
+	 * Prende il nome utente dalla pagina.
+	 *
+	 * @return Il nome utente.
+	 */
+	public String loadUserFromDocument(Document doc) {
+		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
+		return user;
+	}
+
+	public userTypes getUserType() {
 		String text;
-		try{
-			if(userType.equals("")){
+		try {
+			if (userType.equals("")) {
 				final Document doc = getPage("");
 				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+				loadUserFromDocument(doc);
 				text = elm.text().split(".+\\(|\\)")[1];
 				userType = text;
 				//return text;

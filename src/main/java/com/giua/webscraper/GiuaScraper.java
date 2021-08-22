@@ -185,13 +185,24 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
-	//TODO: robe notifiche da fare
-	//Assenze - da news (impossibile ricreare per ora)
-	//DisciplNotice - manuale (no notifiche)
-	//Lesson - manuale (no notifiche)
-	//News - manuale (notifiche??)
-	//Reportcard - manuale (notifiche??)
-	//Vote - manuale (notifiche??)
+
+	/**
+	 * Permette di controllare se ci sono assenze o ritardi da giustificare
+	 * dalle news
+	 *
+	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
+	 */
+	public boolean checkForAbsenceUpdate(){
+		List<News> news = getAllNewsFromHome(true);
+
+		for(News nw : news){
+			if(nw.newsText.contains("assenze")){
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	/**
 	 * Restituisce il numero di circolari da leggere preso dalle notizie
@@ -222,6 +233,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return num;
 	}
 
+	/**
+	 * Restituisce il numero di avvisi da leggere preso dalle notizie
+	 * nella home
+	 *
+	 * Per ottenere il numero di avvisi nuove basta memorizzare il risultato
+	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
+	 * e fare la differenza valore2 - valore1.
+	 *
+	 * @return numero di avvisi da leggere
+	 */
 	public int checkForAlertsUpdate(){
 		List<News> news = getAllNewsFromHome(true);
 		String text;
@@ -242,6 +263,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 
+	/**
+	 * Controlla se ci sono nuove verifiche presenti
+	 *
+	 * Attenzione: questa funzione non prende le informazioni
+	 * dalle news, ma dalla pagina Agenda
+	 *
+	 * @param yearmonth Anno-Mese in cui controllare
+	 * @return Una lista di Test nuovi
+	 */
 	public List<Test> checkForTestsUpdate(String yearmonth) {
 		List<Test> cache = allTestsCache;
 		List<Test> test = getAllTestsWithoutDetails(yearmonth,true);
@@ -250,6 +280,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
+	/**
+	 * Controlla se ci sono nuove compiti presenti
+	 *
+	 * Attenzione: questa funzione non prende le informazioni
+	 * dalle news, ma dalla pagina Agenda
+	 *
+	 * @param yearmonth Anno-Mese in cui controllare
+	 * @return Una lista di Homework nuovi
+	 */
 	public List<Homework> checkForHomeworksUpdate(String yearmonth) {
 		List<Homework> cache = allHomeworksCache;
 		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth,true);
@@ -258,6 +297,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
+	/**
+	 * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi
+	 *
+	 * @param oldHomework Homeworks vecchi con cui controllare
+	 * @param newHomework Homeworks nuovi
+	 * @return Una lista
+	 */
 	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
 		List<Homework> homeworkDiff = new Vector<>();
 

@@ -24,8 +24,10 @@ import com.giua.utils.JsonHelper;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -613,16 +615,17 @@ class TestClasses {
         try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://localhost");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:6060");
 
         startLogin();
-        testReportCard(false);
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
+        logln(String.valueOf(gS.checkForAbsenceUpdate()));
 
+/*
         Newsletter nl = gS.getAllNewsletters(0, false).get(0);
 
         //logln(nl.toJSON());
@@ -642,9 +645,9 @@ class TestClasses {
 
         /*for(Newsletter n : robe){
             logln(n.toString());
-        }*/
+        }*
 
-        new JsonHelper().parseJsonForVotes(json);
+        new JsonHelper().parseJsonForVotes(json);*/
 
 
 

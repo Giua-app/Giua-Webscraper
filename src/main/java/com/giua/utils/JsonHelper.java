@@ -26,6 +26,10 @@ import com.giua.objects.Vote;
 import com.giua.webscraper.GiuaScraper;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -53,10 +57,26 @@ public class JsonHelper {
         return rootNode;
     }
 
+    public List<Newsletter> parseJsonForNewsletters(Path path){
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForNewsletters(json);
+    }
+
     public List<Newsletter> parseJsonForNewsletters(String json){
         List<Newsletter> returnNewsletters = new Vector<>();
         JsonNode rootNode = getRootNode(json);
         JsonNode newsletters = rootNode.findPath("newsletters");
+
+
+
+
 
         int i = 0;
         //non dovrebbe MAI raggiungere 50 (perchè il massimo di circolari in una pagina sono 20)
@@ -92,6 +112,20 @@ public class JsonHelper {
         }
         return returnNewsletters;
     }
+
+
+    public void parseJsonForVotes(Path path){
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //return parseJsonForVotes(json);
+    }
+
 
     public void parseJsonForVotes(String json){
         List<Vote> returnVote = new Vector<>();

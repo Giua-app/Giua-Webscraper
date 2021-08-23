@@ -300,9 +300,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi
 	 *
+     * Attenzione: per evitare di spammare il sito con richieste, questa
+     * funzione non prende i dettagli dei homework, quindi non può distinguere
+     * tra più homework nello stesso giorno
+     *
 	 * @param oldHomework Homeworks vecchi con cui controllare
 	 * @param newHomework Homeworks nuovi
-	 * @return Una lista
+	 * @return Una lista di homework diversi/nuovi
 	 */
 	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
 		List<Homework> homeworkDiff = new Vector<>();
@@ -325,6 +329,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return homeworkDiff;
 	}
 
+    /**
+     * Fa il confronto tra due test e restituisce i test diversi/nuovi
+     *
+     * Attenzione: per evitare di spammare il sito con richieste, questa
+     * funzione non prende i dettagli dei test, quindi non può distinguere
+     * tra più test nello stesso giorno
+     *
+     * @param oldTest Test vecchi con cui controllare
+     * @param newTest Test nuovi
+     * @return Una lista di test diversi/nuovi
+     */
 	public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
 		List<Test> testDiff = new Vector<>();
 
@@ -1071,7 +1086,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return new JsonHelper().parseJsonForNewsletters(rootNode);
 	}*/
 
-	public String saveDataToJson(){
+	/*public String saveDataToJson(){
 		logln("saveDataToJSON: Salvo i dati su json");
 		StringBuilder json = new StringBuilder("{\"version\":1,"); //Versione del json: 1 (aumentare se si cambia qualcosa)
 		Date calendar = Calendar.getInstance().getTime();
@@ -1081,7 +1096,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		List<Alert> alerts = getAllAlerts(0, true);
 		/*for (Alert a : alerts){
 			a.getDetails(GiuaScraper.this);
-		}*/
+		}*
 		Map<String, List<Vote>> votes = getAllVotes(true);
 
 		//region Newsletters json
@@ -1135,7 +1150,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		logln(json.toString());
 		logln("saveDataToJSON: Salvataggio completato");
 		return json.toString();
-	}
+	}*/
 
 	public static String escape(String raw) {
 		String escaped = raw;

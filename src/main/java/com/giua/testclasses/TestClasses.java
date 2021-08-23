@@ -615,39 +615,49 @@ class TestClasses {
         try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:6060");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:6060");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
-        logln(String.valueOf(gS.checkForAbsenceUpdate()));
+        //logln(String.valueOf(gS.checkForAbsenceUpdate()));
 
-/*
-        Newsletter nl = gS.getAllNewsletters(0, false).get(0);
+
+        List<Newsletter> nl = gS.getAllNewsletters(0, false);
+        Map<String, List<Vote>> vot = gS.getAllVotes(false);
 
         //logln(nl.toJSON());
         //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
 
         long t1 = nanoTime();
-        String json = gS.saveDataToJson();
+        try {
+            new JsonHelper().saveNewslettersToFile("newsletters.json",nl);
+            new JsonHelper().saveVotesToFile("votes.json",vot);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         long t2 = nanoTime();
 
         logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
 
         t1 = nanoTime();
-        List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(json);
+        List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(Paths.get("newsletters.json"));
+        Map<String, List<Vote>> votesOut = new JsonHelper().parseJsonForVotes(Paths.get("votes.json"));
         t2 = nanoTime();
 
         logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
 
-        /*for(Newsletter n : robe){
+        for(Newsletter n : robe){
             logln(n.toString());
-        }*
+        }
 
-        new JsonHelper().parseJsonForVotes(json);*/
+        for (String m : votesOut.keySet()) {
+            logln(m + ": " + votesOut.get(m).toString());
+        }
+
 
 
 

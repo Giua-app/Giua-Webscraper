@@ -43,6 +43,9 @@ public class JsonHelper {
         debugMode = GiuaScraper.getDebugMode();
     }
 
+    // FUNZIONI UTILI
+    //region
+
     public JsonNode getRootNode(String jsonData){
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -70,6 +73,23 @@ public class JsonHelper {
         logln("saveDataToJSON: Salvataggio completato");
         return json.toString();
     }
+
+    private void saveJsonStringToFile(String path, String string) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+        ObjectMapper mapper = new ObjectMapper();
+        Object jsonOb = mapper.readValue(string, Object.class);
+
+        String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonOb);
+
+        writer.write(pretty);
+        writer.close();
+    }
+
+    //endregion
+
+    // FUNZIONI PER SCRITTURA DI OGGETTI
+    //region
 
     public StringBuilder writeNewslettersToJson(StringBuilder json, List<Newsletter> newsletters){
         json.append("\"newsletters\":[{")
@@ -118,18 +138,10 @@ public class JsonHelper {
         return json;
     }
 
-    private void saveJsonStringToFile(String path, String string) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+    //endregion
 
-        ObjectMapper mapper = new ObjectMapper();
-        Object jsonOb = mapper.readValue(string, Object.class);
-
-        String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonOb);
-
-        writer.write(pretty);
-        writer.close();
-    }
-
+    // FUNZIONI PER SALVATAGGIO DI OGGETTI IN FILE SINGOLI
+    //region
 
     public void saveNewslettersToFile(String path, List<Newsletter> newsletters) throws IOException {
         StringBuilder json = writeJsonVerAndDate();
@@ -158,7 +170,10 @@ public class JsonHelper {
         saveJsonStringToFile(path, finalJson);
     }
 
+    //endregion
 
+    // FUNZIONI PER PARSING DI OGGETTI DA FILE O STRINGA JSON
+    //region
 
     public List<Newsletter> parseJsonForNewsletters(Path path){
 
@@ -211,7 +226,6 @@ public class JsonHelper {
         }
         return returnNewsletters;
     }
-
 
 
     public Map<String, List<Vote>> parseJsonForVotes(Path path){
@@ -267,43 +281,75 @@ public class JsonHelper {
         }
         logln("parseJsonForVotes: lettura completata");
         return returnVote;
+    }
 
 
-        /*int i = 0;
-        //non dovrebbe MAI raggiungere 50 (perchè il massimo di circolari in una pagina sono 20)
+    public List<Alert> parseJsonForAlerts(Path path){
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForAlerts(json);
+    }
+
+    public List<Alert> parseJsonForAlerts(String json){
+        List<Alert> returnAlerts = new Vector<>();
+        JsonNode rootNode = getRootNode(json);
+        JsonNode alerts = rootNode.findPath("alerts");
+
+        int i = 0;
+        //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
         //ma nel caso succeda qualcosa almeno ferma il loop
-        log("loadDataFromJSON: Leggo json circolari");
+        log("parseJsonForAlerts: Leggo json avvisi");
         while(i < 50){
-            JsonNode newsletter;
-            newsletter = newsletters.findPath(""+i);
+            JsonNode alert;
+            alert = alerts.findPath(""+i);
 
-            if(newsletter.isMissingNode()){
-                logln("\nloadDataFromJSON: Lettura circolari completata, ho letto " + i + " circolari");
+            if(alert.isMissingNode()){
+                logln("\nparseJsonForAlerts: Lettura avvisi completata, ho letto " + i + " avvisi");
                 break;
             }
 
-            String status = newsletter.findPath("status").asText();
-            String date = newsletter.findPath("date").asText();
-            String object = newsletter.findPath("object").asText();
-            int number = newsletter.findPath("number").asInt();
-            int page = newsletter.findPath("page").asInt();
-            String details = newsletter.findPath("detailsUrl").asText();
+            String status = alert.findPath("status").asText();
+            String date = alert.findPath("date").asText();
+            String receivers = alert.findPath("receivers").asText();
+            String object = alert.findPath("object").asText();
+            int page = alert.findPath("page").asInt();
+            String detailsUrl = alert.findPath("detailsUrl").asText();
+            String details = alert.findPath("details").asText();
+            String creator = alert.findPath("creator").asText();
+            String type = alert.findPath("type").asText();
+            boolean isDetailed = alert.findPath("isDetailed").asBoolean();
 
-            //Controlla se ci sono allegati
-            Iterator<JsonNode> attachmentsNode = newsletter.findPath("attachments").elements();
-            List<String> attachments = new Vector<>();
-            while(attachmentsNode.hasNext()){
-                attachments.add(attachmentsNode.next().asText());
+
+
+            if(!isDetailed){
+                //Alert non dettagliata
+                returnAlerts.add(new Alert(status, date, receivers, object, detailsUrl, page));
+            } else {
+                //Alert dettagliata
+
+                //Controlla gli allegati
+                Iterator<JsonNode> attachmentsNode = alert.findPath("attachmentUrls").elements();
+                List<String> attachments = new Vector<>();
+                while(attachmentsNode.hasNext()){
+                    attachments.add(attachmentsNode.next().asText());
+                }
+
+                returnAlerts.add(new Alert(status, date, receivers, object, detailsUrl, page, attachments, details, creator, type));
             }
 
-
-            returnNewsletters.add(new Newsletter(status, number, date, object, details, attachments, page));
             i++;
-            log(".");
         }
-        return returnNewsletters;*/
+        return returnAlerts;
     }
 
+
+    //endregion
 
 
     /**

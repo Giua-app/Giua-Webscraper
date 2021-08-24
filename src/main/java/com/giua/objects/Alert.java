@@ -50,6 +50,20 @@ public class Alert {
         this.isDetailed = false;
     }
 
+    public Alert(String status, String date, String receivers, String object, String detailsUrl, int page, List<String> attachmentUrls, String details, String creator, String type) {
+        this.status = status;
+        this.date = date;
+        this.receivers = receivers;
+        this.object = object;
+        this.page = page;
+        this.detailsUrl = detailsUrl;
+        this.isDetailed = true;
+        this.attachmentUrls = attachmentUrls;
+        this.details = details;
+        this.creator = creator;
+        this.type = type;
+    }
+
     /**
      * Ottiene i dettagli, il tipo e il creatore dell'avviso con una richiesta HTTP
      *

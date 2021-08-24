@@ -627,7 +627,10 @@ class TestClasses {
 
 
         List<Newsletter> nl = gS.getAllNewsletters(0, false);
+        List<Alert> al = gS.getAllAlerts(0, false);
         Map<String, List<Vote>> vot = gS.getAllVotes(false);
+
+        al.get(0).getDetails(gS);
 
         //logln(nl.toJSON());
         //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
@@ -636,6 +639,7 @@ class TestClasses {
         try {
             new JsonHelper().saveNewslettersToFile("newsletters.json",nl);
             new JsonHelper().saveVotesToFile("votes.json",vot);
+            new JsonHelper().saveAlertsToFile("alerts.json", al);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -646,6 +650,7 @@ class TestClasses {
         t1 = nanoTime();
         List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(Paths.get("newsletters.json"));
         Map<String, List<Vote>> votesOut = new JsonHelper().parseJsonForVotes(Paths.get("votes.json"));
+        List<Alert> alertsOut = new JsonHelper().parseJsonForAlerts(Paths.get("alerts.json"));
         t2 = nanoTime();
 
         logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
@@ -658,6 +663,9 @@ class TestClasses {
             logln(m + ": " + votesOut.get(m).toString());
         }
 
+        for (Alert a : alertsOut) {
+            logln(a.toString());
+        }
 
 
 

@@ -24,9 +24,8 @@ import com.giua.utils.JsonHelper;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -667,7 +666,8 @@ class TestClasses {
             logln(a.toString());
         }
 
-
+        /*JsonHelper jsonHelper = new JsonHelper();
+        jsonHelper.saveVotesToString(vot);*/
 
 
     }

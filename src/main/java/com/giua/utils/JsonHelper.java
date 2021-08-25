@@ -130,12 +130,41 @@ public class JsonHelper {
         json.append("\"alerts\":[{")
                 .append("\"0\":")
                 .append(alerts.get(0).toJSON());
-        for(int i=1;i < alerts.size();i++){
+        for (int i = 1; i < alerts.size(); i++) {
             json.append(",\"").append(i).append("\":")
                     .append(alerts.get(i).toJSON());
         }
         json.append("}]");
         return json;
+    }
+
+    //endregion
+
+    //FUNIONI PER SALAVATAGGIO DI OGGETTI IN STRINGHE
+    //region
+
+    public String saveNewslettersToString(List<Newsletter> newsletters) {
+        StringBuilder json = writeJsonVerAndDate();
+
+        json = writeNewslettersToJson(json, newsletters);
+
+        return writeJsonEOF(json);
+    }
+
+    public String saveVotesToString(Map<String, List<Vote>> votes) {
+        StringBuilder json = writeJsonVerAndDate();
+
+        json = writeVotesToJson(json, votes);
+
+        return writeJsonEOF(json);
+    }
+
+    public String saveAlertsToString(List<Alert> alerts) {
+        StringBuilder json = writeJsonVerAndDate();
+
+        json = writeAlertsToJson(json, alerts);
+
+        return writeJsonEOF(json);
     }
 
     //endregion

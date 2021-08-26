@@ -22,6 +22,7 @@ package com.giua.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giua.objects.Alert;
+import com.giua.objects.Homework;
 import com.giua.objects.Newsletter;
 import com.giua.objects.Vote;
 import com.giua.webscraper.GiuaScraper;
@@ -46,7 +47,7 @@ public class JsonHelper {
     // FUNZIONI UTILI
     //region
 
-    public JsonNode getRootNode(String jsonData){
+    private JsonNode getRootNode(String jsonData) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode rootNode = null;
@@ -91,27 +92,67 @@ public class JsonHelper {
     // FUNZIONI PER SCRITTURA DI OGGETTI
     //region
 
-    public StringBuilder writeNewslettersToJson(StringBuilder json, List<Newsletter> newsletters){
-        json.append("\"newsletters\":[{")
+    /**
+     * Scrive sul StringBuilder json le newsletters.
+     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
+     * tra questa funzione e la prossima, in modo che il json sia valido
+     *
+     * @param json      StringBuilder del json in uso
+     * @param homeworks Lista di newsletters da salvare
+     * @return StringBuilder json aggiornato con newsletters
+     */
+    public StringBuilder writeHomeworksToJson(StringBuilder json, List<Homework> homeworks) {
+        json.append("\"homeworks\":[{")
                 .append("\"0\":")
-                .append(newsletters.get(0).toJSON());
-        for(int i=1;i < newsletters.size();i++){
+                .append(homeworks.get(0).toJson());
+        for (int i = 1; i < homeworks.size(); i++) {
             json.append(",\"").append(i).append("\":")
-                    .append(newsletters.get(i).toJSON());
+                    .append(homeworks.get(i).toJson());
         }
         json.append("}]");
         return json;
     }
 
-    public StringBuilder writeVotesToJson(StringBuilder json, Map<String, List<Vote>> votes){
+
+    /**
+     * Scrive sul StringBuilder json le newsletters.
+     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
+     * tra questa funzione e la prossima, in modo che il json sia valido
+     *
+     * @param json        StringBuilder del json in uso
+     * @param newsletters Lista di newsletters da salvare
+     * @return StringBuilder json aggiornato con newsletters
+     */
+    public StringBuilder writeNewslettersToJson(StringBuilder json, List<Newsletter> newsletters) {
+        json.append("\"newsletters\":[{")
+                .append("\"0\":")
+                .append(newsletters.get(0).toJson());
+        for (int i = 1; i < newsletters.size(); i++) {
+            json.append(",\"").append(i).append("\":")
+                    .append(newsletters.get(i).toJson());
+        }
+        json.append("}]");
+        return json;
+    }
+
+    /**
+     * Scrive sul StringBuilder json i votes.
+     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
+     * tra questa funzione e la prossima, in modo che il json sia valido
+     *
+     * @param json  StringBuilder del json in uso
+     * @param votes Lista di votes da salvare
+     * @return StringBuilder json aggiornato con votes
+     */
+    public StringBuilder writeVotesToJson(StringBuilder json, Map<String, List<Vote>> votes) {
         json.append("\"votes\":[{");
-        for(String str : votes.keySet()){
+        for (String str : votes.keySet()) {
             //Materia
             json.append("\"").append(str).append("\":[{")
                     .append("\"0\":")
                     .append(votes.get(str).get(0).toJSON());
 
-            for(int i=1;i < votes.get(str).size();i++){
+            for (int i = 1; i < votes.get(str).size(); i++) {
                 //Voto
                 json.append(",\"").append(i).append("\":")
                         .append(votes.get(str).get(i).toJSON());
@@ -119,14 +160,23 @@ public class JsonHelper {
             //Fine di una materia
             json.append("}],");
         }
-        json.deleteCharAt(json.length()-1); //Cancella la virgola dell'ultima materia
+        json.deleteCharAt(json.length() - 1); //Cancella la virgola dell'ultima materia
 
         json.append("}]");
 
         return json;
     }
 
-    public StringBuilder writeAlertsToJson(StringBuilder json, List<Alert> alerts){
+    /**
+     * Scrive sul StringBuilder json gli alerts.
+     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
+     * tra questa funzione e la prossima, in modo che il json sia valido
+     *
+     * @param json   StringBuilder del json in uso
+     * @param alerts Lista di alerts da salvare
+     * @return StringBuilder json aggiornato con alerts
+     */
+    public StringBuilder writeAlertsToJson(StringBuilder json, List<Alert> alerts) {
         json.append("\"alerts\":[{")
                 .append("\"0\":")
                 .append(alerts.get(0).toJSON());
@@ -171,6 +221,15 @@ public class JsonHelper {
 
     // FUNZIONI PER SALVATAGGIO DI OGGETTI IN FILE SINGOLI
     //region
+
+    public void saveHomeworksToFile(String path, List<Homework> homeworks) throws IOException {
+        StringBuilder json = writeJsonVerAndDate();
+
+        json = writeHomeworksToJson(json, homeworks);
+
+        String finalJson = writeJsonEOF(json);
+        saveJsonStringToFile(path, finalJson);
+    }
 
     public void saveNewslettersToFile(String path, List<Newsletter> newsletters) throws IOException {
         StringBuilder json = writeJsonVerAndDate();

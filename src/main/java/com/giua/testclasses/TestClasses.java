@@ -19,6 +19,7 @@
 
 package com.giua.testclasses;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.giua.objects.*;
 import com.giua.utils.JsonHelper;
 import com.giua.webscraper.DownloadedFile;
@@ -628,6 +629,7 @@ class TestClasses {
         List<Newsletter> nl = gS.getAllNewsletters(0, false);
         List<Alert> al = gS.getAllAlerts(0, false);
         Map<String, List<Vote>> vot = gS.getAllVotes(false);
+        List<Homework> hw = gS.getAllHomeworksWithoutDetails("2021-03", false);
 
         al.get(0).getDetails(gS);
 
@@ -639,6 +641,7 @@ class TestClasses {
             new JsonHelper().saveNewslettersToFile("newsletters.json",nl);
             new JsonHelper().saveVotesToFile("votes.json",vot);
             new JsonHelper().saveAlertsToFile("alerts.json", al);
+            new JsonHelper().saveHomeworksToFile("homeworks.json", hw);
         } catch (IOException e) {
             e.printStackTrace();
         }

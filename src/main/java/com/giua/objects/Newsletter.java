@@ -88,6 +88,7 @@ public class Newsletter{
         }
         return differences;
     }*/
+
     public boolean equals(Newsletter newsletter2) {
         //true se uguale, false altrimenti
         return this.status.equals(newsletter2.status) && this.number == newsletter2.number
@@ -96,7 +97,7 @@ public class Newsletter{
                 && this.page == newsletter2.page;
     }
 
-    public String toJSON(){
+    public String toJson() {
 
         StringBuilder ris = new StringBuilder("[{" +
                 "\"status\":\"" + this.status + "\"" +

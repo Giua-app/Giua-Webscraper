@@ -19,6 +19,8 @@
 
 package com.giua.objects;
 
+import com.giua.webscraper.GiuaScraper;
+
 import java.util.List;
 import java.util.Vector;
 
@@ -52,6 +54,19 @@ public class Homework {
                 && this.year.equals(homework.year) && this.date.equals(homework.date)
                 && this.subject.equals(homework.subject) && this.creator.equals(homework.creator)
                 && this.details.equals(homework.details) && this.exists == homework.exists;
+    }
+
+    public String toJson() {
+
+        return "[{" +
+                "\"day\":\"" + this.day + "\"" +
+                ",\"month\":\"" + this.month + "\"" +
+                ",\"year\":\"" + this.year + "\"" +
+                ",\"date\":\"" + this.date + "\"" +
+                ",\"subject\":\"" + this.subject + "\"" +
+                ",\"creator\":\"" + this.creator + "\"" +
+                ",\"details\":\"" + GiuaScraper.escape(this.details) + "\"" +
+                ",\"exists\":" + this.exists + "}]";
     }
 
     /*public List<String> compare(Homework homework) {

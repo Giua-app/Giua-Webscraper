@@ -1541,7 +1541,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
-	 *
 	 * @return Il nome utente.
 	 */
 	public String loadUserFromDocument() {
@@ -1552,7 +1551,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Prende il nome utente dalla pagina. Utilizza il {@code Document} passato come parametro.
-	 *
 	 * @return Il nome utente.
 	 */
 	public String loadUserFromDocument(Document doc) {
@@ -1566,7 +1564,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if (userType.equals("")) {
 				final Document doc = getPage("");
 				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-				loadUserFromDocument(doc);
 				text = elm.text().split(".+\\(|\\)")[1];
 				userType = text;
 				//return text;

@@ -1442,22 +1442,33 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * La funzione per loggarsi effetivamente. Genera un phpsessid e un csrftoken per potersi loggare.
+	 *
+	 * @throws UnableToLogin                Il login è andato male e il sito non ha detto cosa è andato storto
+	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non ci si può loggare
+	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
 	 */
-	public void login() {
+	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
 		try {
 
 			if (isSessionValid(PHPSESSID)) {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
 			} else {
-				logln("login: Session expired, creating a new one");
+				if (isMaintenanceActive())
+
+					logln("login: Session expired, creating a new one");
 				initiateSession();
 
 				//logln("login: First connection (login form)");
 
-				session.newRequest()
+				Document firstRequestDoc = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/login/form/")
 						.get();
+
+				//Reimplementato isMaintenaceActive() per utilizzare la richiesta precedente e fare una richiesta HTTP in meno
+				Elements loginForm = firstRequestDoc.getElementsByAttributeValue("name", "login_form");
+				if (loginForm.isEmpty())
+					throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
 				//logln("login: Second connection (authenticate)");
 
@@ -1529,7 +1540,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * Prende il nome utente dalla pagina.
+	 * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
 	 *
 	 * @return Il nome utente.
 	 */
@@ -1540,7 +1551,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * Prende il nome utente dalla pagina.
+	 * Prende il nome utente dalla pagina. Utilizza il {@code Document} passato come parametro.
 	 *
 	 * @return Il nome utente.
 	 */

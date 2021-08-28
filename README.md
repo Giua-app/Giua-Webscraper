@@ -21,8 +21,25 @@ Può raccogliere informazioni su:
 - Lezioni
 - e molto altro ancora
 
-## Installazione
-Vai sulle [Actions](https://github.com/Giua-app/Giua-Webscraper/actions?query=is%3Asuccess+branch%3Amain+event%3Apush++) e clicca il workflow più recente, su Artifacts dovresti trovare un file chiamato "build-output". Una volta scaricato estrailo e dentro ci sarà il file jar del Giua webscraper
+## Installazione (come dipendenza Android)
+Aggiungi JitPack al tuo top-level `build.gradle`
+```gradle
+allprojects {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Inserisci la dipendenza nel `build.gradle` module (subproject)
+```gradle
+dependencies {
+    // Giua scraper
+    implementation 'com.github.Giua-app:Giua-Webscraper:VERSION'
+}
+```
+
+Sostituisci "VERSION" con il numero scritto qui (senza la v iniziale) ![](https://img.shields.io/github/v/release/Giua-app/Giua-Webscraper?color=success&include_prereleases&label=%E2%80%8B&logo=github)
 
 
 ## Come posso contribuire?

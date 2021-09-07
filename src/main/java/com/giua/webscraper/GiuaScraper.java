@@ -1419,6 +1419,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		//Funzione indipendente. Non usa ne getPage ne altro
 
 		try {
+			if (isMaintenanceActive())
+				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
+
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
 					.get();
@@ -1454,9 +1457,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
 			} else {
-				if (isMaintenanceActive())
-
-					logln("login: Session expired, creating a new one");
+				logln("login: Session expired, creating a new one");
 				initiateSession();
 
 				//logln("login: First connection (login form)");

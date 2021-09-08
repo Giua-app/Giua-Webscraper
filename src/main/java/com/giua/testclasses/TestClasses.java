@@ -19,15 +19,12 @@
 
 package com.giua.testclasses;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.giua.objects.*;
-import com.giua.utils.JsonHelper;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -164,7 +161,7 @@ class TestClasses {
         gS.login();
 
         //Document doc = gS.getPage("");
-        logln("Account type: " + gS.getUserType());
+        logln("Account type: " + gS.getUserTypeEnum());
     }
     //endregion
     
@@ -488,7 +485,7 @@ class TestClasses {
         //gS.setSiteURL("https://registroasiaiai.giua.edu.it");
 
         //Document doc = gS.getPage("");
-        System.out.println("Account type: " + gS.getUserType());
+        System.out.println("Account type: " + gS.getUserTypeEnum());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
@@ -541,7 +538,7 @@ class TestClasses {
         System.out.println("Created new gS variable");
 
 
-        System.out.println("Account type: " + gS.getUserType());
+        System.out.println("Account type: " + gS.getUserTypeEnum());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
@@ -620,13 +617,13 @@ class TestClasses {
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
         //logln(String.valueOf(gS.checkForAbsenceUpdate()));
 
 
-        List<Newsletter> nl = gS.getAllNewsletters(0, false);
+        /*List<Newsletter> nl = gS.getAllNewsletters(0, false);
         List<Alert> al = gS.getAllAlerts(0, false);
         Map<String, List<Vote>> vot = gS.getAllVotes(false);
         List<Homework> hw = gS.getAllHomeworksWithoutDetails("2021-03", false);

@@ -78,10 +78,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Permette di settare l'URL del registro
 	 *
-	 * @param newurl formattato come "https://example.com"
+	 * @param newUrl formattato come "https://example.com"
 	 */
-	public static void setSiteURL(String newurl) {
-		GiuaScraper.SiteURL = newurl;
+	public static void setSiteURL(String newUrl) {
+		if (!newUrl.endsWith("/"))
+			GiuaScraper.SiteURL = newUrl;
+		else
+			GiuaScraper.SiteURL = newUrl.substring(0, newUrl.length() - 1);    //Togli l'ultimo / dal nuovo url
 	}
 
 	/**
@@ -374,7 +377,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		//TODO: permettere di modificare assenza gia giustificata
 		//TODO: sistemare la stringa type
-		if (getUserType() != userTypes.PARENT) {
+		if (getUserTypeEnum() != userTypes.PARENT) {
 			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}
@@ -586,7 +589,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 			List<Alert> allAlerts = new Vector<>();
 			Document doc = getPage("genitori/avvisi/" + page);
-			Elements allAlertsHTML = doc.getElementsByTag("tbody").get(0).children();
+			Elements allAlertsHTML = doc.getElementsByTag("tbody");
+			if (allAlertsHTML.isEmpty())
+				return allAlerts;
+			allAlertsHTML = allAlertsHTML.get(0).children();
 
 			for (Element alertHTML : allAlertsHTML) {
 				allAlerts.add(new Alert(
@@ -1286,12 +1292,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param page
 	 * @return Una pagina HTML come {@link Document}
+	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non si può richiedere la pagina indicata
+	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
-	public Document getPage(String page) {
+	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
 		try {
-			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
 			if (page.startsWith("/"))
 				page = page.substring(1);
+			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
 			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
 				return getPageCache;
 			if (page.equals("login/form/")) {
@@ -1315,21 +1323,19 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				if (response.statusCode() == 302)
 					throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");
 
-				if (doc == null)
-					return new Document(GiuaScraper.SiteURL + "/" + page);
-
 				getPageCache = doc;
 				lastGetPageTime = System.nanoTime();
 				return doc;
 			}
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
 			}
 			e.printStackTrace();
 		}
-		return null;
+		logln("getPage: I'm returning a blank page");
+		return new Document(GiuaScraper.SiteURL + "/" + page);	//Non si dovrebbe mai verificare
 	}
 
 	/**
@@ -1348,11 +1354,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			logln("\t Done!");
 
-			if (doc == null)
-				return new Document(GiuaScraper.SiteURL + "/" + page);
 			return doc;
 
-		} catch (Exception e) {
+		} catch (IOException e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
 			}
@@ -1375,8 +1379,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.get();
 
 			logln("\t Done!");
-			if (doc == null)
-				return new Document(url);
 			return doc;
 
 		} catch (IOException e) {
@@ -1405,8 +1407,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			logln("\t" + res.statusCode());
 			return res.statusCode() != 302;
 
-		} catch (Exception e) {
-			if(!isSiteWorking()){
+		} catch (IOException e) {
+			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
@@ -1414,14 +1416,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
-	public boolean isSessionValid(String phpsessid){
-
-		//Funzione indipendente. Non usa ne getPage ne altro
-
+	public boolean isSessionValid(String phpsessid) {
 		try {
-			if (isMaintenanceActive())
-				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
-
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
 					.get();
@@ -1431,7 +1427,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			userType = elm.text().split(".+\\(|\\)")[1];
 
 		} catch (Exception e) {
-			if(!isSiteWorking()){
+			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
 			}
 
@@ -1452,7 +1448,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
 		try {
-
+			if (isMaintenanceActive())
+				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 			if (isSessionValid(PHPSESSID)) {
 				//Il cookie esistente è ancora valido, niente login.
 				logln("login: Session still valid, ignoring");
@@ -1465,11 +1462,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				Document firstRequestDoc = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/login/form/")
 						.get();
-
-				//Reimplementato isMaintenaceActive() per utilizzare la richiesta precedente e fare una richiesta HTTP in meno
-				Elements loginForm = firstRequestDoc.getElementsByAttributeValue("name", "login_form");
-				if (loginForm.isEmpty())
-					throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
 				//logln("login: Second connection (authenticate)");
 
@@ -1506,9 +1498,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					}
 				}
 			}
-
-
-
 		} catch (IOException e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
@@ -1552,6 +1541,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Prende il nome utente dalla pagina. Utilizza il {@code Document} passato come parametro.
+	 *
 	 * @return Il nome utente.
 	 */
 	public String loadUserFromDocument(Document doc) {
@@ -1559,7 +1549,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return user;
 	}
 
-	public userTypes getUserType() {
+	public userTypes getUserTypeEnum() {
 		String text;
 		try {
 			if (userType.equals("")) {
@@ -1568,28 +1558,43 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				text = elm.text().split(".+\\(|\\)")[1];
 				userType = text;
 				//return text;
-			} else {
-				//return userType;
 			}
 		} catch (Exception e) {
-			throw new UnableToGetUserType("unable to get user type, are we not logged in?", e);
+			throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
 		}
 
 		if(userType.equals("Genitore")){
 			return userTypes.PARENT;
 		}
-		if(userType.equals("Studente")){
+		if (userType.equals("Studente")) {
 			return userTypes.STUDENT;
 		}
-		if(userType.equals("Dirigente")){
+		if (userType.equals("Dirigente")) {
 			return userTypes.PRINCIPAL;
 		}
-		if(userType.equals("Amministratore")){
+		if (userType.equals("Amministratore")) {
 			return userTypes.ADMIN;
 		}
 
 		//non dovrebbe mai accadere
-		throw new UnableToGetUserType("unable to parse userType to userTypes enum because it's unknown");
+		throw new UnableToGetUserType("Unable to parse userType to userTypes enum because it's unknown");
+	}
+
+	public String getUserTypeString() {
+		String text;
+		try {
+			if (userType.equals("")) {
+				final Document doc = getPage("");
+				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+				text = elm.text().split(".+\\(|\\)")[1];
+				userType = text;
+				return text;
+			} else {
+				return userType;
+			}
+		} catch (Exception e) {
+			throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
+		}
 	}
 
 	public void clearCache() {

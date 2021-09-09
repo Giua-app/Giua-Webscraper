@@ -605,22 +605,31 @@ class TestClasses {
             }
         }
 
-        try { logEnabled = Boolean.parseBoolean(args[2]); } catch(Exception ignored) {}
+        try {
+            logEnabled = Boolean.parseBoolean(args[2]);
+        } catch (Exception ignored) {
+        }
 
-        try { speedTest = Boolean.parseBoolean(args[3]); } catch(Exception ignored) {}
+        try {
+            speedTest = Boolean.parseBoolean(args[3]);
+        } catch (Exception ignored) {
+        }
 
-        try { speedTestAmount = Integer.parseInt(args[4]); } catch(Exception ignored) {}
+        try {
+            speedTestAmount = Integer.parseInt(args[4]);
+        } catch (Exception ignored) {
+        }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:6060");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        startLogin();
-        //gS = new GiuaScraper(user, password, true);
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //startLogin();
+        gS = new GiuaScraper(user, password, true);
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
 
-        //logln(String.valueOf(gS.checkForAbsenceUpdate()));
+        logln(gS.getLoginPageBanner());
 
 
         /*List<Newsletter> nl = gS.getAllNewsletters(0, false);

@@ -188,6 +188,27 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
+	/**
+	 * Ottiene il banner della login page se presente
+	 *
+	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
+	 * @throws LoginPageBannerNotFound se non esiste il banner
+	 */
+	public String getLoginPageBanner() {
+		Document doc = getPageNoCookie(""); //pagina di login
+		Element els;
+
+		try {
+			els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new LoginPageBannerNotFound("Cant find banner in login page", e);
+		}
+
+		return els.child(0).html();
+	}
+
+
+	//region Controllo aggiornamenti oggetti
 
 	/**
 	 * Permette di controllare se ci sono assenze o ritardi da giustificare
@@ -195,7 +216,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
 	 */
-	public boolean checkForAbsenceUpdate(){
+	public boolean checkForAbsenceUpdate() {
 		List<News> news = getAllNewsFromHome(true);
 
 		for(News nw : news){
@@ -205,7 +226,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 		return false;
 	}
-
 
 	/**
 	 * Restituisce il numero di circolari da leggere preso dalle notizie
@@ -265,7 +285,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return num;
 	}
 
-
 	/**
 	 * Controlla se ci sono nuove verifiche presenti
 	 *
@@ -294,19 +313,23 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Homework> checkForHomeworksUpdate(String yearmonth) {
 		List<Homework> cache = allHomeworksCache;
-		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth,true);
+		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth, true);
 
 		return compareHomeworks(cache, homework);
 
 	}
 
+	//endregion
+
+	//region Confronto tra oggetti
+
 	/**
 	 * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi
 	 *
-     * Attenzione: per evitare di spammare il sito con richieste, questa
-     * funzione non prende i dettagli dei homework, quindi non può distinguere
-     * tra più homework nello stesso giorno
-     *
+	 * Attenzione: per evitare di spammare il sito con richieste, questa
+	 * funzione non prende i dettagli dei homework, quindi non può distinguere
+	 * tra più homework nello stesso giorno
+	 *
 	 * @param oldHomework Homeworks vecchi con cui controllare
 	 * @param newHomework Homeworks nuovi
 	 * @return Una lista di homework diversi/nuovi
@@ -356,7 +379,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				if (!newTest.get(i).day.equals(oldTest.get(i).day) && !newTest.get(i).date.equals(oldTest.get(i).date)) {
 					testDiff.add(newTest.get(i));
 				}
-			} catch (ArrayIndexOutOfBoundsException e){
+			} catch (ArrayIndexOutOfBoundsException e) {
 				testDiff.add(newTest.get(i));
 			}
 		}
@@ -364,6 +387,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return testDiff;
 	}
 
+	//endregion
 
 	//region Absence
 
@@ -1071,92 +1095,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
-
-
-
-	/*public List<Newsletter> loadDataFromJson(String jsonData){
-		//read json file data to String
-		//byte[] jsonData = Files.readAllBytes(Paths.get("employee.txt"));
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		JsonNode rootNode = null;
-		try {
-			rootNode = objectMapper.readTree(jsonData);
-		} catch (IOException e) {
-			logln("loadDataFromJSON: Impossibile leggere json");
-			e.printStackTrace();
-		}
-		JsonNode version = rootNode.path("version");
-
-		return new JsonHelper().parseJsonForNewsletters(rootNode);
-	}*/
-
-	/*public String saveDataToJson(){
-		logln("saveDataToJSON: Salvo i dati su json");
-		StringBuilder json = new StringBuilder("{\"version\":1,"); //Versione del json: 1 (aumentare se si cambia qualcosa)
-		Date calendar = Calendar.getInstance().getTime();
-		json.append("\"create_date\":\"").append(calendar).append("\",");
-
-		List<Newsletter> newsletters = getAllNewsletters(0, true);
-		List<Alert> alerts = getAllAlerts(0, true);
-		/*for (Alert a : alerts){
-			a.getDetails(GiuaScraper.this);
-		}*
-		Map<String, List<Vote>> votes = getAllVotes(true);
-
-		//region Newsletters json
-		json.append("\"newsletters\":[{")
-				.append("\"0\":")
-				.append(newsletters.get(0).toJSON());
-		for(int i=1;i < newsletters.size();i++){
-			json.append(",\"").append(i).append("\":")
-					.append(newsletters.get(i).toJSON());
-		}
-		json.append("}]");
-		//endregion
-
-		json.append(",");
-
-		//region Votes json
-		json.append("\"votes\":[{");
-		for(String str : votes.keySet()){
-			//Materia
-			json.append("\"").append(str).append("\":[{")
-					.append("\"0\":")
-					.append(votes.get(str).get(0).toJSON());
-
-			for(int i=1;i < votes.get(str).size();i++){
-				//Voto
-				json.append(",\"").append(i).append("\":")
-						.append(votes.get(str).get(i).toJSON());
-			}
-			//Fine di una materia
-			json.append("}],");
-		}
-		json.deleteCharAt(json.length()-1); //Cancella la virgola dell'ultima materia
-
-		json.append("}]");
-		//endregion
-
-		json.append(",");
-
-		//region Alerts json
-		json.append("\"alerts\":[{")
-				.append("\"0\":")
-				.append(alerts.get(0).toJSON());
-		for(int i=1;i < alerts.size();i++){
-			json.append(",\"").append(i).append("\":")
-					.append(alerts.get(i).toJSON());
-		}
-		json.append("}]");
-		//endregion
-
-		json.append("}");
-		logln(json.toString());
-		logln("saveDataToJSON: Salvataggio completato");
-		return json.toString();
-	}*/
 
 	public static String escape(String raw) {
 		String escaped = raw;

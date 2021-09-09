@@ -132,4 +132,14 @@ public class GiuaScraperExceptions implements Serializable {
         }
     }
 
+    public static class LoginPageBannerNotFound extends RuntimeException {
+        public LoginPageBannerNotFound(String errorMessage) {
+            super(errorMessage);
+        }
+
+        public LoginPageBannerNotFound(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
+    }
+
 }

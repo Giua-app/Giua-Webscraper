@@ -69,6 +69,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private List<Absence> allAbsencesCache = null;
 	private List<News> allNewsFromHomeCache = null;
 	private Document getPageCache = null;
+	private List<Observations> allObservationsCache = null;
 	//endregion
 
 	//endregion
@@ -187,6 +188,40 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	//endregion
 
 	//region Funzioni per ottenere dati dal registro
+
+	public List<Observations> getAllObservations(boolean forceRefresh) {
+		if (allObservationsCache == null || forceRefresh) {
+			List<Observations> returnAllObs = new Vector<>();
+			Document doc = getPage("genitori/osservazioni/");
+			Elements obsTables = doc.getElementsByTag("tbody"); //Primo e Secondo quadrimestre
+			//TODO: aggiungere supporto per quadrimestri
+
+			for (Element el : obsTables) {
+
+				logln("robe prima - " + el.html());
+
+				for (Element el2 : el.children()) {
+
+					returnAllObs.add(new Observations(
+							el2.child(0).child(0).text(), //Data
+							el2.child(1).child(0).text(), //Materia
+							el2.child(1).child(2).text(), //Insegnante
+							el2.child(2).text()           //Testo
+					));
+
+				}
+			}
+
+			if (cacheable) {
+				allObservationsCache = returnAllObs;
+			}
+			return returnAllObs;
+
+		} else {
+			return allObservationsCache;
+		}
+	}
+
 
 	/**
 	 * Ottiene il banner della login page se presente
@@ -510,16 +545,19 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			List<DisciplNotice> allDisciplNotices = new Vector<>();
 			Document doc = getPage("genitori/note/");
 			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
+			//TODO: aggiungere supporto per far vedere di che quadrimestre fa parte
 
 			for (Element el : allDisciplNoticeTBodyHTML) {
 
 
-				for (Element el2 : el.children()){
+				for (Element el2 : el.children()) {
 					//logln(" -------\n" + el2.toString());
 					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
 					String author1 = el2.child(2).child(1).text();
 					String author2;
-					try{ author2 = el2.child(3).child(1).text(); } catch (IndexOutOfBoundsException e){
+					try {
+						author2 = el2.child(3).child(1).text();
+					} catch (IndexOutOfBoundsException e){
 						author2 = ""; }
 
 					el2.child(2).child(1).remove();

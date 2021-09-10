@@ -19,10 +19,7 @@
 
 package com.giua.objects;
 
-import com.giua.webscraper.GiuaScraper;
-
-import java.util.List;
-import java.util.Vector;
+import com.giua.utils.JsonBuilder;
 
 public class Homework {
     public final String day;        //usato per trovare quale compito interessa
@@ -58,15 +55,16 @@ public class Homework {
 
     public String toJson() {
 
-        return "[{" +
-                "\"day\":\"" + this.day + "\"" +
-                ",\"month\":\"" + this.month + "\"" +
-                ",\"year\":\"" + this.year + "\"" +
-                ",\"date\":\"" + this.date + "\"" +
-                ",\"subject\":\"" + this.subject + "\"" +
-                ",\"creator\":\"" + this.creator + "\"" +
-                ",\"details\":\"" + GiuaScraper.escape(this.details) + "\"" +
-                ",\"exists\":" + this.exists + "}]";
+        return new JsonBuilder("[{")
+                .addValue("day", this.day)
+                .addValue("month", this.month)
+                .addValue("year", this.year)
+                .addValue("date", this.date)
+                .addValue("subject", this.subject)
+                .addValue("creator", this.creator)
+                .addValue("details", JsonBuilder.escape(this.details))
+                .addValue("exists", this.exists)
+                .build("}]");
     }
 
     /*public List<String> compare(Homework homework) {

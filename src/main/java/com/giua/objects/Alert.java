@@ -19,6 +19,7 @@
 
 package com.giua.objects;
 
+import com.giua.utils.JsonBuilder;
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -105,37 +106,32 @@ public class Alert {
             return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
     }
 
-    public String toJSON(){
+    public String toJSON() {
 
-        StringBuilder ris = new StringBuilder("[{" +
-                "\"status\":\"" + this.status + "\"" +
-                ",\"date\":\"" + this.date + "\"" +
-                ",\"receivers\":\"" + this.receivers + "\"" +
-                ",\"object\":\"" + (!this.object.isEmpty() ? GiuaScraper.escape(this.object) : "") + "\"" +
-                ",\"page\":" + this.page +
-                ",\"detailsUrl\":\"" + this.detailsUrl + "\"" +
-                ",\"details\":\"" + (this.details != null ? GiuaScraper.escape(this.details) : "") + "\"" +
-                ",\"creator\":\"" + this.creator + "\"" +
-                ",\"type\":\"" + this.type + "\"" +
-                ",\"isDetailed\":" + this.isDetailed +
-                ",\"attachmentUrls\":[");
+        JsonBuilder jsonBuilder = new JsonBuilder("[{")
+                .addValue("status", this.status)
+                .addValue("date", this.date)
+                .addValue("receivers", this.receivers)
+                .addValue("object", (!this.object.isEmpty() ? JsonBuilder.escape(this.object) : ""))
+                .addValue("page", this.page)
+                .addValue("detailsUrl", this.detailsUrl)
+                .addValue("details", (this.details != null ? JsonBuilder.escape(this.details) : ""))
+                .addValue("creator", this.creator)
+                .addValue("type", this.type)
+                .addValue("isDetailed", this.isDetailed)
+                .addCustomString(",\"attachmentUrls\":[");
 
-        if(this.attachmentUrls != null && !this.attachmentUrls.isEmpty()){
+        if (this.attachmentUrls != null && !this.attachmentUrls.isEmpty()) {
             //aggiungi attachments
 
-            ris.append("\"").append(this.attachmentUrls.get(0)).append("\"");
+            jsonBuilder.addCustomString("\"" + this.attachmentUrls.get(0) + "\"");
 
-            for(int i=1;i < this.attachmentUrls.size();i++){
-                ris.append(",\"")
-                        .append(this.attachmentUrls.get(i))
-                        .append("\"");
+            for (int i = 1; i < this.attachmentUrls.size(); i++) {
+                jsonBuilder.addCustomString(",\"" + this.attachmentUrls.get(i) + "\"");
             }
         }
 
-
-        ris.append("]}]");
-
-        return ris.toString();
+        return jsonBuilder.build("]}]");
     }
 
 }

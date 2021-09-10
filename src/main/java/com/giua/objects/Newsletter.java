@@ -19,7 +19,7 @@
 
 package com.giua.objects;
 
-import com.giua.webscraper.GiuaScraper;
+import com.giua.utils.JsonBuilder;
 
 import java.util.List;
 
@@ -99,30 +99,25 @@ public class Newsletter{
 
     public String toJson() {
 
-        StringBuilder ris = new StringBuilder("[{" +
-                "\"status\":\"" + this.status + "\"" +
-                ",\"date\":\"" + this.date + "\"" +
-                ",\"object\":\"" + GiuaScraper.escape(this.newslettersObject) + "\"" +
-                ",\"detailsUrl\":\"" + this.detailsUrl + "\"" +
-                ",\"number\":" + this.number +
-                ",\"page\":" + this.page +
-                ",\"attachments\":[");
+        JsonBuilder jsonBuilder = new JsonBuilder("[{")
+                .addValue("status", this.status)
+                .addValue("date", this.date)
+                .addValue("object", JsonBuilder.escape(this.newslettersObject))
+                .addValue("detailsUrl", this.detailsUrl)
+                .addValue("number", this.number)
+                .addValue("page", this.page)
+                .addCustomString(",\"attachments\":[");
 
-        if(this.attachments != null){
+        if (this.attachments != null) {
             //aggiungi attachments
 
-            ris.append("\"").append(this.attachments.get(0)).append("\"");
+            jsonBuilder.addCustomString("\"" + this.attachments.get(0) + "\"");
 
-            for(int i=1;i < this.attachments.size();i++){
-                ris.append(",\"")
-                        .append(this.attachments.get(i))
-                        .append("\"");
+            for (int i = 1; i < this.attachments.size(); i++) {
+                jsonBuilder.addCustomString(",\"" + this.attachments.get(i) + "\"");
             }
         }
 
-
-        ris.append("]}]");
-
-        return ris.toString();
+        return jsonBuilder.build("]}]");
     }
 }

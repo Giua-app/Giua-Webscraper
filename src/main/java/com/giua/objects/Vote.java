@@ -19,9 +19,7 @@
 
 package com.giua.objects;
 
-import com.giua.webscraper.GiuaScraper;
-
-import java.io.Serializable;
+import com.giua.utils.JsonBuilder;
 
 public class Vote{
     public final String value;
@@ -56,15 +54,15 @@ public class Vote{
     }
 
 
-    public String toJSON(){
-        return "[{" +
-                "\"value\":\"" + this.value + "\"" +
-                ",\"isFirstQuarterly\":" + this.isFirstQuarterly +
-                ",\"isAsterisk\":" + this.isAsterisk +
-                ",\"date\":\"" + this.date + "\"" +
-                ",\"judgement\":\"" + GiuaScraper.escape(this.judgement) + "\"" +
-                ",\"type\":\"" + this.testType + "\"" +
-                ",\"arguments\":\"" + GiuaScraper.escape(this.arguments) + "\"" +
-                "}]";
+    public String toJSON() {
+        return new JsonBuilder("[{")
+                .addValue("value", this.value)
+                .addValue("isFirstQuarterly", this.isFirstQuarterly)
+                .addValue("isAsterisk", this.isAsterisk)
+                .addValue("date", this.date)
+                .addValue("judgement", JsonBuilder.escape(this.judgement))
+                .addValue("type", this.testType)
+                .addValue("arguments", JsonBuilder.escape(this.arguments))
+                .build("}]");
     }
 }

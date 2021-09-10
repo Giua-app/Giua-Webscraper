@@ -1133,20 +1133,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni fondamentali
 
-
-	public static String escape(String raw) {
-		String escaped = raw;
-		escaped = escaped.replace("\\", "\\\\");
-		escaped = escaped.replace("\"", "\\\"");
-		escaped = escaped.replace("\b", "\\b");
-		escaped = escaped.replace("\f", "\\f");
-		escaped = escaped.replace("\n", "\\n");
-		escaped = escaped.replace("\r", "\\r");
-		escaped = escaped.replace("\t", "\\t");
-		//escaped = escaped.replace("\"", "\\u0022");
-		return escaped;
-	}
-
 	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
 		logln("initSession: creating new session");

@@ -72,7 +72,6 @@ public class Alert {
      * @return Una Stringa contenente i dettagli dell'avviso
      */
     public String getDetails(GiuaScraper gS) {
-        //TODO: togliere il parametro e trovare un altro modo per ottenere gS
         if (!this.isDetailed) {
             Document detailsHTML = gS.getPage(detailsUrl);
             this.attachmentUrls = new Vector<>();

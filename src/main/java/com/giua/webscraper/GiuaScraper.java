@@ -70,6 +70,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private List<News> allNewsFromHomeCache = null;
 	private Document getPageCache = null;
 	private List<Observations> allObservationsCache = null;
+	private Autorization autorizationCache = null;
+	private List<com.giua.objects.Document> documentsCache = null;
 	//endregion
 
 	//endregion
@@ -189,7 +191,136 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Funzioni per ottenere dati dal registro
 
-	public List<Observations> getAllObservations(boolean forceRefresh) {
+	private String getDocumentsToken() {
+		return Objects.requireNonNull(getPage("documenti/bacheca").getElementById("documento__token")).attr("value");
+	}
+
+	/**
+	 * Ottiene una lista di {@code Document} con i filtri indicati nei parametri
+	 *
+	 * @param filterType Indica con un numero che filtro si vuole applicare:
+	 *                   0 - tutti i documenti;
+	 *                   1 - solo da leggere;
+	 *                   2 - programmi svolti;
+	 *                   3 - documenti del 15 maggio;
+	 *                   4 - altro
+	 * @param filterText Indica il testo da filtrare
+	 * @return Una lista di {@code Document}
+	 */
+	public List<com.giua.objects.Document> getDocumentsWithFilter(int filterType, String filterText, boolean forceRefresh) {
+		if (isMaintenanceActive())
+			throw new MaintenanceIsActiveException("The website is in maintenance");
+		if (documentsCache == null || forceRefresh) {
+			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
+			Document doc = null;
+
+			try {
+				doc = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/documenti/bacheca")
+						.data("documento[tipo]", switch (filterType) {
+							case 1 -> "X";
+							case 2 -> "p";
+							case 3 -> "M";
+							case 4 -> "G";
+							default -> "";
+						})
+						.data("documento[titolo]", filterText)
+						.data("documento[_token]", getDocumentsToken())
+						.post();
+			} catch (IOException e) {
+				if (!isSiteWorking()) {
+					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+				}
+				e.printStackTrace();
+			}
+			Elements allDocumentsHTML = Objects.requireNonNull(doc).getElementsByTag("tbody");
+			if (!allDocumentsHTML.isEmpty())
+				allDocumentsHTML = allDocumentsHTML.get(0).children();
+			else {
+				if (cacheable)
+					documentsCache = returnAllDocuments;
+				return returnAllDocuments;
+			}
+
+			for (Element documentHTML : allDocumentsHTML) {
+				returnAllDocuments.add(new com.giua.objects.Document(
+						documentHTML.child(0).text(),
+						documentHTML.child(1).text().split(" - ")[0].split(" Classe: ")[0],
+						documentHTML.child(1).text().split(" - ")[2].split(" Materia: ")[0],
+						documentHTML.child(1).text().split(" - ")[1].replace(" ", ""),
+						documentHTML.child(3).child(0).attr("href")
+				));
+			}
+
+			if (cacheable)
+				documentsCache = returnAllDocuments;
+			return returnAllDocuments;
+		} else
+			return documentsCache;
+
+	}
+
+	/**
+	 * Ottiene una lista di {@code Document}
+	 *
+	 * @param forceRefresh
+	 * @return Una lista di {@code Document}
+	 */
+	public List<com.giua.objects.Document> getDocuments(boolean forceRefresh) {
+		if (documentsCache == null || forceRefresh) {
+			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
+			Document doc = getPage("documenti/bacheca");
+			Elements allDocumentsHTML = doc.getElementsByTag("tbody");
+			if (!allDocumentsHTML.isEmpty())
+				allDocumentsHTML = allDocumentsHTML.get(0).children();
+			else {
+				if (cacheable)
+					documentsCache = returnAllDocuments;
+				return returnAllDocuments;
+			}
+
+			for (Element documentHTML : allDocumentsHTML) {
+				returnAllDocuments.add(new com.giua.objects.Document(
+						documentHTML.child(0).text(),
+						documentHTML.child(1).text().split(" - ")[0].split("Classe: ")[1],
+						documentHTML.child(1).text().split(" - ")[2].split(" Materia: ")[0],
+						documentHTML.child(1).text().split(" - ")[1].replace(" ", ""),
+						documentHTML.child(3).child(0).attr("href")
+				));
+			}
+
+			if (cacheable)
+				documentsCache = returnAllDocuments;
+			return returnAllDocuments;
+		} else
+			return documentsCache;
+
+	}
+
+	public Autorization getAutorizations(boolean forceRefresh) {
+		if (autorizationCache == null || forceRefresh) {
+			Document doc = getPage("genitori/deroghe/");
+			Elements textsHTML = doc.getElementsByClass("gs-text-normal gs-big");
+			String entry = textsHTML.get(0).text();
+			String exit = textsHTML.get(1).text();
+
+			if (cacheable)
+				autorizationCache = new Autorization(entry, exit);
+			return new Autorization(entry, exit);
+		} else
+			return autorizationCache;
+	}
+
+	/**
+	 * Ottiene le osservazioni e le ritorna in una lista.
+	 * ATTENZIONE! Solo il genitore può accedervi
+	 *
+	 * @return Una lista di {@code Observations} contenente le osservazioni
+	 * @throws UnsupportedAccount Quando si è un genitore
+	 */
+	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
+		if (getUserTypeEnum() != userTypes.PARENT)
+			throw new UnsupportedAccount("Only PARENT account type can request observations page");
 		if (allObservationsCache == null || forceRefresh) {
 			List<Observations> returnAllObs = new Vector<>();
 			Document doc = getPage("genitori/osservazioni/");

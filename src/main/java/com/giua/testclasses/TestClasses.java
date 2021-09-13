@@ -140,6 +140,19 @@ class TestClasses {
         }
     }
 
+    public static void testDocuments(boolean forceRefresh) {
+        logln("Get documents");
+        List<Document> documents = gS.getDocuments(forceRefresh);
+        for (Document doc : documents)
+            logln(doc.toString());
+    }
+
+    public static void testAutorization(boolean forceRefresh) {
+        logln("Get autorization");
+        Autorization autorization = gS.getAutorizations(forceRefresh);
+        logln(autorization.toString());
+    }
+
     public static void testNotes(boolean forceRefresh) {
         logln("Get disciplinary notes");
         List<DisciplNotice> allDN = gS.getAllDisciplNotices(forceRefresh);
@@ -468,6 +481,12 @@ class TestClasses {
         System.out.println("--------ASSENZE--------");
         testAbsences(true);
 
+        System.out.println("--------AUTORIZZAZIONI--------");
+        testAutorization(true);
+
+        System.out.println("--------DOCUMENTI--------");
+        testDocuments(true);
+
         t2 = nanoTime();
         tPhase1 = t2 - t1;
         System.out.println("---------------------------------------------------");
@@ -518,6 +537,12 @@ class TestClasses {
 
         System.out.println("--------ASSENZE--------");
         testAbsences(false);
+
+        System.out.println("--------AUTORIZZAZIONI--------");
+        testAutorization(false);
+
+        System.out.println("--------DOCUMENTI--------");
+        testDocuments(false);
 
         t2 = nanoTime();
         tPhase2 = t2 - t1;
@@ -572,6 +597,12 @@ class TestClasses {
         System.out.println("--------ASSENZE--------");
         testAbsences(true);
 
+        System.out.println("--------AUTORIZZAZIONI--------");
+        testAutorization(true);
+
+        System.out.println("--------DOCUMENTI--------");
+        testDocuments(true);
+
         t2 = nanoTime();
         tPhase3 = t2 - t1;
         System.out.println("---------------------------------------------------");
@@ -622,14 +653,16 @@ class TestClasses {
 
         GiuaScraper.setDebugMode(logEnabled);
         //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:6060");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
+        testAutorization(true);
+        testDocuments(true);
 
-        logln(gS.getAllObservations(true).toString());
+        //logln(gS.getAllObservations(true).toString());
 
 
         /*List<Newsletter> nl = gS.getAllNewsletters(0, false);

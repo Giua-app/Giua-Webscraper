@@ -49,10 +49,27 @@ public class Vote{
         }
     }
 
-    public String toString(){
+    public String toString() {
         return (this.isAsterisk) ? "*" : this.value;
     }
 
+    public float toFloat() {
+        if (isAsterisk)
+            return -1f;
+
+        char lastChar = value.charAt(value.length() - 1);
+        if (lastChar == '+')
+            return (value.length() == 2) ? Character.getNumericValue(value.charAt(0)) + 0.15f : Integer.parseInt(value.substring(0, 2)) + 0.15f;
+
+        else if (lastChar == '-')
+            return (value.length() == 2) ? Character.getNumericValue(value.charAt(0)) - 1 + 0.85f : Integer.parseInt(value.substring(0, 2)) - 1 + 0.85f;
+
+        else if (lastChar == '½')
+            return (value.length() == 2) ? Character.getNumericValue(value.charAt(0)) + 0.5f : Integer.parseInt(value.substring(0, 2)) + 0.5f;
+
+        else
+            return Integer.parseInt(value);
+    }
 
     public String toJSON() {
         return new JsonBuilder("[{")

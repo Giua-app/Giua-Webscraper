@@ -136,7 +136,7 @@ class TestClasses {
         logln("Get report card");
         ReportCard reportCard = gS.getReportCard(false, forceRefresh);
         if (reportCard.exists) {
-            logln(reportCard.allVotes.toString());
+            logln(reportCard.toString());
         }
     }
 
@@ -652,15 +652,14 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        testAutorization(true);
-        testDocuments(true);
+        testReportCard(true);
 
         //logln(gS.getAllObservations(true).toString());
 

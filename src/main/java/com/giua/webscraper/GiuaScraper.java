@@ -214,16 +214,22 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
 			Document doc = null;
 
+			String filter;
+			if (filterType == 1)
+				filter = "X";
+			else if (filterType == 2)
+				filter = "P";
+			else if (filterType == 3)
+				filter = "M";
+			else if (filterType == 4)
+				filter = "G";
+			else
+				filter = "";
+
 			try {
 				doc = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/documenti/bacheca")
-						.data("documento[tipo]", switch (filterType) {
-							case 1 -> "X";
-							case 2 -> "p";
-							case 3 -> "M";
-							case 4 -> "G";
-							default -> "";
-						})
+						.data("documento[tipo]", filter)
 						.data("documento[titolo]", filterText)
 						.data("documento[_token]", getDocumentsToken())
 						.post();
@@ -734,7 +740,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			Elements elements = doc.getElementsByTag("tr");
 
 			if (elements.size() == 0)
-				return new ReportCard(firstQuarterly, null, false);
+				return new ReportCard(firstQuarterly, null, "", "", false);
 
 			elements.remove(0);
 
@@ -751,7 +757,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				returnReportCardValue.put(subject, pairValue);
 			}
 
-			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue, true);
+			String finalResult = doc.getElementsByClass("alert alert-success text-center gs-mt-4").text();
+			String[] finalResultSplitted = finalResult.split(" ");
+			finalResult = finalResultSplitted[2];
+			String credits = finalResultSplitted[4];
+			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue, finalResult, credits, true);
 
 			if (cacheable)
 				reportCardCache = returnReportCard;

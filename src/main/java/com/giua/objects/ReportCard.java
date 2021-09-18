@@ -24,6 +24,8 @@ import java.util.Map;
 
 public class ReportCard {
     public final boolean isFirstQuarterly;
+    public final String finalResult;
+    public final String credits;
 
     /**
      * Una map la cui chiave è la materia e come contenuto una lista di stringhe contente all'indice 0 il voto e all'indice 1 le ore di assenza
@@ -31,14 +33,63 @@ public class ReportCard {
     public final Map<String, List<String>> allVotes;
 
     public final boolean exists;
+    private float calculatedMean = -1f;
 
-    public ReportCard(boolean isFirstQuarterly, Map<String, List<String>> allVotes, boolean exists) {
+    public ReportCard(boolean isFirstQuarterly, Map<String, List<String>> allVotes, String finalResult, String credits, boolean exists) {
         this.isFirstQuarterly = isFirstQuarterly;
         this.allVotes = allVotes;
         this.exists = exists;
+        this.finalResult = finalResult;
+        this.credits = credits;
     }
 
     public String toString() {
-        return String.valueOf(isFirstQuarterly);
+        return finalResult + "; " + credits + "; " + isFirstQuarterly + "; " + exists;
+    }
+
+    /**
+     * Ottieni la media dei voti calcolata.
+     * ATTENZIONE: i giudizi (Es. Ottimo) non vengono contati nella media
+     *
+     * @return La media dei voti come un {@code float}
+     */
+    public float getCalculatedMean() {
+        if (calculatedMean != -1f) {
+            float mean = 0f;
+            int i = 0;  //contatore dei voti reali non conta i giudizi
+
+            for (String subject : allVotes.keySet()) {
+                List<String> s = allVotes.get(subject);
+                String vote = s.get(0);
+                float voteF = getFloatFromVote(vote);
+                if (voteF != -1f) {
+                    mean += voteF;
+                    i++;
+                }
+            }
+
+            calculatedMean = mean / allVotes.keySet().size();
+        }
+        return calculatedMean;
+    }
+
+    private float getFloatFromVote(String vote) {
+        char lastChar = vote.charAt(vote.length() - 1);
+        if (lastChar == '+')
+            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.15f : Integer.parseInt(vote.substring(0, 2)) + 0.15f;
+
+        else if (lastChar == '-')
+            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) - 1 + 0.85f : Integer.parseInt(vote.substring(0, 2)) - 1 + 0.85f;
+
+        else if (lastChar == '½')
+            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.5f : Integer.parseInt(vote.substring(0, 2)) + 0.5f;
+
+        else {
+            try {
+                return Integer.parseInt(vote);
+            } catch (NumberFormatException e) {  //Il voto è un giudizio
+                return -1f;
+            }
+        }
     }
 }

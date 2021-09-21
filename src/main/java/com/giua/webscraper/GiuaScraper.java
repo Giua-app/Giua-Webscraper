@@ -402,59 +402,57 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Restituisce il numero di circolari da leggere preso dalle notizie
 	 * nella home
-	 *
+	 * <p>
 	 * Per ottenere il numero di circolari nuove basta memorizzare il risultato
 	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
 	 * e fare la differenza valore2 - valore1.
 	 *
 	 * @return numero di circolari da leggere
 	 */
-	public int checkForNewsletterUpdate(){
-		List<News> news = getAllNewsFromHome(true);
+	public int checkForNewsletterUpdate(boolean forceRefresh) {
+		List<News> news = getAllNewsFromHome(forceRefresh);
 		String text;
-		int num = 0;
 
-		for(News nw : news){
-			if(nw.newsText.contains("circolari")){
+		for (News nw : news) {
+			if (nw.newsText.contains("circolari")) {
 				text = nw.newsText;
 				text = text.split("nuove")[0].split("presenti")[1].charAt(1) + "";
 
-				num = Integer.parseInt(text);
-			} else if(nw.newsText.contains("circolare")){
-				num = 1;
+				return Integer.parseInt(text);
+			} else if (nw.newsText.contains("circolare")) {
+				return 1;
 			}
 		}
 
-		return num;
+		return 0;
 	}
 
 	/**
 	 * Restituisce il numero di avvisi da leggere preso dalle notizie
 	 * nella home
-	 *
+	 * <p>
 	 * Per ottenere il numero di avvisi nuove basta memorizzare il risultato
 	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
 	 * e fare la differenza valore2 - valore1.
 	 *
 	 * @return numero di avvisi da leggere
 	 */
-	public int checkForAlertsUpdate(){
-		List<News> news = getAllNewsFromHome(true);
+	public int checkForAlertsUpdate(boolean forceRefresh) {
+		List<News> news = getAllNewsFromHome(forceRefresh);
 		String text;
-		int num = 0;
 
-		for(News nw : news){
-			if(nw.newsText.contains("avvisi")){
+		for (News nw : news) {
+			if (nw.newsText.contains("avvisi")) {
 				text = nw.newsText;
 				text = text.split("nuovi")[0].split("presenti")[1].charAt(1) + "";
 
-				num = Integer.parseInt(text);
-			} else if(nw.newsText.contains("avviso")){
-				num = 1;
+				return Integer.parseInt(text);
+			} else if (nw.newsText.contains("avviso")){
+				return 1;
 			}
 		}
 
-		return num;
+		return 0;
 	}
 
 	/**

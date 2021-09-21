@@ -652,14 +652,15 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         startLogin();
         //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        testReportCard(true);
+        System.out.println(gS.getNearHomeworks(true));
+        System.out.println(gS.getNearTests(true));
 
         //logln(gS.getAllObservations(true).toString());
 

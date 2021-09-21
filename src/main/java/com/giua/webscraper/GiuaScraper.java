@@ -31,6 +31,8 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.2.x and 1.4.0 of giua@school
@@ -388,15 +390,63 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
 	 */
-	public boolean checkForAbsenceUpdate() {
-		List<News> news = getAllNewsFromHome(true);
+	public boolean checkForAbsenceUpdate(boolean forceRefresh) {
+		List<News> news = getAllNewsFromHome(forceRefresh);
 
-		for(News nw : news){
-			if(nw.newsText.contains("assenze")){
+		for (News nw : news) {
+			if (nw.newsText.contains("assenze")) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Ottiene il numero dei compiti del giorno dopo
+	 * facendo una richiesta alle news
+	 *
+	 * @return Il numero dei compiti
+	 */
+	public int getNearHomeworks(boolean forceRefresh) {
+		List<News> news = getAllNewsFromHome(forceRefresh);
+
+		for (News nw : news) {
+			if (nw.newsText.contains("compito") && nw.newsText.contains("un"))
+				return 1;
+			else if (nw.newsText.contains("compiti")) {
+				Pattern pattern = Pattern.compile("[0-9]+");
+				Matcher matcher = pattern.matcher(nw.newsText);
+				if (matcher.find())
+					return Integer.parseInt(matcher.group());
+				return 0;
+			}
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Ottiene il numero di verifiche dei prossimi giorni (3 giorni)
+	 * facendo una richiesta alle news
+	 *
+	 * @return Il numero dei compiti
+	 */
+	public int getNearTests(boolean forceRefresh) {
+		List<News> news = getAllNewsFromHome(forceRefresh);
+
+		for (News nw : news) {
+			if (nw.newsText.contains("verifica") && nw.newsText.contains("una"))
+				return 1;
+			else if (nw.newsText.contains("verifiche")) {
+				Pattern pattern = Pattern.compile("[0-9]+");
+				Matcher matcher = pattern.matcher(nw.newsText);
+				if (matcher.find())
+					return Integer.parseInt(matcher.group());
+				return 0;
+			}
+		}
+
+		return 0;
 	}
 
 	/**

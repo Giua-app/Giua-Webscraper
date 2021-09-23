@@ -411,9 +411,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 
 		for (News nw : news) {
-			if (nw.newsText.contains("compito") && nw.newsText.contains("un"))
+			if (nw.newsText.contains("compito") && nw.newsText.contains("un") && !nw.newsText.contains("oggi"))
 				return 1;
-			else if (nw.newsText.contains("compiti")) {
+			else if (nw.newsText.contains("compiti") && !nw.newsText.contains("oggi")) {
 				Pattern pattern = Pattern.compile("[0-9]+");
 				Matcher matcher = pattern.matcher(nw.newsText);
 				if (matcher.find())
@@ -435,9 +435,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 
 		for (News nw : news) {
-			if (nw.newsText.contains("verifica") && nw.newsText.contains("una"))
+			if (nw.newsText.contains("verifica") && nw.newsText.contains("una") && !nw.newsText.contains("oggi"))
 				return 1;
-			else if (nw.newsText.contains("verifiche")) {
+			else if (nw.newsText.contains("verifiche") && !nw.newsText.contains("oggi")) {
 				Pattern pattern = Pattern.compile("[0-9]+");
 				Matcher matcher = pattern.matcher(nw.newsText);
 				if (matcher.find())

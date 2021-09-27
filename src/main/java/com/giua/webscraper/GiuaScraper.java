@@ -1511,6 +1511,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public boolean isMaintenanceActive() {
+		if (demoMode)
+			return false;
 		Document doc = getPage("login/form/");
 		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
 
@@ -1611,6 +1613,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
 	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
+		if (demoMode)
+			return new Document(GiuaScraper.SiteURL + "/" + page);
 		try {
 			if (page.startsWith("/"))
 				page = page.substring(1);
@@ -1660,6 +1664,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
+		if (demoMode)
+			return new Document(GiuaScraper.SiteURL + "/" + page);
 		try {
 
 			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
@@ -1687,6 +1693,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una pagina HTML come {@link Document}
 	 */
 	public Document getExtPage(String url) {
+		if (demoMode)
+			return new Document(url);
 		try {
 			log("getExtPage: Getting external page " + url);
 
@@ -1709,6 +1717,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return true se e' loggato altrimenti false
 	 */
 	public Boolean checkLogin() {
+		if (demoMode)
+			return true;
 		try {
 			log("checkLogin: the site answered with status code: ");
 			Connection.Response res = session.newRequest()
@@ -1732,6 +1742,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public boolean isSessionValid(String phpsessid) {
+		if (demoMode)
+			return true;
 		try {
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
@@ -1762,6 +1774,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
 	 */
 	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
+		if (demoMode)
+			return;
 		try {
 			if (isMaintenanceActive())
 				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
@@ -1849,6 +1863,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Il nome utente.
 	 */
 	public String loadUserFromDocument() {
+		if (demoMode)
+			return "DEMO";
 		final Document doc = getPage("");
 		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
 		return user;
@@ -1860,6 +1876,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Il nome utente.
 	 */
 	public String loadUserFromDocument(Document doc) {
+		if (demoMode)
+			return "DEMO";
 		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
 		return user;
 	}

@@ -50,13 +50,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private long lastGetPageTime = 0;
 	public final boolean demoMode;
 
-	public enum userTypes{
+	public enum userTypes {
 		STUDENT,
 		PARENT,
 		TEACHER,
 		ADMIN,
 		PRINCIPAL,
-		ATA
+		ATA,
+		DEMO
 	}
 
 
@@ -1883,6 +1884,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public userTypes getUserTypeEnum() {
+		if (demoMode)
+			return userTypes.DEMO;
 		String text;
 		try {
 			if (userType.equals("")) {

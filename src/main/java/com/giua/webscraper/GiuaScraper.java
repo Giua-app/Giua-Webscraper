@@ -48,6 +48,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private String PHPSESSID = "";
 	private Connection session;
 	private long lastGetPageTime = 0;
+	public final boolean demoMode;
 
 	public enum userTypes{
 		STUDENT,
@@ -135,6 +136,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
+		this.demoMode = false;
 		logln("GiuaScraper: started");
 		initiateSession();
 	}
@@ -151,6 +153,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
+		this.demoMode = false;
 		logln("GiuaScraper: started");
 		initiateSession();
 	}
@@ -167,16 +170,54 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
+		this.demoMode = false;
 		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
 		initiateSession(newCookie);
 	}
 
+	/**
+	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+	 *
+	 * @param user      es. nome.utente.f1
+	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+	 * @param cacheable true se deve usare la cache, false altrimenti
+	 */
+	public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode) {
+		this.user = user;
+		this.password = password;
+		this.cacheable = cacheable;
+		this.demoMode = demoMode;
+		logln("GiuaScraper: started");
+		initiateSession();
+	}
 
 	/**
 	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
 	 * effettuato con le credenziali
-	 * @param user es. nome.utente.f1
+	 *
+	 * @param user      es. nome.utente.f1
+	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+	 * @param newCookie il cookie della sessione
+	 * @param cacheable true se deve usare la cache, false altrimenti
+	 */
+	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode) {
+		this.user = user;
+		this.password = password;
+		this.cacheable = cacheable;
+		this.demoMode = demoMode;
+		logln("GiuaScraper: started");
+		PHPSESSID = newCookie;
+		initiateSession(newCookie);
+	}
+
+	/**
+	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+	 * effettuato con le credenziali
+	 *
+	 * @param user      es. nome.utente.f1
 	 * @param password
 	 * @param newCookie il cookie della sessione
 	 */
@@ -184,6 +225,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
+		this.demoMode = false;
 		logln("GiuaScraper: started");
 		PHPSESSID = newCookie;
 		initiateSession(newCookie);
@@ -306,6 +348,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public Autorization getAutorizations(boolean forceRefresh) {
+		if (demoMode)
+			return new Autorization("08:40", "12:20");
 		if (autorizationCache == null || forceRefresh) {
 			Document doc = getPage("genitori/deroghe/");
 			Elements textsHTML = doc.getElementsByClass("gs-text-normal gs-big");
@@ -327,6 +371,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws UnsupportedAccount Quando si è un genitore
 	 */
 	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
+		if (demoMode) {
+			List<Observations> obs = new Vector<>();
+			obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo"));
+			obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia"));
+			return obs;
+		}
 		if (getUserTypeEnum() != userTypes.PARENT)
 			throw new UnsupportedAccount("Only PARENT account type can request observations page");
 		if (allObservationsCache == null || forceRefresh) {
@@ -336,11 +386,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			//TODO: aggiungere supporto per quadrimestri
 
 			for (Element el : obsTables) {
-
 				logln("robe prima - " + el.html());
 
 				for (Element el2 : el.children()) {
-
 					returnAllObs.add(new Observations(
 							el2.child(0).child(0).text(), //Data
 							el2.child(1).child(0).text(), //Materia
@@ -645,7 +693,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una lista di Absence
 	 */
 	public List<Absence> getAllAbsences(boolean forceRefresh) {
-		if(allAbsencesCache == null || forceRefresh) {
+		if (demoMode) {
+			List<Absence> absences = new Vector<>();
+			absences.add(new Absence("2021-10-28", "Assenza", "", true, "/genitori/giustifica/assenza/4"));
+			absences.add(new Absence("2021-10-29", "Ritardo", "", false, "/genitori/giustifica/ritardo/3"));
+			return absences;
+		}
+		if (allAbsencesCache == null || forceRefresh) {
 			List<Absence> allAbsences = new Vector<>();
 			Document doc = getPage("genitori/assenze/");
 
@@ -653,8 +707,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
 
 			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non esiste
-			try{ allAbsencesTBodyHTML.remove(0); }
-			catch (Exception e) {
+			try{ allAbsencesTBodyHTML.remove(0); } catch (Exception e) {
 				logln("getAllAbsences: Tabella 'Da giustificare' non presente. Le assenze sono tutte giustificate");
 			}
 
@@ -694,6 +747,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una lista di stringhe contenenti le news
 	 */
 	public List<News> getAllNewsFromHome(boolean forceRefresh) {
+		if (demoMode) {
+			List<News> news = new Vector<>();
+			news.add(new News("Sono presenti 2 nuove circolari da leggere:", "/circolari/genitori"));
+			news.add(new News("È prevista una verifica per i prossimi giorni:", "/agenda/eventi"));
+			news.add(new News("È presente un compito assegnato per domani:", "/agenda/eventi"));
+			news.add(new News("Sono presenti 2 nuovi avvisi da leggere:", "/bacheca/avvisi"));
+			return news;
+		}
 		if (allNewsFromHomeCache == null || forceRefresh) {
 			List<News> returnAllNews = new Vector<>();
 			Document doc = getPage("");
@@ -726,6 +787,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una lista di DisciplNotice
 	 */
 	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
+		if (demoMode) {
+			List<DisciplNotice> disciplNotices = new Vector<>();
+			disciplNotices.add(new DisciplNotice("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa"));
+			disciplNotices.add(new DisciplNotice("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa"));
+			return disciplNotices;
+		}
 		if (allDisciplNoticesCache == null || forceRefresh) {
 			List<DisciplNotice> allDisciplNotices = new Vector<>();
 			Document doc = getPage("genitori/note/");
@@ -776,6 +843,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return La pagella del quadrimestre indicato
 	 */
 	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
+		if (demoMode) {
+			Map<String, List<String>> votes = new HashMap<>();
+			votes.put("Italiano", List.of("7", "8"));
+			votes.put("Matematica", List.of("8", "8"));
+			votes.put("Fisica", List.of("1", "16"));
+			votes.put("Informatica", List.of("10", "8"));
+			votes.put("Geografia", List.of("5", "8"));
+			votes.put("Sistemi", List.of("6", "8"));
+			votes.put("Scienze", List.of("4", "8"));
+			return new ReportCard(true, votes, "AMMESSO", "2", true);
+		}
 		if (reportCardCache == null || forceRefresh) {
 			ReportCard returnReportCard;
 			Map<String, List<String>> returnReportCardValue = new HashMap<>();
@@ -834,6 +912,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
 	 */
 	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
+		if (demoMode) {
+			List<Alert> alerts = new Vector<>();
+			alerts.add(new Alert("LETTO", "2021-11-19", "Tutti", "Uscita anticipata", "", 1, new Vector<>(), "La classe uscira alle 10:00", "Leopoldo Piccio", "Comunicazione generica"));
+			alerts.add(new Alert("DA LEGGERE", "2021-11-19", "Tutti", "Entrata anticipata", "", 1, new Vector<>(), "La classe entrerà alle 07:20", "Leopoldo Piccio", "Comunicazione generica"));
+			return alerts;
+		}
 		if (allAlertsCache == null || forceRefresh) {
 			if (page < 0) {
 				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
@@ -903,6 +987,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
 	 */
 	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
+		if (demoMode) {
+			List<Newsletter> newsletters = new Vector<>();
+			newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
+			newsletters.add(new Newsletter("LETTA", 32, "2021-11-21", "Questa circolare è rotonda", "", new Vector<>(), 0));
+			return newsletters;
+		}
 		if (allNewslettersCache == null || forceRefresh) {
 			if (page < 0) {
 				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
@@ -948,6 +1038,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 */
 	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
+		if (demoMode) {
+			List<Newsletter> newsletters = new Vector<>();
+			newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
+			newsletters.add(new Newsletter("LETTA", 32, "2021-11-21", "Questa circolare è rotonda", "", new Vector<>(), 0));
+			return newsletters;
+		}
 		if (allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
 			try {
@@ -1004,6 +1100,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una lista di tutti gli {@link Homework} della data specificata se esiste, altrimenti una lista vuota
 	 */
 	public List<Homework> getHomework(String date) {
+		if (demoMode) {
+			List<Homework> homeworkList = new Vector<>();
+			if (date.equals("2021-11-02")) {
+				homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "Italiano", "Mario Ginnasio", "Studiare da pagina 100 a pagina 120", true));
+				homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Studiare da pagina 80 a pagina 100", true));
+			} else
+				homeworkList.add(new Homework("6", "11", "2021", "2021-11-06", "Geografia", "Mario Ginnasio", "Studiare da pagina 80 a pagina 100", true));
+			return homeworkList;
+		}
 		List<Homework> allHomeworksInThisDate = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
 		Elements homeworkGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
@@ -1039,6 +1144,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
 	 */
 	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
+		if (demoMode) {
+			List<Homework> homeworkList = new Vector<>();
+			homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "", "", "", true));
+			homeworkList.add(new Homework("6", "11", "2021", "2021-11-06", "", "", "", true));
+			return homeworkList;
+		}
 		if (allHomeworksCache == null || forceRefresh) {
 			List<Homework> allHomeworks = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
@@ -1080,6 +1191,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una lista di tutti i {@link Test} della data specificata se esiste, altrimenti una lista vuota
 	 */
 	public List<Test> getTest(String date) {
+		if (demoMode) {
+			List<Test> tests = new Vector<>();
+			if (date.equals("2021-11-02"))
+				tests.add(new Test("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Epoca medievale", true));
+			else
+				tests.add(new Test("12", "11", "2021", "2021-11-12", "Italiano", "Mario Ginnasio", "Poeti medievali", true));
+			return tests;
+		}
 		List<Test> allTests = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/V");
 		Elements testGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
@@ -1114,8 +1233,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param forceRefresh Ricarica effettivamente tutti le verifiche
 	 * @return Lista di {@link Test} del mese specificato oppure del mese attuale
 	 */
-	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh){
-		if(allTestsCache == null || forceRefresh) {
+	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh) {
+		if (demoMode) {
+			List<Test> tests = new Vector<>();
+			tests.add(new Test("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Epoca medievale", true));
+			tests.add(new Test("12", "11", "2021", "2021-11-12", "Italiano", "Mario Ginnasio", "Poeti medievali", true));
+			return tests;
+		}
+		if (allTestsCache == null || forceRefresh) {
 			List<Test> allTests = new Vector<>();
 			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
 			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
@@ -1170,7 +1295,31 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return {@code Map<String, List<Vote>>}. Esempio di come e' fatta: {"Italiano": [9,3,1,4,2], ...}
 	 */
 	public Map<String, List<Vote>> getAllVotes(boolean forceRefresh) {
-		if(allVotesCache == null || forceRefresh) {
+		if (demoMode) {
+			Map<String, List<Vote>> votes = new HashMap<>();
+			List<Vote> itaVotes = new Vector<>();
+			itaVotes.add(new Vote("9-", "2021-10-10", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
+			itaVotes.add(new Vote("2+", "2021-10-12", "Orale", "Poeti medievali parte 2", "", true, false));
+			itaVotes.add(new Vote("4", "2021-10-13", "Scritto", "", "", true, false));
+			itaVotes.add(new Vote("7", "2021-10-16", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
+			itaVotes.add(new Vote("*", "2021-10-16", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
+			itaVotes.add(new Vote("4", "2021-10-17", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
+			itaVotes.add(new Vote("2", "2021-10-19", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
+			itaVotes.add(new Vote("9", "2021-10-20", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
+			votes.put("Italiano", itaVotes);
+			List<Vote> storiaVotes = new Vector<>();
+			storiaVotes.add(new Vote("9-", "2021-10-10", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
+			storiaVotes.add(new Vote("2+", "2021-10-11", "Orale", "Poeti medievali parte 2", "", true, false));
+			storiaVotes.add(new Vote("4", "2021-10-12", "Scritto", "", "", true, false));
+			storiaVotes.add(new Vote("7", "2021-10-13", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
+			storiaVotes.add(new Vote("*", "2021-10-13", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
+			storiaVotes.add(new Vote("4", "2021-10-14", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
+			storiaVotes.add(new Vote("2", "2021-10-15", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
+			storiaVotes.add(new Vote("9", "2021-10-16", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
+			votes.put("Italiano", storiaVotes);
+			return votes;
+		}
+		if (allVotesCache == null || forceRefresh) {
 			Map<String, List<Vote>> returnVotes = new HashMap<>();
 			Document doc = getPage("genitori/voti");
 			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
@@ -1230,6 +1379,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una List delle {@link Lesson} di una determinata materia
 	 */
 	public List<Lesson> getAllLessonsOfSubject(String subjectName, boolean forceRefresh) {
+		if (demoMode) {
+			List<Lesson> lessons = new Vector<>();
+			lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
+			lessons.add(new Lesson("2021-11-03", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
+			lessons.add(new Lesson("2021-10-02", "10:30-11:30", "Informatica", "", "Guardato un film", true));
+			return lessons;
+		}
 		if (allLessonsCache == null || forceRefresh) {
 			Document doc = getPage("genitori/argomenti");
 			List<Lesson> returnLesson = new Vector<>();
@@ -1286,6 +1442,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return Una List delle {@link Lesson} di un dato giorno
 	 */
 	public List<Lesson> getAllLessons(String date, boolean forceRefresh) {
+		if (demoMode) {
+			List<Lesson> lessons = new Vector<>();
+			lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
+			lessons.add(new Lesson("2021-11-01", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
+			lessons.add(new Lesson("2021-11-01", "10:30-11:30", "Storia", "", "Guardato un film", true));
+			lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));
+			return lessons;
+		}
 		if (allLessonsCache == null || forceRefresh) {
 			Document doc = getPage("genitori/lezioni/" + date);
 			List<Lesson> returnLesson = new Vector<>();

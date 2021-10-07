@@ -677,6 +677,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}
 		try {
+			if (ab.justifyUrl.equals(""))
+				return;
 			if (ab.justifyUrl.contains("assenza")) {
 				session.newRequest()
 						.url(GiuaScraper.SiteURL + ab.justifyUrl)
@@ -705,6 +707,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}
 		try {
+			if (ab.justifyUrl.equals(""))
+				return;
 			if (ab.justifyUrl.contains("assenza")) {
 				session.newRequest()
 						.url(GiuaScraper.SiteURL + ab.justifyUrl)
@@ -749,16 +753,30 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 			for (Element el : allAbsencesTBodyHTML) {
-				for (Element el2 : el.children()){
+				for (Element el2 : el.children()) {
 					String urlJ = "";
 
 					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
+					boolean isJustified = false;
+					boolean isModificable = false;
 
-					if(!button.isEmpty()){
+					if (!button.isEmpty()) {    //Controlla se esiste il bottone Giustifica
 						urlJ = button.first().attr("data-href");
+						//isJustified = false;
+						//isModificable = false;
+					} else {
+						button = el2.child(3).getElementsByClass("btn btn-default btn-xs gs-button-remote");
+						if (!button.isEmpty()) {    //Controlla se esiste il bottone Modifica
+							urlJ = button.first().attr("data-href");
+							isJustified = true;
+							isModificable = true;
+						} else {
+							isJustified = true;
+							//isModificable = false;
+						}
 					}
 
-					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), button.isEmpty(), urlJ));
+					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), isJustified, isModificable, urlJ));
 				}
 			}
 
@@ -1645,7 +1663,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 			e.printStackTrace();
 		}
-		return null;
+		return new Document(GiuaScraper.SiteURL + "/" + page);    //Non si dovrebbe mai verificare
 	}
 
 	/**
@@ -1671,7 +1689,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new YourConnectionProblems("Your internet may not work properly", e);
 			}
 		}
-		return null;
+		return new Document(url);    //Non si dovrebbe mai verificare
 	}
 
 	/**
@@ -1699,7 +1717,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
-			return null;
+			return false;
 		}
 	}
 

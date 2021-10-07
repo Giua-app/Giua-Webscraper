@@ -43,8 +43,9 @@ public class GiuaScraperDemo {
 
     public static List<Absence> getAllAbsences() {
         List<Absence> absences = new Vector<>();
-        absences.add(new Absence("2021-10-28", "Assenza", "", true, "/genitori/giustifica/assenza/4"));
-        absences.add(new Absence("2021-10-29", "Ritardo", "", false, "/genitori/giustifica/ritardo/3"));
+        absences.add(new Absence("2021-10-28", "Assenza", "", true, true, "/genitori/giustifica/assenza/4"));
+        absences.add(new Absence("2021-10-29", "Ritardo (09:30)", "", false, false, "/genitori/giustifica/ritardo/3"));
+        absences.add(new Absence("2021-10-29", "Uscita anticipata (11:30)", "", true, false, "/genitori/giustifica/ritardo/3"));
         return absences;
 
     }

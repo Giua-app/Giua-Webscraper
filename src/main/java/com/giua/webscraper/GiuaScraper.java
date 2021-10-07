@@ -743,16 +743,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			List<Absence> allAbsences = new Vector<>();
 			Document doc = getPage("genitori/assenze/");
 
-			Elements allAbsencesTBodyHTML = doc.getElementsByTag("tbody");
+			Elements allAbsencesTBodyHTML = doc.getElementsByClass("table table-bordered table-hover table-striped");
 			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
 
-			//Se non la troviamo vuol dire che prima abbiamo cancellato la tabella "Situazione globale", e quindi la tabella da giustificare non esiste
-			try{ allAbsencesTBodyHTML.remove(0); } catch (Exception e) {
-				logln("getAllAbsences: Tabella 'Da giustificare' non presente. Le assenze sono tutte giustificate");
-			}
-
-
 			for (Element el : allAbsencesTBodyHTML) {
+				el = el.child(2);
 				for (Element el2 : el.children()) {
 					String urlJ = "";
 
@@ -771,7 +766,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 							isJustified = true;
 							isModificable = true;
 						} else {
-							isJustified = true;
+							button = el2.child(3).getElementsByClass("label label-danger");
+							if (!button.isEmpty())    //Controlla se cè il testo "Da giustificare"
+								isJustified = false;
+							else
+								isJustified = true;
 							//isModificable = false;
 						}
 					}

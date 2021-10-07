@@ -348,9 +348,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
+	@Deprecated
 	public Autorization getAutorizations(boolean forceRefresh) {
 		if (demoMode)
-			return new Autorization("08:40", "12:20");
+			return GiuaScraperDemo.getAutorizations();
 		if (autorizationCache == null || forceRefresh) {
 			Document doc = getPage("genitori/deroghe/");
 			Elements textsHTML = doc.getElementsByClass("gs-text-normal gs-big");
@@ -373,10 +374,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
 		if (demoMode) {
-			List<Observations> obs = new Vector<>();
-			obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo"));
-			obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia"));
-			return obs;
+			return GiuaScraperDemo.getAllObservations();
 		}
 		if (getUserTypeEnum() != userTypes.PARENT)
 			throw new UnsupportedAccount("Only PARENT account type can request observations page");
@@ -664,26 +662,66 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Permette di giustificare una assenza da un account genitore.
 	 *
 	 * @param ab     l'assenza da giustificare
-	 * @param type   il tipo di assenza (numerico, per ora metti solo "1")
+	 * @param type   il tipo di assenza, può anche essere vuoto (""):
+	 *               1 - Motivi di salute;
+	 *               2 - Esigenze di famiglia;
+	 *               3 - Problemi di trasporto;
+	 *               4 - Attività sportiva;
+	 *               5 - Problemi di connessione nella modalità a distanza;
+	 *               9 - Altro
 	 * @param reason la motivazione dell'assenza
 	 */
 	public void justifyAbsence(Absence ab, String type, String reason) {
-		//TODO: permettere di modificare assenza gia giustificata
-		//TODO: sistemare la stringa type
 		if (getUserTypeEnum() != userTypes.PARENT) {
 			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
 			throw new UnsupportedAccount("Può giustificare solo il genitore!");
 		}
 		try {
-			session.newRequest()
-					.url(GiuaScraper.SiteURL + ab.justifyUrl)
-					.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
-					.post();
+			if (ab.justifyUrl.contains("assenza")) {
+				session.newRequest()
+						.url(GiuaScraper.SiteURL + ab.justifyUrl)
+						.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
+						.post();
+			} else if (ab.justifyUrl.contains("ritardo")) {
+				session.newRequest()
+						.url(GiuaScraper.SiteURL + ab.justifyUrl)
+						.data("giustifica_ritardo[tipo]", type, "giustifica_ritardo[motivazione]", reason, "giustifica_ritardo[submit]", "")
+						.post();
+			}
 		} catch (Exception e) {
 			logErrorLn("Qualcosa è andato storto");
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Permette di giustificare una assenza da un account genitore.
+	 *
+	 * @param ab l' assenza a cui togliere la giustificazione
+	 */
+	public void deleteJustificationAbsence(Absence ab) {
+		if (getUserTypeEnum() != userTypes.PARENT) {
+			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
+			throw new UnsupportedAccount("Può giustificare solo il genitore!");
+		}
+		try {
+			if (ab.justifyUrl.contains("assenza")) {
+				session.newRequest()
+						.url(GiuaScraper.SiteURL + ab.justifyUrl)
+						.data("giustifica_assenza[tipo]", "", "giustifica_assenza[motivazione]", "", "giustifica_assenza[delete]", "")
+						.post();
+			} else if (ab.justifyUrl.contains("ritardo")) {
+				session.newRequest()
+						.url(GiuaScraper.SiteURL + ab.justifyUrl)
+						.data("giustifica_ritardo[tipo]", "", "giustifica_ritardo[motivazione]", "", "giustifica_ritardo[delete]", "")
+						.post();
+			}
+		} catch (Exception e) {
+			logErrorLn("Qualcosa è andato storto");
+			e.printStackTrace();
+		}
+	}
+
 
 
 
@@ -695,10 +733,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Absence> getAllAbsences(boolean forceRefresh) {
 		if (demoMode) {
-			List<Absence> absences = new Vector<>();
-			absences.add(new Absence("2021-10-28", "Assenza", "", true, "/genitori/giustifica/assenza/4"));
-			absences.add(new Absence("2021-10-29", "Ritardo", "", false, "/genitori/giustifica/ritardo/3"));
-			return absences;
+			return GiuaScraperDemo.getAllAbsences();
 		}
 		if (allAbsencesCache == null || forceRefresh) {
 			List<Absence> allAbsences = new Vector<>();
@@ -714,10 +749,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 			for (Element el : allAbsencesTBodyHTML) {
-
-
 				for (Element el2 : el.children()){
-					String urlJ = "niente url";
+					String urlJ = "";
 
 					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
 
@@ -749,12 +782,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<News> getAllNewsFromHome(boolean forceRefresh) {
 		if (demoMode) {
-			List<News> news = new Vector<>();
-			news.add(new News("Sono presenti 2 nuove circolari da leggere:", "/circolari/genitori"));
-			news.add(new News("È prevista una verifica per i prossimi giorni:", "/agenda/eventi"));
-			news.add(new News("È presente un compito assegnato per domani:", "/agenda/eventi"));
-			news.add(new News("Sono presenti 2 nuovi avvisi da leggere:", "/bacheca/avvisi"));
-			return news;
+			return GiuaScraperDemo.getAllNewsFromHome();
 		}
 		if (allNewsFromHomeCache == null || forceRefresh) {
 			List<News> returnAllNews = new Vector<>();
@@ -789,10 +817,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
 		if (demoMode) {
-			List<DisciplNotice> disciplNotices = new Vector<>();
-			disciplNotices.add(new DisciplNotice("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa"));
-			disciplNotices.add(new DisciplNotice("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa"));
-			return disciplNotices;
+			return GiuaScraperDemo.getAllDisciplNotices();
 		}
 		if (allDisciplNoticesCache == null || forceRefresh) {
 			List<DisciplNotice> allDisciplNotices = new Vector<>();
@@ -845,15 +870,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
 		if (demoMode) {
-			Map<String, List<String>> votes = new HashMap<>();
-			votes.put("Italiano", List.of("7", "8"));
-			votes.put("Matematica", List.of("8", "8"));
-			votes.put("Fisica", List.of("1", "16"));
-			votes.put("Informatica", List.of("10", "8"));
-			votes.put("Geografia", List.of("5", "8"));
-			votes.put("Sistemi", List.of("6", "8"));
-			votes.put("Scienze", List.of("4", "8"));
-			return new ReportCard(true, votes, "AMMESSO", "2", true);
+			return GiuaScraperDemo.getReportCard();
 		}
 		if (reportCardCache == null || forceRefresh) {
 			ReportCard returnReportCard;
@@ -914,10 +931,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
 		if (demoMode) {
-			List<Alert> alerts = new Vector<>();
-			alerts.add(new Alert("LETTO", "2021-11-19", "Tutti", "Uscita anticipata", "", 1, new Vector<>(), "La classe uscira alle 10:00", "Leopoldo Piccio", "Comunicazione generica"));
-			alerts.add(new Alert("DA LEGGERE", "2021-11-19", "Tutti", "Entrata anticipata", "", 1, new Vector<>(), "La classe entrerà alle 07:20", "Leopoldo Piccio", "Comunicazione generica"));
-			return alerts;
+			return GiuaScraperDemo.getAllAlerts();
 		}
 		if (allAlertsCache == null || forceRefresh) {
 			if (page < 0) {
@@ -989,10 +1003,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
 		if (demoMode) {
-			List<Newsletter> newsletters = new Vector<>();
-			newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
-			newsletters.add(new Newsletter("LETTA", 32, "2021-11-21", "Questa circolare è rotonda", "", new Vector<>(), 0));
-			return newsletters;
+			return GiuaScraperDemo.getAllNewsletters();
 		}
 		if (allNewslettersCache == null || forceRefresh) {
 			if (page < 0) {
@@ -1040,10 +1051,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
 		if (demoMode) {
-			List<Newsletter> newsletters = new Vector<>();
-			newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
-			newsletters.add(new Newsletter("LETTA", 32, "2021-11-21", "Questa circolare è rotonda", "", new Vector<>(), 0));
-			return newsletters;
+			return GiuaScraperDemo.getAllNewslettersWithFilter();
 		}
 		if (allNewslettersCache == null || forceRefresh) {
 			List<Newsletter> allNewsletters = new Vector<>();
@@ -1102,13 +1110,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Homework> getHomework(String date) {
 		if (demoMode) {
-			List<Homework> homeworkList = new Vector<>();
-			if (date.equals("2021-11-02")) {
-				homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "Italiano", "Mario Ginnasio", "Studiare da pagina 100 a pagina 120", true));
-				homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Studiare da pagina 80 a pagina 100", true));
-			} else
-				homeworkList.add(new Homework("6", "11", "2021", "2021-11-06", "Geografia", "Mario Ginnasio", "Studiare da pagina 80 a pagina 100", true));
-			return homeworkList;
+			return GiuaScraperDemo.getHomework(date);
 		}
 		List<Homework> allHomeworksInThisDate = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
@@ -1146,10 +1148,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
 		if (demoMode) {
-			List<Homework> homeworkList = new Vector<>();
-			homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "", "", "", true));
-			homeworkList.add(new Homework("6", "11", "2021", "2021-11-06", "", "", "", true));
-			return homeworkList;
+			return GiuaScraperDemo.getAllHomeworksWithoutDetails();
 		}
 		if (allHomeworksCache == null || forceRefresh) {
 			List<Homework> allHomeworks = new Vector<>();
@@ -1193,12 +1192,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Test> getTest(String date) {
 		if (demoMode) {
-			List<Test> tests = new Vector<>();
-			if (date.equals("2021-11-02"))
-				tests.add(new Test("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Epoca medievale", true));
-			else
-				tests.add(new Test("12", "11", "2021", "2021-11-12", "Italiano", "Mario Ginnasio", "Poeti medievali", true));
-			return tests;
+			return GiuaScraperDemo.getTest(date);
 		}
 		List<Test> allTests = new Vector<>();
 		Document doc = getPage("genitori/eventi/dettagli/" + date + "/V");
@@ -1236,10 +1230,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh) {
 		if (demoMode) {
-			List<Test> tests = new Vector<>();
-			tests.add(new Test("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Epoca medievale", true));
-			tests.add(new Test("12", "11", "2021", "2021-11-12", "Italiano", "Mario Ginnasio", "Poeti medievali", true));
-			return tests;
+			return GiuaScraperDemo.getAllTestsWithoutDetails();
 		}
 		if (allTestsCache == null || forceRefresh) {
 			List<Test> allTests = new Vector<>();
@@ -1297,28 +1288,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Map<String, List<Vote>> getAllVotes(boolean forceRefresh) {
 		if (demoMode) {
-			Map<String, List<Vote>> votes = new HashMap<>();
-			List<Vote> itaVotes = new Vector<>();
-			itaVotes.add(new Vote("9-", "10 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
-			itaVotes.add(new Vote("2+", "11 Ottobre", "Orale", "Poeti medievali parte 2", "", true, false));
-			itaVotes.add(new Vote("4", "12 Ottobre", "Scritto", "", "", true, false));
-			itaVotes.add(new Vote("7", "13 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
-			itaVotes.add(new Vote("*", "14 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
-			itaVotes.add(new Vote("4", "15 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
-			itaVotes.add(new Vote("2", "16 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
-			itaVotes.add(new Vote("9", "17 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
-			votes.put("Italiano", itaVotes);
-			List<Vote> storiaVotes = new Vector<>();
-			storiaVotes.add(new Vote("9-", "18 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
-			storiaVotes.add(new Vote("2+", "18 Ottobre", "Orale", "Poeti medievali parte 2", "", true, false));
-			storiaVotes.add(new Vote("4", "18 Ottobre", "Scritto", "", "", true, false));
-			storiaVotes.add(new Vote("7", "18 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
-			storiaVotes.add(new Vote("*", "19 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
-			storiaVotes.add(new Vote("4", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
-			storiaVotes.add(new Vote("2", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
-			storiaVotes.add(new Vote("9", "20 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
-			votes.put("Italiano", storiaVotes);
-			return votes;
+			return GiuaScraperDemo.getAllVotes();
 		}
 		if (allVotesCache == null || forceRefresh) {
 			Map<String, List<Vote>> returnVotes = new HashMap<>();
@@ -1381,11 +1351,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Lesson> getAllLessonsOfSubject(String subjectName, boolean forceRefresh) {
 		if (demoMode) {
-			List<Lesson> lessons = new Vector<>();
-			lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
-			lessons.add(new Lesson("2021-11-03", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
-			lessons.add(new Lesson("2021-10-02", "10:30-11:30", "Informatica", "", "Guardato un film", true));
-			return lessons;
+			return GiuaScraperDemo.getAllLessonsOfSubject();
 		}
 		if (allLessonsCache == null || forceRefresh) {
 			Document doc = getPage("genitori/argomenti");
@@ -1444,12 +1410,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public List<Lesson> getAllLessons(String date, boolean forceRefresh) {
 		if (demoMode) {
-			List<Lesson> lessons = new Vector<>();
-			lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
-			lessons.add(new Lesson("2021-11-01", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
-			lessons.add(new Lesson("2021-11-01", "10:30-11:30", "Storia", "", "Guardato un film", true));
-			lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));
-			return lessons;
+			return GiuaScraperDemo.getAllLessons();
 		}
 		if (allLessonsCache == null || forceRefresh) {
 			Document doc = getPage("genitori/lezioni/" + date);
@@ -1513,7 +1474,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public boolean isMaintenanceActive() {
 		if (demoMode)
-			return false;
+			return GiuaScraperDemo.isMaintenanceActive();
 		Document doc = getPage("login/form/");
 		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
 
@@ -1615,7 +1576,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
 		if (demoMode)
-			return new Document(GiuaScraper.SiteURL + "/" + page);
+			return GiuaScraperDemo.getPage(page);
 		try {
 			if (page.startsWith("/"))
 				page = page.substring(1);
@@ -1666,7 +1627,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Document getPageNoCookie(String page) {
 		if (demoMode)
-			return new Document(GiuaScraper.SiteURL + "/" + page);
+			return GiuaScraperDemo.getPage(page);
 		try {
 
 			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
@@ -1695,7 +1656,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Document getExtPage(String url) {
 		if (demoMode)
-			return new Document(url);
+			return GiuaScraperDemo.getExtPage(url);
 		try {
 			log("getExtPage: Getting external page " + url);
 
@@ -1719,7 +1680,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public Boolean checkLogin() {
 		if (demoMode)
-			return true;
+			return GiuaScraperDemo.checkLogin();
 		try {
 			log("checkLogin: the site answered with status code: ");
 			Connection.Response res = session.newRequest()
@@ -1744,7 +1705,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public boolean isSessionValid(String phpsessid) {
 		if (demoMode)
-			return true;
+			return GiuaScraperDemo.isSessionValid();
 		try {
 			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
 					.cookie("PHPSESSID", phpsessid)
@@ -1865,7 +1826,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public String loadUserFromDocument() {
 		if (demoMode)
-			return "DEMO";
+			return GiuaScraperDemo.loadUserFromDocument();
 		final Document doc = getPage("");
 		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
 		return user;
@@ -1878,14 +1839,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public String loadUserFromDocument(Document doc) {
 		if (demoMode)
-			return "DEMO";
+			return GiuaScraperDemo.loadUserFromDocument();
 		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
 		return user;
 	}
 
 	public userTypes getUserTypeEnum() {
 		if (demoMode)
-			return userTypes.DEMO;
+			return GiuaScraperDemo.getUserTypeEnum();
 		String text;
 		try {
 			if (userType.equals("")) {

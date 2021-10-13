@@ -1494,8 +1494,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return GiuaScraperDemo.isMaintenanceActive();
 		Document doc = getPage("login/form/");
 		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
+		Elements topBar = doc.getElementsByClass("col-sm-6");
 
-		if (loginForm.isEmpty()) {
+		if (loginForm.isEmpty() && !topBar.isEmpty()) {
 			logln("isMaintenanceActive: Manutenzione attiva");
 			return true;
 		}
@@ -1632,8 +1633,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 			e.printStackTrace();
 		}
-		logln("getPage: I'm returning a blank page");
-		return new Document(GiuaScraper.SiteURL + "/" + page);	//Non si dovrebbe mai verificare
+		//Qui ci si arriva solo in rari casi di connessioni molto lente
+		logln("getPage: I reached the end, this is NOT a good thing");
+		if (!isSiteWorking()) {
+			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+		}
+		return new Document(GiuaScraper.SiteURL + "/" + page);
 	}
 
 	/**
@@ -1706,8 +1711,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
 			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
-			//Attenzione: Il sito ritorna 200 anche quando il PHPSESSID non è valido!
-			//Attenzione 2: Il sito ritorna 200 anche quando è in manutenzione!
+			//Attenzione: Il sito ritorna 200 anche quando è in manutenzione!
 			logln("\t" + res.statusCode());
 			return res.statusCode() != 302;
 
@@ -1746,7 +1750,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * La funzione per loggarsi effetivamente. Genera un phpsessid e un csrftoken per potersi loggare.
+	 * La funzione per loggarsi effettivamente. Genera un phpsessid e un csrftoken per potersi loggare.
 	 *
 	 * @throws UnableToLogin                Il login è andato male e il sito non ha detto cosa è andato storto
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non ci si può loggare
@@ -1824,9 +1828,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
-	public static boolean isSiteWorking(){
+	public static boolean isSiteWorking() {
 		try {
-			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).execute();    //Se la richiesta impiega più di 5 secondi
+			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).execute();
 			return true;
 		} catch (IOException io) {
 			if (isMyInternetWorking()) {

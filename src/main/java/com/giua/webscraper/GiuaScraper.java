@@ -35,7 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /* -- Giua Webscraper ALPHA -- */
-// Tested with version 1.2.x and 1.4.0 of giua@school
+// Tested with version 1.4.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
@@ -1797,12 +1797,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 						.post();
 
-				Elements err = doc.getElementsByClass("alert alert-danger"); //prendi errore dal sito
+				Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
 				if (!err.isEmpty()) {
 					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
 				} else {
 					PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
-					if(isSessionValid(PHPSESSID)) {
+					if (isSessionValid(PHPSESSID)) {
 						logln("login: Cookie: " + PHPSESSID);
 						logln("login: Logged in as " + this.user);
 					} else {

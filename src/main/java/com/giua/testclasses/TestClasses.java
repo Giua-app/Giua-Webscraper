@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Vector;
 
 import static java.lang.System.nanoTime;
@@ -621,7 +620,8 @@ class TestClasses {
 
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
-        try {
+
+        /*try {
             user = args[0];
             password = args[1];
         } catch(Exception e) {
@@ -660,7 +660,7 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         System.out.println(gS.getNearHomeworks(true));
-        System.out.println(gS.getNearTests(true));
+        System.out.println(gS.getNearTests(true));*/
 
         //logln(gS.getAllObservations(true).toString());
 

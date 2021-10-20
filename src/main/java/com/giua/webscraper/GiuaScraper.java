@@ -21,6 +21,8 @@
 package com.giua.webscraper;
 
 import com.giua.objects.*;
+import com.giua.pages.UrlPaths;
+import com.giua.pages.VotesPage;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -1282,80 +1284,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//#endregion
 
-	//region Vote
-
-	/**
-	 * Deve essere usata solo da {@link #getAllVotes(boolean)} e serve a gestire quei voti che non hanno alcuni dettagli
-	 * @param e
-	 * @param index
-	 * @return Stringa contenente i dettagli di quel voto
-	 */
-	private String getDetailOfVote(Element e, int index){
-		try {
-			return e.siblingElements().get(e.elementSiblingIndex()).child(0).child(0).child(index).text().split(": ")[1];
-		} catch (Exception err){
-			return "";
-		}
-	}
-
-	/**
-	 * Ottiene tutti i {@link Vote}
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return {@code Map<String, List<Vote>>}. Esempio di come e' fatta: {"Italiano": [9,3,1,4,2], ...}
-	 */
-	public Map<String, List<Vote>> getAllVotes(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllVotes();
-		}
-		if (allVotesCache == null || forceRefresh) {
-			Map<String, List<Vote>> returnVotes = new HashMap<>();
-			Document doc = getPage("genitori/voti");
-			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
-
-			for (final Element voteHTML : votesHTML) {
-				assert voteHTML.parent() != null;
-				assert voteHTML.parent().parent() != null;
-				assert voteHTML.parent().parent().parent() != null;
-				assert voteHTML.parent().parent().parent().parent() != null;
-
-				final String voteAsString = voteHTML.text(); //prende il voto
-				final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-				final String voteDate = getDetailOfVote(voteHTML, 0);
-				final String type = getDetailOfVote(voteHTML, 1);
-				final String args = getDetailOfVote(voteHTML, 2);
-				final String judg = getDetailOfVote(voteHTML, 3);
-				final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
-
-				if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-					if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
-						List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-						tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
-					} else {
-						returnVotes.put(materiaName, new Vector<Vote>() {{
-							add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
-						}});
-					}
-				} else {        //e' un asterisco
-					if (returnVotes.containsKey(materiaName)) {
-						returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-					} else {
-						returnVotes.put(materiaName, new Vector<Vote>() {{
-							add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-						}});
-					}
-				}
-			}
-
-			if (cacheable) {
-				allVotesCache = returnVotes;
-			}
-			return returnVotes;
-		} else {
-			return allVotesCache;
-		}
-	}
-
-	//endregion
+    /**
+     * Ottiene la pagina dei voti
+     */
+    public VotesPage getVotesPage() {
+        return new VotesPage(this, getPage(UrlPaths.VOTES_PAGE));
+    }
 
 	//region Lesson
 

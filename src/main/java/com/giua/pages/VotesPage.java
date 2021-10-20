@@ -35,10 +35,9 @@ public class VotesPage implements IPage {
     private String filterSubject;
     private Document doc;
 
-    public VotesPage(GiuaScraper gS, Document doc) {
+    public VotesPage(GiuaScraper gS) {
         this.gS = gS;
-        this.doc = doc;
-        filterSubject = "";
+        refreshPage();
     }
 
     @Override

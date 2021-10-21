@@ -20,7 +20,6 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.pages.HomePage;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
@@ -28,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Vector;
 
 import static java.lang.System.nanoTime;
@@ -53,9 +51,8 @@ class TestClasses {
             System.out.println(msg);
         }
     }
-
+    
     //region Funzioni
-    /*
     private static void testDownload() {
         try {
             DownloadedFile downloadedFile = gS.download("/circolari/download/393/0");
@@ -619,14 +616,15 @@ class TestClasses {
         System.out.println("|");
         System.out.println("|    Totale:                         " + (tPhase1 / 1000000 + tPhase2 / 1000000 + tPhase3 / 1000000) + "ms");
         System.out.println("\\--------------------------------------------------------");
-    }*/
+    }
 
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
-        try {
+
+        /*try {
             user = args[0];
             password = args[1];
-        } catch (Exception e) {
+        } catch(Exception e) {
 
             Scanner sc = new Scanner(System.in);
 
@@ -654,29 +652,66 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        gS = new GiuaScraper(user, password, true);
-        gS.login();
-        logln("Login ok");
-        logln("Voti:");
-
-        Map<String, List<Vote>> votes = gS.getVotesPage().getAllVotes();
-        for (String m : votes.keySet()) {
-            logln(m + ": " + votes.get(m).toString());
-        }
-
-        HomePage homePage = gS.getHomePage();
-        logln("News:");
-        List<News> allNews = homePage.getAllNewsFromHome();
-        for (News news : allNews) {
-            logln(news.toString());
-        }
-
-        logln("Ultimo accesso: " + homePage.getLastAccessTime().toString());
-
-
+        startLogin();
+        //gS = new GiuaScraper(user, password, true);
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
+        System.out.println(gS.getNearHomeworks(true));
+        System.out.println(gS.getNearTests(true));*/
+
+        //logln(gS.getAllObservations(true).toString());
+
+
+        /*List<Newsletter> nl = gS.getAllNewsletters(0, false);
+        List<Alert> al = gS.getAllAlerts(0, false);
+        Map<String, List<Vote>> vot = gS.getAllVotes(false);
+        List<Homework> hw = gS.getAllHomeworksWithoutDetails("2021-03", false);
+
+        al.get(0).getDetails(gS);
+
+
+        //logln(nl.toJSON());
+        //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
+
+        long t1 = nanoTime();
+        try {
+            new JsonHelper().saveNewslettersToFile("newsletters.json",nl);
+            new JsonHelper().saveVotesToFile("votes.json",vot);
+            new JsonHelper().saveAlertsToFile("alerts.json", al);
+            new JsonHelper().saveHomeworksToFile("homeworks.json", hw);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        long t2 = nanoTime();
+
+        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
+
+        t1 = nanoTime();
+        List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(Paths.get("newsletters.json"));
+        Map<String, List<Vote>> votesOut = new JsonHelper().parseJsonForVotes(Paths.get("votes.json"));
+        List<Alert> alertsOut = new JsonHelper().parseJsonForAlerts(Paths.get("alerts.json"));
+        t2 = nanoTime();
+
+        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
+
+        for(Newsletter n : robe){
+            logln(n.toString());
+        }
+
+        for (String m : votesOut.keySet()) {
+            logln(m + ": " + votesOut.get(m).toString());
+        }
+
+        for (Alert a : alertsOut) {
+            logln(a.toString());
+        }
+
+        /*JsonHelper jsonHelper = new JsonHelper();
+        jsonHelper.saveVotesToString(vot);*/
+
+
     }
 }

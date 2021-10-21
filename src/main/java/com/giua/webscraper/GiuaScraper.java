@@ -21,7 +21,6 @@
 package com.giua.webscraper;
 
 import com.giua.objects.*;
-import com.giua.pages.HomePage;
 import com.giua.pages.UrlPaths;
 import com.giua.pages.VotesPage;
 import org.jsoup.Connection;
@@ -237,21 +236,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//endregion
 
-	/**
-	 * Ottiene la pagina dei voti
-	 */
-	public VotesPage getVotesPage() {
-		return new VotesPage(this);
-	}
-
-	public HomePage getHomePage() {
-		return new HomePage(this);
-	}
-
-
 	//region Funzioni per ottenere dati dal registro
 
-	/*
 	private String getDocumentsToken() {
 		return Objects.requireNonNull(getPage("documenti/bacheca").getElementById("documento__token")).attr("value");
 	}
@@ -267,7 +253,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *                   4 - altro
 	 * @param filterText Indica il testo da filtrare
 	 * @return Una lista di {@code Document}
-	 *0/
+	 */
 	public List<com.giua.objects.Document> getDocumentsWithFilter(int filterType, String filterText, boolean forceRefresh) {
 		if (isMaintenanceActive())
 			throw new MaintenanceIsActiveException("The website is in maintenance");
@@ -332,7 +318,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param forceRefresh
 	 * @return Una lista di {@code Document}
-	 *0/
+	 */
 	public List<com.giua.objects.Document> getDocuments(boolean forceRefresh) {
 		if (documentsCache == null || forceRefresh) {
 			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
@@ -387,7 +373,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @return Una lista di {@code Observations} contenente le osservazioni
 	 * @throws UnsupportedAccount Quando si è un genitore
-	 *0/
+	 */
 	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllObservations();
@@ -430,7 +416,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
 	 * @throws LoginPageBannerNotFound se non esiste il banner
-	 *0/
+	 */
 	public String getLoginPageBanner() {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
@@ -452,7 +438,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * dalle news
 	 *
 	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
-	 *0/
+	 */
 	public boolean checkForAbsenceUpdate(boolean forceRefresh) {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 
@@ -469,7 +455,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * facendo una richiesta alle news
 	 *
 	 * @return Il numero dei compiti
-	 *0/
+	 */
 	public int getNearHomeworks(boolean forceRefresh) {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 
@@ -493,7 +479,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * facendo una richiesta alle news
 	 *
 	 * @return Il numero dei compiti
-	 *0/
+	 */
 	public int getNearTests(boolean forceRefresh) {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 
@@ -521,7 +507,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * e fare la differenza valore2 - valore1.
 	 *
 	 * @return numero di circolari da leggere
-	 *0/
+	 */
 	public int checkForNewsletterUpdate(boolean forceRefresh) {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 		String text;
@@ -549,7 +535,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * e fare la differenza valore2 - valore1.
 	 *
 	 * @return numero di avvisi da leggere
-	 *0/
+	 */
 	public int checkForAlertsUpdate(boolean forceRefresh) {
 		List<News> news = getAllNewsFromHome(forceRefresh);
 		String text;
@@ -576,7 +562,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param yearmonth Anno-Mese in cui controllare
 	 * @return Una lista di Test nuovi
-	 *0/
+	 */
 	public List<Test> checkForTestsUpdate(String yearmonth) {
 		List<Test> cache = allTestsCache;
 		List<Test> test = getAllTestsWithoutDetails(yearmonth,true);
@@ -593,7 +579,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param yearmonth Anno-Mese in cui controllare
 	 * @return Una lista di Homework nuovi
-	 *0/
+	 */
 	public List<Homework> checkForHomeworksUpdate(String yearmonth) {
 		List<Homework> cache = allHomeworksCache;
 		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth, true);
@@ -616,7 +602,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param oldHomework Homeworks vecchi con cui controllare
 	 * @param newHomework Homeworks nuovi
 	 * @return Una lista di homework diversi/nuovi
-	 *0/
+	 */
 	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
 		List<Homework> homeworkDiff = new Vector<>();
 
@@ -648,7 +634,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
      * @param oldTest Test vecchi con cui controllare
      * @param newTest Test nuovi
      * @return Una lista di test diversi/nuovi
-     *0/
+     */
 	public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
 		List<Test> testDiff = new Vector<>();
 
@@ -686,7 +672,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *               5 - Problemi di connessione nella modalità a distanza;
 	 *               9 - Altro
 	 * @param reason la motivazione dell'assenza
-	 *0/
+	 */
 	public void justifyAbsence(Absence ab, String type, String reason) {
 		if (getUserTypeEnum() != userTypes.PARENT) {
 			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
@@ -716,7 +702,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Permette di giustificare una assenza da un account genitore.
 	 *
 	 * @param ab l' assenza a cui togliere la giustificazione
-	 *0/
+	 */
 	public void deleteJustificationAbsence(Absence ab) {
 		if (getUserTypeEnum() != userTypes.PARENT) {
 			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
@@ -750,7 +736,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param forceRefresh
 	 * @return Una lista di Absence
-	 *0/
+	 */
 	public List<Absence> getAllAbsences(boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllAbsences();
@@ -804,7 +790,41 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 	}
 
-	//#endregion
+	//#endregione
+
+	//region News From Home
+
+	/**
+	 * Permette di ottenere le news dalla home
+	 *
+	 * @return Una lista di stringhe contenenti le news
+	 */
+	public List<News> getAllNewsFromHome(boolean forceRefresh) {
+		if (demoMode) {
+			return GiuaScraperDemo.getAllNewsFromHome();
+		}
+		if (allNewsFromHomeCache == null || forceRefresh) {
+			List<News> returnAllNews = new Vector<>();
+			Document doc = getPage("");
+			Element els = doc.getElementsByClass("panel-body").get(0);
+			Elements allNewsHTML = els.children();
+
+			for (Element news : allNewsHTML) {
+				String url = news.child(0).child(0).attr("href");
+				returnAllNews.add(new News(news.text(), url));
+			}
+
+			if (cacheable) {
+				allNewsFromHomeCache = returnAllNews;
+			}
+			return returnAllNews;
+
+		} else {
+			return allNewsFromHomeCache;
+		}
+	}
+
+	//endregion
 
 	//region DisciplNotices
 
@@ -813,7 +833,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param forceRefresh
 	 * @return Una lista di DisciplNotice
-	 *0/
+	 */
 	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllDisciplNotices();
@@ -866,7 +886,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param firstQuarterly
 	 * @param forceRefresh
 	 * @return La pagella del quadrimestre indicato
-	 *0/
+	 */
 	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getReportCard();
@@ -927,7 +947,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di Alert
 	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 *0/
+	 */
 	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllAlerts();
@@ -972,7 +992,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param el
 	 * @return Lista di Stringa con tutti gli URL degli allegati
-	 *0/
+	 */
 	private List<String> attachmentsUrls(Element el) {
 		Elements els = el.child(1).children();
 		List<String> r = new Vector<>();
@@ -999,7 +1019,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
 	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 *0/
+	 */
 	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllNewsletters();
@@ -1047,7 +1067,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param page         Indica a quale pagina andare. Le pagine partono da 1
 	 * @param forceRefresh Ricarica effettivamente tutti i voti
 	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
-	 *0/
+	 */
 	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllNewslettersWithFilter();
@@ -1106,7 +1126,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param date Formato: anno-mese-giorno
 	 * @return Una lista di tutti gli {@link Homework} della data specificata se esiste, altrimenti una lista vuota
-	 *0/
+	 */
 	public List<Homework> getHomework(String date) {
 		if (demoMode) {
 			return GiuaScraperDemo.getHomework(date);
@@ -1144,7 +1164,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param date puo essere {@code null}. Formato: anno-mese
 	 * @param forceRefresh Ricarica effettivamente tutti i compiti
 	 * @return Lista di Homework del mese specificato oppure del mese attuale
-	 *0/
+	 */
 	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllHomeworksWithoutDetails();
@@ -1188,7 +1208,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param date Formato: anno-mese-giorno
 	 * @return Una lista di tutti i {@link Test} della data specificata se esiste, altrimenti una lista vuota
-	 *0/
+	 */
 	public List<Test> getTest(String date) {
 		if (demoMode) {
 			return GiuaScraperDemo.getTest(date);
@@ -1226,7 +1246,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param date puo essere {@code null}. Formato: anno-mese
 	 * @param forceRefresh Ricarica effettivamente tutti le verifiche
 	 * @return Lista di {@link Test} del mese specificato oppure del mese attuale
-	 *0/
+	 */
 	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllTestsWithoutDetails();
@@ -1264,6 +1284,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//#endregion
 
+    /**
+     * Ottiene la pagina dei voti
+     */
+    public VotesPage getVotesPage() {
+        return new VotesPage(this, getPage(UrlPaths.VOTES_PAGE));
+    }
 
 	//region Lesson
 
@@ -1273,7 +1299,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param subjectName  Il nome della materia che corrisponda con i nomi del sito
 	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
 	 * @return Una List delle {@link Lesson} di una determinata materia
-	 *0/
+	 */
 	public List<Lesson> getAllLessonsOfSubject(String subjectName, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllLessonsOfSubject();
@@ -1332,7 +1358,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param date         Formato: anno-mese-giorno
 	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
 	 * @return Una List delle {@link Lesson} di un dato giorno
-	 *0/
+	 */
 	public List<Lesson> getAllLessons(String date, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getAllLessons();
@@ -1366,7 +1392,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return allLessonsCache;
 		}
 	}
-	 */
 
 	//endregion
 

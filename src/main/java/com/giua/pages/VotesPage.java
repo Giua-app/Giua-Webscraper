@@ -32,13 +32,11 @@ import java.util.Vector;
 
 public class VotesPage implements IPage {
     private GiuaScraper gS;
-    private String filterSubject;
     private Document doc;
 
     public VotesPage(GiuaScraper gS, Document doc) {
         this.gS = gS;
         this.doc = doc;
-        filterSubject = "";
     }
 
     @Override
@@ -106,4 +104,50 @@ public class VotesPage implements IPage {
         }
     }
 
+    /**
+     * Ottiene tutti i voti di una materia specifica con una richiesta HTTP
+     *
+     * @param filterSubject ATTENZIONE: il nome deve essere identico a quello del registro nella sezione voti
+     * @return Una {@code List} ordinata per quadrimestre contenente i voti di quel quadrimestre.
+     * Per esempio per ottenere la {@code List} dei voti del secondo quadrimestre (se esiste): lista.get(1)
+     */
+    public List<List<Vote>> getAllVotes(String filterSubject) {
+        Elements els = doc.getElementsByClass("dropdown-menu").get(3).children();
+        Document votesDoc = null;
+
+        for (Element el : els) {
+            if (el.text().trim().equalsIgnoreCase(filterSubject.trim())) {
+                votesDoc = gS.getPage(el.child(0).attr("href"));
+            }
+        }
+
+        if (votesDoc != null) {
+            Elements allQuartersHTML = votesDoc.getElementsByTag("tbody");
+            if (allQuartersHTML.isEmpty())
+                return new Vector<>();
+            else {
+                int nQuarter = allQuartersHTML.size();
+
+                List<List<Vote>> allVotes = new Vector<>();
+                for (int i = 0; i < nQuarter; i++) {
+                    allVotes.add(new Vector<>());
+                    for (Element el : allQuartersHTML.get(i).children()) {
+                        allVotes.get(i).add(new Vote(
+                                el.child(3).text(),
+                                el.child(0).text(),
+                                el.child(1).text(),
+                                el.child(2).text(),
+                                el.child(4).text(),
+                                i == 0,
+                                el.child(3).text().equals("")
+                        ));
+                    }
+                }
+
+                return allVotes;
+            }
+
+        } else
+            return new Vector<>();
+    }
 }

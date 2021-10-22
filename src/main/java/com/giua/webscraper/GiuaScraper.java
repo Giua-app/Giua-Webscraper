@@ -21,10 +21,7 @@
 package com.giua.webscraper;
 
 import com.giua.objects.*;
-import com.giua.pages.AbsencesPage;
-import com.giua.pages.HomePage;
-import com.giua.pages.UrlPaths;
-import com.giua.pages.VotesPage;
+import com.giua.pages.*;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -255,6 +252,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public HomePage getHomePage() {
 		return new HomePage(this);
+	}
+
+	public LessonsPage getLessonsPage() {
+		return new LessonsPage(this);
+	}
+
+	public ArgumentsActivitiesPage getArgumentsActivitiesPage() {
+		return new ArgumentsActivitiesPage(this);
 	}
 
 
@@ -1151,105 +1156,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Lesson
 
-	/**
-	 * Ottiene tutte le lezioni di una determinata materia
-	 *
-	 * @param subjectName  Il nome della materia che corrisponda con i nomi del sito
-	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
-	 * @return Una List delle {@link Lesson} di una determinata materia
-	 *0/
-	public List<Lesson> getAllLessonsOfSubject(String subjectName, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllLessonsOfSubject();
-		}
-		if (allLessonsCache == null || forceRefresh) {
-			Document doc = getPage("genitori/argomenti");
-			List<Lesson> returnLesson = new Vector<>();
-			boolean foundSubject = false;
 
-			try {
-				Elements allSubjectsHTML = doc.getElementsByAttributeValue("aria-labelledby", "gs-dropdown-menu").get(0).children();
 
-				for (Element subjectHTML : allSubjectsHTML) {
-					if (subjectHTML.text().equals(subjectName)) {
-						doc = getPage(subjectHTML.child(0).attr("href").substring(1));
-						foundSubject = true;
-						break;
-					}
-				}
 
-				if (!foundSubject) {
-					throw new SubjectNameInvalid("Subject " + subjectName + " not found in genitori/argomenti");
-				}
-
-				Elements allLessonsHTML = doc.getElementsByTag("tbody");
-
-				for (int i = 0; i < allLessonsHTML.size(); i++) {
-					Elements lessonsHTML = allLessonsHTML.get(i).children();
-					for (Element lessonHTML : lessonsHTML) {
-						returnLesson.add(new Lesson(
-								lessonHTML.child(0).child(0).attr("href").substring(18, 27),
-								"",
-								subjectName,
-								lessonHTML.child(1).text(),
-								lessonHTML.child(2).text(),
-								true
-						));
-					}
-				}
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				returnLesson.add(new Lesson("", "", subjectName, "", "", false));
-			}
-
-			if (cacheable) {
-				allLessonsCache = returnLesson;
-			}
-			return returnLesson;
-		} else {
-			return allLessonsCache;
-		}
-	}
-
-	/**
-	 * Ottiene tutte le lezioni di un dato giorno
-	 *
-	 * @param date         Formato: anno-mese-giorno
-	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
-	 * @return Una List delle {@link Lesson} di un dato giorno
-	 *0/
-	public List<Lesson> getAllLessons(String date, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllLessons();
-		}
-		if (allLessonsCache == null || forceRefresh) {
-			Document doc = getPage("genitori/lezioni/" + date);
-			List<Lesson> returnLesson = new Vector<>();
-
-			try {
-				Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
-
-				for (Element lessonHTML : allLessonsHTML) {
-					returnLesson.add(new Lesson(
-							date,
-							lessonHTML.child(0).text(),
-							lessonHTML.child(1).text(),
-							lessonHTML.child(2).text(),
-							lessonHTML.child(3).text(),
-							true
-					));
-				}
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				returnLesson.add(new Lesson(date, "", "", "", "", false));
-			}
-
-			if (cacheable) {
-				allLessonsCache = returnLesson;
-			}
-			return returnLesson;
-		} else {
-			return allLessonsCache;
-		}
-	}
 	 */
 
 	//endregion

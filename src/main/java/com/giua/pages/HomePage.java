@@ -21,7 +21,6 @@ package com.giua.pages;
 
 import com.giua.objects.News;
 import com.giua.webscraper.GiuaScraper;
-import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;

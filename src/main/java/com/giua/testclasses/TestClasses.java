@@ -668,6 +668,15 @@ class TestClasses {
         gS = new GiuaScraper(user, password, true);
         gS.login();
         logln("Login ok");
+
+        HomePage homePage = gS.getHomePage();
+        logln("Ultimo accesso: " + homePage.getLastAccessTime().toString());
+        logln("News:");
+        List<News> allNews = homePage.getAllNewsFromHome();
+        for (News news : allNews) {
+            logln(news.toString());
+        }
+
         logln("Voti:");
 
         Map<String, List<Vote>> votes = gS.getVotesPage().getAllVotes();
@@ -675,14 +684,18 @@ class TestClasses {
             logln(m + ": " + votes.get(m).toString());
         }
 
-        HomePage homePage = gS.getHomePage();
-        logln("News:");
-        List<News> allNews = homePage.getAllNewsFromHome();
-        for (News news : allNews) {
-            logln(news.toString());
+        logln("Lessons:");
+        List<Lesson> allLessons = gS.getLessonsPage().getAllLessonsFromDate("2021-10-21");
+        for (Lesson lessons : allLessons) {
+            logln(lessons.toString());
         }
 
-        logln("Ultimo accesso: " + homePage.getLastAccessTime().toString());
+        //FIXME: Non funziona bene per materie con due ore nello stesso giorno
+        logln("Lezioni di informatica:");
+        List<Lesson> allArgs = gS.getArgumentsActivitiesPage().getAllLessonsOfSubject("Informatica");
+        for (Lesson lessons : allArgs) {
+            logln(lessons.toString());
+        }
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria

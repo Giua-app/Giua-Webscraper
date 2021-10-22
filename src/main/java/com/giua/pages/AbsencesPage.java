@@ -117,7 +117,6 @@ public class AbsencesPage implements IPage {
     /**
      * Permette di ottenere tutte le assenze presenti
      *
-     * @param forceRefresh
      * @return Una lista di Absence
      */
     public List<Absence> getAllAbsences() {

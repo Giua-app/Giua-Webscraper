@@ -215,4 +215,5 @@ public class GiuaScraperDemo {
     public static GiuaScraper.userTypes getUserTypeEnum() {
         return GiuaScraper.userTypes.DEMO;
     }
+
 }

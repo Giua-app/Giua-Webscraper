@@ -19,14 +19,24 @@
 
 package com.giua.pages;
 
+import com.giua.objects.Lesson;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
+import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 public class ArgumentsActivitiesPage implements IPage{
     private GiuaScraper gS;
     private Document doc;
 
-    public ArgumentsActivitiesPage(GiuaScraper gS){
+    public ArgumentsActivitiesPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
     }
@@ -34,6 +44,57 @@ public class ArgumentsActivitiesPage implements IPage{
 
     @Override
     public void refreshPage() {
-        doc = gS.getPage(UrlPaths.ABSENCES_PAGE);
+        doc = gS.getPage(UrlPaths.ARGUMENTS_ACTIVITIES_PAGE);
+    }
+
+    /**
+     * Ottiene tutte le lezioni di una determinata materia
+     *
+     * @param subjectName Il nome della materia che corrisponda con i nomi del sito
+     * @return Una List delle {@link Lesson} di una determinata materia
+     */
+    public List<Lesson> getAllLessonsOfSubject(String subjectName) {
+        //FIXME: Non funziona bene per materie con due ore nello stesso giorno
+        List<Lesson> returnLesson = new Vector<>();
+        boolean foundSubject = false;
+
+        try {
+            Elements allSubjectsHTML = doc.getElementsByAttributeValue("aria-labelledby", "gs-dropdown-menu").get(0).children();
+
+            for (Element subjectHTML : allSubjectsHTML) {
+                if (subjectHTML.text().equals(subjectName)) {
+                    doc = gS.getPage(subjectHTML.child(0).attr("href").substring(1));
+                    foundSubject = true;
+                    break;
+                }
+            }
+
+            if (!foundSubject) {
+                throw new GiuaScraperExceptions.SubjectNameInvalid("Subject " + subjectName + " not found in genitori/argomenti");
+            }
+
+            Elements allLessonsHTML = doc.getElementsByTag("tbody");
+
+            for (Element element : allLessonsHTML) {
+                Elements lessonsHTML = element.children();
+                for (Element lessonHTML : lessonsHTML) {
+                    String date = lessonHTML.child(0).child(0).attr("href").substring(18, 27);
+                    returnLesson.add(new Lesson(
+                            Lesson.dateFormat.parse(date),
+                            "",
+                            subjectName,
+                            lessonHTML.child(1).text(),
+                            lessonHTML.child(2).text(),
+                            true
+                    ));
+                }
+            }
+        } catch (IndexOutOfBoundsException | NullPointerException e) {
+            returnLesson.add(new Lesson(new Date(), "", subjectName, "", "", false));
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Impossibile fare parsing della stringa per una data", e);
+        }
+
+        return returnLesson;
     }
 }

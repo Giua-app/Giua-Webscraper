@@ -19,5 +19,21 @@
 
 package com.giua.pages;
 
-public class ReportcardPage {
+import com.giua.webscraper.GiuaScraper;
+import org.jsoup.nodes.Document;
+
+public class ReportcardPage implements IPage{
+    private GiuaScraper gS;
+    private Document doc;
+
+    public ReportcardPage(GiuaScraper gS){
+        this.gS = gS;
+        refreshPage();
+    }
+
+
+    @Override
+    public void refreshPage() {
+        doc = gS.getPage(UrlPaths.ABSENCES_PAGE);
+    }
 }

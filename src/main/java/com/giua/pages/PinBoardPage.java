@@ -19,5 +19,21 @@
 
 package com.giua.pages;
 
-public class PinBoardPage {
+import com.giua.webscraper.GiuaScraper;
+import org.jsoup.nodes.Document;
+
+public class PinBoardPage implements IPage{
+    private GiuaScraper gS;
+    private Document doc;
+
+    public PinBoardPage(GiuaScraper gS){
+        this.gS = gS;
+        refreshPage();
+    }
+
+
+    @Override
+    public void refreshPage() {
+        doc = gS.getPage(UrlPaths.ABSENCES_PAGE);
+    }
 }

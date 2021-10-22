@@ -21,6 +21,7 @@
 package com.giua.webscraper;
 
 import com.giua.objects.*;
+import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.UrlPaths;
 import com.giua.pages.VotesPage;
@@ -51,7 +52,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private String PHPSESSID = "";
 	private Connection session;
 	private long lastGetPageTime = 0;
-	public final boolean demoMode;
+	private final boolean demoMode;
 
 	public enum userTypes {
 		STUDENT,
@@ -124,6 +125,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	public String getUser() {
 		return user;
+	}
+
+	public Connection getSession(){
+		return session;
+	}
+
+	public boolean isDemoMode(){
+		return demoMode;
 	}
 
 	//endregion
@@ -673,136 +682,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	//endregion
 
 	//region Absence
-
-	/**
-	 * Permette di giustificare una assenza da un account genitore.
-	 *
-	 * @param ab     l'assenza da giustificare
-	 * @param type   il tipo di assenza, può anche essere vuoto (""):
-	 *               1 - Motivi di salute;
-	 *               2 - Esigenze di famiglia;
-	 *               3 - Problemi di trasporto;
-	 *               4 - Attività sportiva;
-	 *               5 - Problemi di connessione nella modalità a distanza;
-	 *               9 - Altro
-	 * @param reason la motivazione dell'assenza
-	 *0/
-	public void justifyAbsence(Absence ab, String type, String reason) {
-		if (getUserTypeEnum() != userTypes.PARENT) {
-			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
-			throw new UnsupportedAccount("Può giustificare solo il genitore!");
-		}
-		try {
-			if (ab.justifyUrl.equals(""))
-				return;
-			if (ab.justifyUrl.contains("assenza")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
-						.post();
-			} else if (ab.justifyUrl.contains("ritardo")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_ritardo[tipo]", type, "giustifica_ritardo[motivazione]", reason, "giustifica_ritardo[submit]", "")
-						.post();
-			}
-		} catch (Exception e) {
-			logErrorLn("Qualcosa è andato storto");
-			e.printStackTrace();
-		}
+	*/
+	public AbsencesPage getAbsencesPage(){
+		return new AbsencesPage(this);
 	}
-
-	/**
-	 * Permette di giustificare una assenza da un account genitore.
-	 *
-	 * @param ab l' assenza a cui togliere la giustificazione
-	 *0/
-	public void deleteJustificationAbsence(Absence ab) {
-		if (getUserTypeEnum() != userTypes.PARENT) {
-			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
-			throw new UnsupportedAccount("Può giustificare solo il genitore!");
-		}
-		try {
-			if (ab.justifyUrl.equals(""))
-				return;
-			if (ab.justifyUrl.contains("assenza")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_assenza[tipo]", "", "giustifica_assenza[motivazione]", "", "giustifica_assenza[delete]", "")
-						.post();
-			} else if (ab.justifyUrl.contains("ritardo")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_ritardo[tipo]", "", "giustifica_ritardo[motivazione]", "", "giustifica_ritardo[delete]", "")
-						.post();
-			}
-		} catch (Exception e) {
-			logErrorLn("Qualcosa è andato storto");
-			e.printStackTrace();
-		}
-	}
-
-
-
-
-	/**
-	 * Permette di ottenere tutte le assenze presenti
-	 *
-	 * @param forceRefresh
-	 * @return Una lista di Absence
-	 *0/
-	public List<Absence> getAllAbsences(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllAbsences();
-		}
-		if (allAbsencesCache == null || forceRefresh) {
-			List<Absence> allAbsences = new Vector<>();
-			Document doc = getPage("genitori/assenze/");
-
-			Elements allAbsencesTBodyHTML = doc.getElementsByClass("table table-bordered table-hover table-striped");
-			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
-
-			for (Element el : allAbsencesTBodyHTML) {
-				el = el.child(2);
-				for (Element el2 : el.children()) {
-					String urlJ = "";
-
-					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
-					boolean isJustified = false;
-					boolean isModificable = false;
-
-					if (!button.isEmpty()) {    //Controlla se esiste il bottone Giustifica
-						urlJ = button.first().attr("data-href");
-						//isJustified = false;
-						//isModificable = false;
-					} else {
-						button = el2.child(3).getElementsByClass("btn btn-default btn-xs gs-button-remote");
-						if (!button.isEmpty()) {    //Controlla se esiste il bottone Modifica
-							urlJ = button.first().attr("data-href");
-							isJustified = true;
-							isModificable = true;
-						} else {
-							button = el2.child(3).getElementsByClass("label label-danger");
-							if (!button.isEmpty())    //Controlla se cè il testo "Da giustificare"
-								isJustified = false;
-							else
-								isJustified = true;
-							//isModificable = false;
-						}
-					}
-
-					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), isJustified, isModificable, urlJ));
-				}
-			}
-
-			if (cacheable) {
-				allAbsencesCache = allAbsences;
-			}
-			return allAbsences;
-		} else {
-			return allAbsencesCache;
-		}
-	}
+	/*
 
 	//#endregion
 

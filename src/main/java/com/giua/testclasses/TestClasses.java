@@ -20,7 +20,9 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
+import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
+import com.giua.pages.VotesPage;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
@@ -75,17 +77,20 @@ class TestClasses {
             logln(news.toString());
         }
     }
-
-    private static void testVotes(boolean forceRefresh) {
+    */
+    private static void testVotesPage(boolean forceRefresh) {
         logln("Get votes");
-        Map<String, List<Vote>> votes = gS.getAllVotes(forceRefresh);
+        VotesPage votesPage = gS.getVotesPage();
+        Map<String, List<Vote>> votes = votesPage.getAllVotes();
         for (String m : votes.keySet()) {
             logln(m + ": " + votes.get(m).toString());
         }
-        logln(votes.get("Ed. civica").get(0).allToString());
-        logln(votes.get("Ed. civica").get(1).allToString());
+        List<List<Vote>> filterVotes = votesPage.getAllVotes("Biologia");
+        for(Vote vote : filterVotes.get(0)) { //Prendo i voti del primo quadrimestre
+            logln(vote.toString());
+        }
     }
-
+    /*
     private static void testAlerts(boolean forceRefresh) {
         logln("Get avvisi");
         List<Alert> allAvvisi = gS.getAllAlerts(1, forceRefresh);
@@ -162,14 +167,17 @@ class TestClasses {
             logln(a.toString());
         }
     }
-
+    */
     public static void testAbsences(boolean forceRefresh) {
         logln("Get absences");
-        List<Absence> allAbsences = gS.getAllAbsences(forceRefresh);
+        AbsencesPage absencesPage = gS.getAbsencesPage();
+        List<Absence> allAbsences = absencesPage.getAllAbsences();
         for (Absence a : allAbsences) {
             logln(a.toString());
         }
+        logln(absencesPage.getAllExtraInfo());
     }
+    /*
 
     private static void startLogin() {
         gS = new GiuaScraper(user, password, true);

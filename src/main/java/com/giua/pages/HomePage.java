@@ -19,5 +19,60 @@
 
 package com.giua.pages;
 
-public class HomePage {
+import com.giua.objects.News;
+import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+
+public class HomePage implements IPage {
+    private GiuaScraper gS;
+    private Document doc;
+
+    public HomePage(GiuaScraper gS) {
+        this.gS = gS;
+        refreshPage();
+    }
+
+    @Override
+    public void refreshPage() {
+        doc = gS.getPage(UrlPaths.HOME_PAGE);
+    }
+
+    /**
+     * Permette di ottenere le news dalla home
+     *
+     * @return Una lista di stringhe contenenti le news
+     */
+    public List<News> getAllNewsFromHome() {
+        List<News> returnAllNews = new Vector<>();
+        Element els = doc.getElementsByClass("panel-body").get(0);
+        Elements allNewsHTML = els.children();
+
+        for (Element news : allNewsHTML) {
+            String url = news.child(0).child(0).attr("href");
+            returnAllNews.add(new News(news.text(), url));
+        }
+
+        return returnAllNews;
+    }
+
+    public Date getLastAccessTime() {
+        Element top = doc.getElementsByClass("panel-title").get(0).child(1);
+        String date = top.text().substring(16);
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        try {
+            return format.parse(date);
+        } catch (ParseException e) {
+            return null; //Trovare un modo migliore per gestire errore
+        }
+    }
+
 }

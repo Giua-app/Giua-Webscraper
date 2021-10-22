@@ -34,9 +34,9 @@ public class VotesPage implements IPage {
     private GiuaScraper gS;
     private Document doc;
 
-    public VotesPage(GiuaScraper gS, Document doc) {
+    public VotesPage(GiuaScraper gS) {
         this.gS = gS;
-        this.doc = doc;
+        refreshPage();
     }
 
     @Override

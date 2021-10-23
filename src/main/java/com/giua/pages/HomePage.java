@@ -74,4 +74,31 @@ public class HomePage implements IPage {
         }
     }
 
+    /**
+     * Restituisce il numero di avvisi da leggere preso dalle notizie
+     * nella home
+     * <p>
+     * Per ottenere il numero di avvisi nuove basta memorizzare il risultato
+     * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
+     * e fare la differenza valore2 - valore1.
+     *
+     * @return numero di avvisi da leggere
+     */
+    public int checkForAlertsUpdate(boolean forceRefresh) {
+        List<News> news = getAllNewsFromHome();
+        String text;
+
+        for (News nw : news) {
+            if (nw.newsText.contains("avvisi")) {
+                text = nw.newsText;
+                text = text.split("nuovi")[0].split("presenti")[1].charAt(1) + "";
+
+                return Integer.parseInt(text);
+            } else if (nw.newsText.contains("avviso")) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
 }

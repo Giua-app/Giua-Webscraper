@@ -69,15 +69,19 @@ class TestClasses {
         }
 
     }
-
+*/
     private static void testNews(boolean forceRefresh) {
         logln("Get news");
-        List<News> allNews = gS.getAllNewsFromHome(forceRefresh);
+        HomePage homePage = gS.getHomePage();
+        logln("News:");
+        List<News> allNews = homePage.getAllNewsFromHome();
         for (News news : allNews) {
             logln(news.toString());
         }
+
+        logln("Ultimo accesso: " + homePage.getLastAccessTime().toString());
     }
-    */
+
     private static void testVotesPage(boolean forceRefresh) {
         logln("Get votes");
         VotesPage votesPage = gS.getVotesPage();
@@ -662,8 +666,8 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         gS = new GiuaScraper(user, password, true);
         gS.login();

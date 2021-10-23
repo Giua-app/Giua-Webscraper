@@ -41,6 +41,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
 	private String user;
+	private String realUsername;
 	private final String password;
 	private String userType = "";
 	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
@@ -63,20 +64,23 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 	//region Cache
-	private Map<String, List<Vote>> allVotesCache = null;
-	private List<Newsletter> allNewslettersCache = null;
-	private List<Alert> allAlertsCache = null;
-	private List<Test> allTestsCache = null;
-	private List<Homework> allHomeworksCache = null;
-	private List<Lesson> allLessonsCache = null;
+	private AbsencesPage absencesPageCache = null;
+	private AlertsPage alertsPageCache = null;
+	private ArgumentsActivitiesPage argumentsActivitiesPageCache = null;
+	private AuthorizationsPage authorizationsPageCache = null;
+	private DocumentsPage documentsPageCache = null;
+	private HomePage homePageCache = null;
+	private InterviewsPage interviewsPageCache = null;
+	private LessonsPage lessonsPageCache = null;
+	private NewslettersPage newslettersPageCache = null;
+	private NotesPage notesPageCache = null;
+	private ObservationsPage observationsPageCache = null;
+	private PinBoardPage pinBoardPageCache = null;
 	private ReportCard reportCardCache = null;
-	private List<DisciplNotice> allDisciplNoticesCache = null;
-	private List<Absence> allAbsencesCache = null;
-	private List<News> allNewsFromHomeCache = null;
+	private VotesPage votesPageCache = null;
 	private Document getPageCache = null;
-	private List<Observations> allObservationsCache = null;
-	private Autorization autorizationCache = null;
-	private List<com.giua.objects.Document> documentsCache = null;
+
+
 	//endregion
 
 	//endregion
@@ -110,18 +114,21 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return il cookie "PHPSESSID"
 	 */
 	public String getCookie() {
-		//FIXME: quando viene usata nell app è come se la sessione non avesse cookie salvati, comunque funziona bene anche ritornando il PHPSESSID
-		//return session.cookieStore().getCookies().get(0).getValue();
 		return PHPSESSID;
 	}
 
 	/**
-	 * Permette di ottenere il nome utente
-	 *
-	 * @return user
+	 * Ottiene il nome utente utilizzato per loggarsi
 	 */
 	public String getUser() {
 		return user;
+	}
+
+	/**
+	 * Ottiene il nome utente reale della persona se caricato.
+	 */
+	public String getRealUsername(){
+		return realUsername;
 	}
 
 	public Connection getSession(){
@@ -554,33 +561,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return 0;
 	}
 
-	/**
-	 * Restituisce il numero di avvisi da leggere preso dalle notizie
-	 * nella home
-	 * <p>
-	 * Per ottenere il numero di avvisi nuove basta memorizzare il risultato
-	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
-	 * e fare la differenza valore2 - valore1.
-	 *
-	 * @return numero di avvisi da leggere
-	 *0/
-	public int checkForAlertsUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-		String text;
 
-		for (News nw : news) {
-			if (nw.newsText.contains("avvisi")) {
-				text = nw.newsText;
-				text = text.split("nuovi")[0].split("presenti")[1].charAt(1) + "";
-
-				return Integer.parseInt(text);
-			} else if (nw.newsText.contains("avviso")){
-				return 1;
-			}
-		}
-
-		return 0;
-	}
 
 	/**
 	 * Controlla se ci sono nuove verifiche presenti
@@ -808,49 +789,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Alerts
 
-	/**
-	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
-	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
-	 *
-	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di Alert
-	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 *0/
-	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllAlerts();
-		}
-		if (allAlertsCache == null || forceRefresh) {
-			if (page < 0) {
-				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
-			}
-			List<Alert> allAlerts = new Vector<>();
-			Document doc = getPage("genitori/avvisi/" + page);
-			Elements allAlertsHTML = doc.getElementsByTag("tbody");
-			if (allAlertsHTML.isEmpty())
-				return allAlerts;
-			allAlertsHTML = allAlertsHTML.get(0).children();
 
-			for (Element alertHTML : allAlertsHTML) {
-				allAlerts.add(new Alert(
-						alertHTML.child(0).text(),
-						alertHTML.child(1).text(),
-						alertHTML.child(2).text(),
-						alertHTML.child(3).text(),
-						alertHTML.child(4).child(0).attr("data-href"),
-						page
-				));
-			}
-
-			if (cacheable) {
-				allAlertsCache = allAlerts;
-			}
-			return allAlerts;
-		} else {
-			return allAlertsCache;
-		}
-	}
 
 	//#endregion
 
@@ -1434,6 +1373,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.cookie("PHPSESSID", phpsessid)
 					.get();
 
+			if(realUsername.equals(""))
+				loadUserFromDocument(doc);
 			// --- Ottieni tipo account
 			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
 			userType = elm.text().split(".+\\(|\\)")[1];
@@ -1551,8 +1492,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		if (demoMode)
 			return GiuaScraperDemo.loadUserFromDocument();
 		final Document doc = getPage("");
-		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
-		return user;
+		realUsername = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
+		return realUsername;
 	}
 
 	/**
@@ -1563,8 +1504,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public String loadUserFromDocument(Document doc) {
 		if (demoMode)
 			return GiuaScraperDemo.loadUserFromDocument();
-		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
-		return user;
+		realUsername = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
+		return realUsername;
 	}
 
 	public userTypes getUserTypeEnum() {
@@ -1618,16 +1559,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public void clearCache() {
-		allVotesCache = null;
-		allNewslettersCache = null;
-		allAlertsCache = null;
-		allTestsCache = null;
-		allHomeworksCache = null;
-		allLessonsCache = null;
+		absencesPageCache = null;
+		alertsPageCache = null;
+		argumentsActivitiesPageCache = null;
+		authorizationsPageCache = null;
+		documentsPageCache = null;
+		homePageCache = null;
+		interviewsPageCache = null;
+		lessonsPageCache = null;
+		newslettersPageCache = null;
+		notesPageCache = null;
+		observationsPageCache = null;
+		pinBoardPageCache = null;
 		reportCardCache = null;
-		allDisciplNoticesCache = null;
-		allAbsencesCache = null;
-		allNewsFromHomeCache = null;
+		votesPageCache = null;
 	}
 
 	//endregion

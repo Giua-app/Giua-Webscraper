@@ -34,6 +34,6 @@ public class NewslettersPage implements IPage{
 
     @Override
     public void refreshPage() {
-        doc = gS.getPage(UrlPaths.ABSENCES_PAGE);
+        doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE);
     }
 }

@@ -19,8 +19,11 @@
 
 package com.giua.pages;
 
+import com.giua.objects.Authorization;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 public class AuthorizationsPage implements IPage{
     private GiuaScraper gS;
@@ -31,9 +34,18 @@ public class AuthorizationsPage implements IPage{
         refreshPage();
     }
 
-
     @Override
     public void refreshPage() {
         doc = gS.getPage(UrlPaths.AUTHORIZATIONS_PAGE);
+    }
+
+    public Authorization getAuthorizations() {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getAutorizations();
+        Elements textsHTML = doc.getElementsByClass("gs-text-normal gs-big");
+        String entry = textsHTML.get(0).text();
+        String exit = textsHTML.get(1).text();
+
+        return new Authorization(entry, exit);
     }
 }

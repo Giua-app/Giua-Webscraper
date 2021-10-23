@@ -50,11 +50,10 @@ public class AlertsPage implements IPage {
      * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
      *
      * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
-     * @param forceRefresh Ricarica effettivamente tutti i voti
      * @return Lista di Alert
      * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
      */
-    public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
+    public List<Alert> getAllAlerts(int page) throws IndexOutOfBoundsException {
         if (gS.isDemoMode()) {
             return GiuaScraperDemo.getAllAlerts();
         }

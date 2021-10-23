@@ -26,10 +26,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -75,6 +73,8 @@ public class LessonsPage implements IPage{
      * @return Una List delle {@link Lesson} di un dato giorno
      */
     public List<Lesson> getAllLessonsFromDate(Date pDate) {
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getAllLessons();
         String date = Lesson.dateFormat.format(pDate);
         doc = gS.getPage("genitori/lezioni/" + date);
         List<Lesson> returnLesson = new Vector<>();

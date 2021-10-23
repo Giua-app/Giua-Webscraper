@@ -29,8 +29,8 @@ import java.util.Vector;
 
 public class GiuaScraperDemo {
 
-    public static Autorization getAutorizations() {
-        return new Autorization("08:40", "12:20");
+    public static Authorization getAutorizations() {
+        return new Authorization("08:40", "12:20");
     }
 
     public static List<Observations> getAllObservations() throws GiuaScraperExceptions.UnsupportedAccount {

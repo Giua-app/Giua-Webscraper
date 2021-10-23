@@ -19,11 +19,11 @@
 
 package com.giua.objects;
 
-public class Autorization {
+public class Authorization {
     public final String entry;
     public final String exit;
 
-    public Autorization(String entry, String exit) {
+    public Authorization(String entry, String exit) {
         this.entry = entry;
         this.exit = exit;
     }

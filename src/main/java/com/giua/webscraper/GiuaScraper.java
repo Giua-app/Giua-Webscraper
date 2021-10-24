@@ -20,20 +20,19 @@
 
 package com.giua.webscraper;
 
-import com.giua.objects.*;
+import com.giua.objects.Maintenance;
+import com.giua.objects.ReportCard;
 import com.giua.pages.*;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.Objects;
 
 /* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.4.0 of giua@school
@@ -73,7 +72,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private InterviewsPage interviewsPageCache = null;
 	private LessonsPage lessonsPageCache = null;
 	private NewslettersPage newslettersPageCache = null;
-	private NotesPage notesPageCache = null;
+	private DisciplinaryNoticesPage disciplinaryNotesPageCache = null;
 	private ObservationsPage observationsPageCache = null;
 	private PinBoardPage pinBoardPageCache = null;
 	private ReportCard reportCardCache = null;
@@ -146,8 +145,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
 	 *
-	 * @param user es. nome.utente.f1
-	 * @param password
+	 * @param user     es. nome.utente.f1
+	 * @param password password
 	 */
 	public GiuaScraper(String user, String password) {
 		this.user = user;
@@ -163,7 +162,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
 	 *
 	 * @param user es. nome.utente.f1
-	 * @param password
+	 * @param password password
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
 	public GiuaScraper(String user, String password, boolean cacheable){
@@ -179,7 +178,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
 	 * effettuato con le credenziali
 	 * @param user es. nome.utente.f1
-	 * @param password
+	 * @param password    password
 	 * @param newCookie il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
@@ -235,7 +234,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * effettuato con le credenziali
 	 *
 	 * @param user      es. nome.utente.f1
-	 * @param password
+	 * @param password    password
 	 * @param newCookie il cookie della sessione
 	 */
 	public GiuaScraper(String user, String password, String newCookie) {
@@ -273,12 +272,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return new DocumentsPage(this);
 	}
 
-	public AuthorizationsPage getAuthorizationsPage(){
+	public AuthorizationsPage getAuthorizationsPage() {
 		return new AuthorizationsPage(this);
 	}
 
 	public AlertsPage getAlertsPage() {
 		return new AlertsPage(this);
+	}
+
+	public AbsencesPage getAbsencesPage() {
+		return new AbsencesPage(this);
+	}
+
+	public DisciplinaryNoticesPage getDisciplinaryNotesPage() {
+		return new DisciplinaryNoticesPage(this);
 	}
 
 
@@ -289,53 +296,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 
-
-
-	@Deprecated
-
-
-	/**
-	 * Ottiene le osservazioni e le ritorna in una lista.
-	 * ATTENZIONE! Solo il genitore può accedervi
-	 *
-	 * @return Una lista di {@code Observations} contenente le osservazioni
-	 * @throws UnsupportedAccount Quando si è un genitore
-	 *0/
-	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllObservations();
-		}
-		if (getUserTypeEnum() != userTypes.PARENT)
-			throw new UnsupportedAccount("Only PARENT account type can request observations page");
-		if (allObservationsCache == null || forceRefresh) {
-			List<Observations> returnAllObs = new Vector<>();
-			Document doc = getPage("genitori/osservazioni/");
-			Elements obsTables = doc.getElementsByTag("tbody"); //Primo e Secondo quadrimestre
-			//TODO: aggiungere supporto per quadrimestri
-
-			for (Element el : obsTables) {
-				logln("robe prima - " + el.html());
-
-				for (Element el2 : el.children()) {
-					returnAllObs.add(new Observations(
-							el2.child(0).child(0).text(), //Data
-							el2.child(1).child(0).text(), //Materia
-							el2.child(1).child(2).text(), //Insegnante
-							el2.child(2).text()           //Testo
-					));
-
-				}
-			}
-
-			if (cacheable) {
-				allObservationsCache = returnAllObs;
-			}
-			return returnAllObs;
-
-		} else {
-			return allObservationsCache;
-		}
-	}
 
 
 	/**
@@ -558,65 +518,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	//endregion
-
-	//region Absence
-	*/
-	public AbsencesPage getAbsencesPage(){
-		return new AbsencesPage(this);
-	}
-	/*
-
-	//#endregion
-
-	//region DisciplNotices
-
-	/**
-	 * Permette di ottenere tutte le note presenti
-	 *
-	 * @param forceRefresh
-	 * @return Una lista di DisciplNotice
-	 *0/
-	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllDisciplNotices();
-		}
-		if (allDisciplNoticesCache == null || forceRefresh) {
-			List<DisciplNotice> allDisciplNotices = new Vector<>();
-			Document doc = getPage("genitori/note/");
-			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
-			//TODO: aggiungere supporto per far vedere di che quadrimestre fa parte
-
-			for (Element el : allDisciplNoticeTBodyHTML) {
-
-
-				for (Element el2 : el.children()) {
-					//logln(" -------\n" + el2.toString());
-					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
-					String author1 = el2.child(2).child(1).text();
-					String author2;
-					try {
-						author2 = el2.child(3).child(1).text();
-					} catch (IndexOutOfBoundsException e){
-						author2 = ""; }
-
-					el2.child(2).child(1).remove();
-					allDisciplNotices.add(new DisciplNotice(el2.child(0).text(),
-							el2.child(1).text(),
-							el2.child(2).text(),
-							el2.child(3).text(),
-							author1,
-							author2));
-				}
-			}
-
-			if (cacheable) {
-				allDisciplNoticesCache = allDisciplNotices;
-			}
-			return allDisciplNotices;
-		} else {
-			return allDisciplNoticesCache;
-		}
-	}
 
 	//#endregion
 
@@ -1096,7 +997,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Effettua il download di una risorsa di qualunque tipo dal registro
 	 *
-	 * @param url
+	 * @param url percorso della risorsa nel sito. IMPORTANTE: mettere lo "/" prima. Es: /bacheca/circolari/0/0/
 	 * @return Un oggetto {@code DownloadedFile}
 	 */
 	public DownloadedFile download(String url) {
@@ -1120,7 +1021,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL}
 	 * Non c'e' bisogno di inserire {@code /} prima di un URL
 	 *
-	 * @param page
+	 * @param page il percorso della pagina nel registro. Es: bacheca/circolari/
 	 * @return Una pagina HTML come {@link Document}
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non si può richiedere la pagina indicata
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
@@ -1177,10 +1078,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene una pagina del registro senza usare il cookie quindi non controlla nemmeno se si è loggati
 	 *
-	 * @param page
+	 * @param page il percorso della pagina nel registro. Es: bacheca/circolari/
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
+		if (page.startsWith("/"))
+			page = page.substring(1);
 		if (demoMode)
 			return GiuaScraperDemo.getPage(page);
 		try {
@@ -1206,7 +1109,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene la pagina HTML specificata da un URL esterna al sito del Giua
 	 *
-	 * @param url
+	 * @param url l' url da cui prendere la pagina
 	 * @return Una pagina HTML come {@link Document}
 	 */
 	public Document getExtPage(String url) {
@@ -1460,7 +1363,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		interviewsPageCache = null;
 		lessonsPageCache = null;
 		newslettersPageCache = null;
-		notesPageCache = null;
+		disciplinaryNotesPageCache = null;
 		observationsPageCache = null;
 		pinBoardPageCache = null;
 		reportCardCache = null;

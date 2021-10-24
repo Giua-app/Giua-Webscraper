@@ -19,14 +19,22 @@
 
 package com.giua.pages;
 
+import com.giua.objects.Observations;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
+import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-public class ObservationsPage implements IPage{
+import java.util.List;
+import java.util.Vector;
+
+public class ObservationsPage implements IPage {
     private GiuaScraper gS;
     private Document doc;
 
-    public ObservationsPage(GiuaScraper gS){
+    public ObservationsPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
     }
@@ -35,5 +43,39 @@ public class ObservationsPage implements IPage{
     @Override
     public void refreshPage() {
         doc = gS.getPage(UrlPaths.OBSERVATIONS_PAGE);
+    }
+
+    /**
+     * Ottiene le osservazioni e le ritorna in una lista.
+     * ATTENZIONE: Solo il genitore può accedervi
+     *
+     * @return Una lista di {@code Observations} contenente le osservazioni
+     * @throws GiuaScraperExceptions.UnsupportedAccount Quando si è un genitore
+     */
+    public List<Observations> getAllObservations() throws GiuaScraperExceptions.UnsupportedAccount {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getAllObservations();
+        if (gS.getUserTypeEnum() != GiuaScraper.userTypes.PARENT)
+            throw new GiuaScraperExceptions.UnsupportedAccount("Only PARENT account type can request observations page");
+
+        List<Observations> returnAllObs = new Vector<>();
+        Elements obsTables = doc.getElementsByTag("tbody"); //Primo e Secondo quadrimestre
+
+        for (Element el : obsTables) {
+            String quarterly = el.parent().child(0).text();
+
+            for (Element el2 : el.children()) {
+                returnAllObs.add(new Observations(
+                        el2.child(0).child(0).text(), //Data
+                        el2.child(1).child(0).text(), //Materia
+                        el2.child(1).child(2).text(), //Insegnante
+                        el2.child(2).text(),          //Testo
+                        quarterly                     //Quadrimestre
+                ));
+
+            }
+        }
+
+        return returnAllObs;
     }
 }

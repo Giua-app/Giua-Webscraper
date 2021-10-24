@@ -35,8 +35,8 @@ public class GiuaScraperDemo {
 
     public static List<Observations> getAllObservations() throws GiuaScraperExceptions.UnsupportedAccount {
         List<Observations> obs = new Vector<>();
-        obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo"));
-        obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia"));
+        obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo", "Primo Quadrimestre"));
+        obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia", "Secondo Quadrimestre"));
         return obs;
 
     }
@@ -60,10 +60,10 @@ public class GiuaScraperDemo {
 
     }
 
-    public static List<DisciplNotice> getAllDisciplNotices() {
-        List<DisciplNotice> disciplNotices = new Vector<>();
-        disciplNotices.add(new DisciplNotice("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa"));
-        disciplNotices.add(new DisciplNotice("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa"));
+    public static List<DisciplinaryNotices> getAllDisciplNotices() {
+        List<DisciplinaryNotices> disciplNotices = new Vector<>();
+        disciplNotices.add(new DisciplinaryNotices("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa", "Primo quadrimestre"));
+        disciplNotices.add(new DisciplinaryNotices("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa", "Secondo quadrimestre"));
         return disciplNotices;
 
     }

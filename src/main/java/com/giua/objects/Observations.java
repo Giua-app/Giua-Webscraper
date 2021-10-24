@@ -19,20 +19,26 @@
 
 package com.giua.objects;
 
+import com.giua.utils.GiuaScraperUtils;
+
 public class Observations {
 
     public final String date;
     public final String subject;
     public final String teacher;
     public final String observations;
-    //public final boolean isFirstQuarterly;
+    public final String quarterly;
 
-    public Observations(String date, String subject, String teacher, String observations) {
+    public Observations(String date, String subject, String teacher, String observations, String quarterly) {
         this.date = date;
         this.subject = subject;
         this.teacher = teacher;
         this.observations = observations;
-        //this.isFirstQuarterly = isFirstQuarterly;
+        this.quarterly = quarterly;
+    }
+
+    public int quarterlyToInt() {
+        return GiuaScraperUtils.quarterlyToInt(quarterly);
     }
 
     public String toString() {
@@ -41,6 +47,7 @@ public class Observations {
                 ", subject='" + subject + '\'' +
                 ", teacher='" + teacher + '\'' +
                 ", observations='" + observations + '\'' +
+                ", quarterly='" + quarterly + '\'' +
                 '}';
     }
 }

@@ -17,23 +17,28 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.pages;
+package com.giua.utils;
 
-import com.giua.webscraper.GiuaScraper;
-import org.jsoup.nodes.Document;
+public class GiuaScraperUtils {
 
-public class NotesPage implements IPage{
-    private GiuaScraper gS;
-    private Document doc;
-
-    public NotesPage(GiuaScraper gS){
-        this.gS = gS;
-        refreshPage();
-    }
-
-
-    @Override
-    public void refreshPage() {
-        doc = gS.getPage(UrlPaths.NOTES_PAGE);
+    /**
+     * Ottieni il numero del quadrimestre dalla stringa.
+     * Esempio: quarter:"Primo quadrimestre" return:1
+     *
+     * @param quarter il quadrimestre
+     * @return numero da 1 a 5 (estremi compresi) se il quadrimestre viene riconosciuto, -1 altrimenti
+     */
+    public static int quarterlyToInt(String quarter) {
+        if (quarter.contains("Primo"))
+            return 1;
+        if (quarter.contains("Secondo"))
+            return 2;
+        if (quarter.contains("Terzo"))
+            return 3;
+        if (quarter.contains("Quarto"))
+            return 4;
+        if (quarter.contains("Quinto"))
+            return 5;
+        return -1;
     }
 }

@@ -26,7 +26,7 @@ public class UrlPaths {
     public static String ARGUMENTS_ACTIVITIES_PAGE = "genitori/argomenti";
     public static String VOTES_PAGE = "genitori/voti";
     public static String ABSENCES_PAGE = "genitori/assenze";
-    public static String NOTES_PAGE = "genitori/note/";
+    public static String DISCIPLINARY_NOTICES_PAGE = "genitori/note/";
     public static String OBSERVATIONS_PAGE = "genitori/osservazioni/";
     public static String AUTHORIZATIONS_PAGE = "genitori/deroghe/";
     public static String REPORTCARD_PAGE = "genitori/pagelle";

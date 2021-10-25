@@ -288,6 +288,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return new DisciplinaryNoticesPage(this);
 	}
 
+	public NewslettersPage getNewslettersPage() {
+		return new NewslettersPage(this);
+	}
+
 
 	//region Funzioni per ottenere dati dal registro
 
@@ -385,33 +389,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return 0;
 	}
 
-	/**
-	 * Restituisce il numero di circolari da leggere preso dalle notizie
-	 * nella home
-	 * <p>
-	 * Per ottenere il numero di circolari nuove basta memorizzare il risultato
-	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
-	 * e fare la differenza valore2 - valore1.
-	 *
-	 * @return numero di circolari da leggere
-	 *0/
-	public int checkForNewsletterUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-		String text;
 
-		for (News nw : news) {
-			if (nw.newsText.contains("circolari")) {
-				text = nw.newsText;
-				text = text.split("nuove")[0].split("presenti")[1].charAt(1) + "";
-
-				return Integer.parseInt(text);
-			} else if (nw.newsText.contains("circolare")) {
-				return 1;
-			}
-		}
-
-		return 0;
-	}
 
 
 
@@ -588,135 +566,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Newsletter
 
-	/**
-	 * Serve solo a {@code #getAllNewsletters} per prendere gli allegati dalle circolari
-	 *
-	 * @param el
-	 * @return Lista di Stringa con tutti gli URL degli allegati
-	 *0/
-	private List<String> attachmentsUrls(Element el) {
-		Elements els = el.child(1).children();
-		List<String> r = new Vector<>();
-		if (els.size() > 2) {     //Ci sono allegati
-			Elements allAttachments = els.get(1).child(0).children();
-			for (Element attachment : allAttachments) {
-				r.add(attachment.child(1).attr("href"));
-			}
-		} else {        //Non ha allegati
-			return null;
-		}
 
-		return r;
-	}
-
-	private String getNewsletterFilterToken() {
-		return Objects.requireNonNull(getPage("circolari/genitori").getElementById("circolari_genitori__token")).attr("value");
-	}
-
-	/**
-	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
-	 *
-	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
-	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 *0/
-	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllNewsletters();
-		}
-		if (allNewslettersCache == null || forceRefresh) {
-			if (page < 0) {
-				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
-			}
-			List<Newsletter> allNewsletters = new Vector<>();
-			try {
-				Document doc = getPage("circolari/genitori/" + page);
-
-				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
-
-				for (Element el : allNewslettersStatusHTML) {
-					allNewsletters.add(new Newsletter(
-							el.child(0).text(),
-							Integer.parseInt(el.child(1).text()),
-							el.child(2).text(),
-							el.child(3).text(),
-							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-							attachmentsUrls(el.child(4)),
-							page));
-				}
-
-				if (cacheable) {
-					allNewslettersCache = allNewsletters;
-				}
-				return allNewsletters;
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				return allNewsletters;
-			}
-		} else {
-			return allNewslettersCache;
-		}
-	}
-
-	/**
-	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata con i filtri specificati.
-	 * Le stringhe possono anche essere lasciate vuote.
-	 *
-	 * @param onlyNotRead  {@code true} per avere solo le circolari non lette
-	 * @param date         Mettere la data del mese nel formato: anno-mese
-	 * @param text         Il testo da cercare tra le circolari
-	 * @param page         Indica a quale pagina andare. Le pagine partono da 1
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
-	 *0/
-	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllNewslettersWithFilter();
-		}
-		if (allNewslettersCache == null || forceRefresh) {
-			List<Newsletter> allNewsletters = new Vector<>();
-			try {
-
-				Document doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/circolari/genitori/" + page)
-						.data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
-						.data("circolari_genitori[mese]", date)
-						.data("circolari_genitori[oggetto]", text)
-						.data("circolari_genitori[submit]", "")
-						.data("circolari_genitori[_token]", getNewsletterFilterToken())
-						.post();
-
-				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
-
-				for (Element el : allNewslettersStatusHTML) {
-					allNewsletters.add(new Newsletter(
-							el.child(0).text(),
-							Integer.parseInt(el.child(1).text()),
-							el.child(2).text(),
-							el.child(3).text(),
-							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-							attachmentsUrls(el.child(4)),
-							page));
-				}
-
-				if (cacheable) {
-					allNewslettersCache = allNewsletters;
-				}
-				return allNewsletters;
-
-			} catch (NullPointerException | IndexOutOfBoundsException e) {
-				return new Vector<>();
-			} catch (Exception e) {
-				if (!isSiteWorking()) {
-					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-				}
-				e.printStackTrace();
-			}
-			return new Vector<>();
-		} else {
-			return allNewslettersCache;
-		}
-	}
 
 	//#endregion
 
@@ -1168,7 +1018,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.cookie("PHPSESSID", phpsessid)
 					.get();
 
-			if(realUsername.equals(""))
+			if (realUsername != null && realUsername.equals(""))
 				loadUserFromDocument(doc);
 			// --- Ottieni tipo account
 			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");

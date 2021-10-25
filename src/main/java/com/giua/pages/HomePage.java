@@ -84,7 +84,7 @@ public class HomePage implements IPage {
      *
      * @return numero di avvisi da leggere
      */
-    public int checkForAlertsUpdate(boolean forceRefresh) {
+    public int checkForAlertsUpdate() {
         List<News> news = getAllNewsFromHome();
         String text;
 
@@ -101,4 +101,33 @@ public class HomePage implements IPage {
 
         return 0;
     }
+
+    /**
+     * Restituisce il numero di circolari da leggere preso dalle notizie
+     * nella home
+     * <p>
+     * Per ottenere il numero di circolari nuove basta memorizzare il risultato
+     * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
+     * e fare la differenza valore2 - valore1.
+     *
+     * @return numero di circolari da leggere
+     */
+    public int checkForNewsletterUpdate() {
+        List<News> news = getAllNewsFromHome();
+        String text;
+
+        for (News nw : news) {
+            if (nw.newsText.contains("circolari")) {
+                text = nw.newsText;
+                text = text.split("nuove")[0].split("presenti")[1].charAt(1) + "";
+
+                return Integer.parseInt(text);
+            } else if (nw.newsText.contains("circolare")) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
 }

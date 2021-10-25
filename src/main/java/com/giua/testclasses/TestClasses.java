@@ -22,6 +22,7 @@ package com.giua.testclasses;
 import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
+import com.giua.pages.NewslettersPage;
 import com.giua.pages.VotesPage;
 import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
@@ -666,8 +667,8 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
         gS = new GiuaScraper(user, password, true);
         gS.login();
@@ -699,6 +700,12 @@ class TestClasses {
         List<Lesson> allArgs = gS.getArgumentsActivitiesPage().getAllLessonsOfSubject("Informatica");
         for (Lesson lessons : allArgs) {
             logln(lessons.toString());
+        }
+
+        logln("Circolari:");
+        List<Newsletter> allNewsletters = gS.getNewslettersPage().getAllNewsletters(0);
+        for (Newsletter newsletters : allNewsletters) {
+            logln(newsletters.toString());
         }
 
 

@@ -88,10 +88,7 @@ public class NewslettersPage implements IPage{
         }
         List<Newsletter> allNewsletters = new Vector<>();
         try {
-            Document doc;
-            if (this.doc.baseUri().equals(GiuaScraper.getSiteURL())) {
-                doc = this.doc;
-            } else {
+            if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + "circolari/genitori/" + page)) {
                 doc = gS.getPage("circolari/genitori/" + page);
             }
 

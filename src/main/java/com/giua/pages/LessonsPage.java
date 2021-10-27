@@ -73,10 +73,13 @@ public class LessonsPage implements IPage{
      * @return Una List delle {@link Lesson} di un dato giorno
      */
     public List<Lesson> getAllLessonsFromDate(Date pDate) {
-        if(gS.isDemoMode())
+        if (gS.isDemoMode())
             return GiuaScraperDemo.getAllLessons();
         String date = Lesson.dateFormat.format(pDate);
-        doc = gS.getPage("genitori/lezioni/" + date);
+
+        if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + "genitori/lezioni/" + date)) {
+            doc = gS.getPage("genitori/lezioni/" + date);
+        }
         List<Lesson> returnLesson = new Vector<>();
 
         try {

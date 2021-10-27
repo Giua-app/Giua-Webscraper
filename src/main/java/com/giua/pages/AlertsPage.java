@@ -78,4 +78,6 @@ public class AlertsPage implements IPage {
         }
         return allAlerts;
     }
+
+    //TODO: filtro
 }

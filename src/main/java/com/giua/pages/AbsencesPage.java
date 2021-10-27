@@ -84,7 +84,7 @@ public class AbsencesPage implements IPage {
     }
 
     /**
-     * Permette di giustificare una assenza da un account genitore.
+     * Permette di cancellare una giustificazione di una assenza da un account genitore.
      *
      * @param ab l' assenza a cui togliere la giustificazione
      */
@@ -123,7 +123,6 @@ public class AbsencesPage implements IPage {
             return GiuaScraperDemo.getAllAbsences();
         }
         List<Absence> allAbsences = new Vector<>();
-        Document doc = gS.getPage("genitori/assenze/");
 
         Elements allAbsencesTBodyHTML = doc.getElementsByClass("table table-bordered table-hover table-striped");
         allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")

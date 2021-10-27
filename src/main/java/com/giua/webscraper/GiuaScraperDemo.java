@@ -77,7 +77,7 @@ public class GiuaScraperDemo {
         votes.put("Geografia", List.of("5", "8"));
         votes.put("Sistemi", List.of("6", "8"));
         votes.put("Scienze", List.of("4", "8"));
-        return new ReportCard(true, votes, "AMMESSO", "2", true);
+        return new ReportCard("Primo quadrimestre", votes, "AMMESSO", "2", true);
 
 
     }

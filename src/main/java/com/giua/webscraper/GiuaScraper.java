@@ -252,43 +252,52 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene la pagina dei voti
 	 */
-	public VotesPage getVotesPage() {
-		return new VotesPage(this);
+	public VotesPage getVotesPage(boolean forceRefresh) {
+		if (votesPageCache == null || forceRefresh)
+			return new VotesPage(this);
+		else
+			return votesPageCache;
 	}
 
-	public HomePage getHomePage() {
-		return new HomePage(this);
+	public HomePage getHomePage(boolean forceRefresh) {
+		if (homePageCache == null || forceRefresh)
+			return new HomePage(this);
+		else
+			return homePageCache;
 	}
 
-	public LessonsPage getLessonsPage() {
-		return new LessonsPage(this);
+	public LessonsPage getLessonsPage(boolean forceRefresh) {
+		if (lessonsPageCache == null || forceRefresh)
+			return new LessonsPage(this);
+		else
+			return lessonsPageCache;
 	}
 
-	public ArgumentsActivitiesPage getArgumentsActivitiesPage() {
+	public ArgumentsActivitiesPage getArgumentsActivitiesPage(boolean forceRefresh) {
 		return new ArgumentsActivitiesPage(this);
 	}
 
-	public DocumentsPage getDocumentsPage() {
+	public DocumentsPage getDocumentsPage(boolean forceRefresh) {
 		return new DocumentsPage(this);
 	}
 
-	public AuthorizationsPage getAuthorizationsPage() {
+	public AuthorizationsPage getAuthorizationsPage(boolean forceRefresh) {
 		return new AuthorizationsPage(this);
 	}
 
-	public AlertsPage getAlertsPage() {
+	public AlertsPage getAlertsPage(boolean forceRefresh) {
 		return new AlertsPage(this);
 	}
 
-	public AbsencesPage getAbsencesPage() {
+	public AbsencesPage getAbsencesPage(boolean forceRefresh) {
 		return new AbsencesPage(this);
 	}
 
-	public DisciplinaryNoticesPage getDisciplinaryNotesPage() {
+	public DisciplinaryNoticesPage getDisciplinaryNotesPage(boolean forceRefresh) {
 		return new DisciplinaryNoticesPage(this);
 	}
 
-	public NewslettersPage getNewslettersPage() {
+	public NewslettersPage getNewslettersPage(boolean forceRefresh) {
 		return new NewslettersPage(this);
 	}
 

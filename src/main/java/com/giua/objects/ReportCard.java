@@ -19,11 +19,13 @@
 
 package com.giua.objects;
 
+import com.giua.utils.GiuaScraperUtils;
+
 import java.util.List;
 import java.util.Map;
 
 public class ReportCard {
-    public final boolean isFirstQuarterly;
+    public final String quarterly;
     public final String finalResult;
     public final String credits;
 
@@ -35,8 +37,8 @@ public class ReportCard {
     public final boolean exists;
     private float calculatedMean = -1f;
 
-    public ReportCard(boolean isFirstQuarterly, Map<String, List<String>> allVotes, String finalResult, String credits, boolean exists) {
-        this.isFirstQuarterly = isFirstQuarterly;
+    public ReportCard(String quarterly, Map<String, List<String>> allVotes, String finalResult, String credits, boolean exists) {
+        this.quarterly = quarterly;
         this.allVotes = allVotes;
         this.exists = exists;
         this.finalResult = finalResult;
@@ -44,7 +46,7 @@ public class ReportCard {
     }
 
     public String toString() {
-        return finalResult + "; " + credits + "; " + isFirstQuarterly + "; " + exists;
+        return finalResult + "; " + credits + "; " + quarterly + "; " + exists;
     }
 
     /**
@@ -91,5 +93,9 @@ public class ReportCard {
                 return -1f;
             }
         }
+    }
+
+    public int quarterlyToInt() {
+        return GiuaScraperUtils.quarterlyToInt(quarterly);
     }
 }

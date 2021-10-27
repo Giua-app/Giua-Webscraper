@@ -22,19 +22,12 @@ package com.giua.testclasses;
 import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
-import com.giua.pages.NewslettersPage;
 import com.giua.pages.VotesPage;
-import com.giua.webscraper.DownloadedFile;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Vector;
-
-import static java.lang.System.nanoTime;
 
 class TestClasses {
 
@@ -73,7 +66,7 @@ class TestClasses {
 */
     private static void testNews(boolean forceRefresh) {
         logln("Get news");
-        HomePage homePage = gS.getHomePage();
+        HomePage homePage = gS.getHomePage(forceRefresh);
         logln("News:");
         List<News> allNews = homePage.getAllNewsFromHome();
         for (News news : allNews) {
@@ -674,13 +667,7 @@ class TestClasses {
         gS.login();
         logln("Login ok");
 
-        HomePage homePage = gS.getHomePage();
-        logln("Ultimo accesso: " + homePage.getLastAccessTime().toString());
-        logln("News:");
-        List<News> allNews = homePage.getAllNewsFromHome();
-        for (News news : allNews) {
-            logln(news.toString());
-        }
+        testNews();
 
         logln("Voti:");
 

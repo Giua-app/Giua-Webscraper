@@ -21,7 +21,6 @@ package com.giua.pages;
 
 import com.giua.objects.Lesson;
 import com.giua.webscraper.GiuaScraper;
-import com.giua.webscraper.GiuaScraperDemo;
 import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -54,7 +53,6 @@ public class ArgumentsActivitiesPage implements IPage{
      * @return Una List delle {@link Lesson} di una determinata materia
      */
     public List<Lesson> getAllLessonsOfSubject(String subjectName) {
-        //FIXME: Non funziona bene per materie con due ore nello stesso giorno
         List<Lesson> returnLesson = new Vector<>();
         boolean foundSubject = false;
 
@@ -78,15 +76,29 @@ public class ArgumentsActivitiesPage implements IPage{
             for (Element element : allLessonsHTML) {
                 Elements lessonsHTML = element.children();
                 for (Element lessonHTML : lessonsHTML) {
-                    String date = lessonHTML.child(0).child(0).attr("href").substring(18, 27);
-                    returnLesson.add(new Lesson(
-                            Lesson.dateFormat.parse(date),
-                            "",
-                            subjectName,
-                            lessonHTML.child(1).text(),
-                            lessonHTML.child(2).text(),
-                            true
-                    ));
+                    String rawHref = lessonHTML.child(0).child(0).attr("href");
+                    Date date;
+                    if (!rawHref.equals("")) {   //Lezione normale
+                        date = Lesson.dateFormat.parse(rawHref.substring(18, 28));
+                        returnLesson.add(new Lesson(
+                                date,
+                                "",
+                                subjectName,
+                                lessonHTML.child(1).text(),
+                                lessonHTML.child(2).text(),
+                                true
+                        ));
+                    } else {    //Lezione presente nello stesso giorno della precedente
+                        date = returnLesson.get(returnLesson.size() - 1).date;
+                        returnLesson.add(new Lesson(
+                                date,
+                                "",
+                                subjectName,
+                                lessonHTML.child(0).text(),
+                                lessonHTML.child(1).text(),
+                                true
+                        ));
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {

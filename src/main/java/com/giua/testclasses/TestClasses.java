@@ -87,6 +87,7 @@ class TestClasses {
         List<List<Vote>> filterVotes = votesPage.getAllVotes("Italiano");
         for (Vote vote : filterVotes.get(0)) { //Prendo i voti del primo quadrimestre
             logln(vote.toString());
+            logln(vote.quarterly);
         }
     }
 
@@ -138,8 +139,16 @@ class TestClasses {
             logln(a.toString());
         }
         logln("Get activities second lesson");
-        logln(lessons.get(2).activities);
+        logln(lessons.get(0).activities);
         //logln(gS.getAllLessonsOfSubject("Informatica", true).get(0).toString());
+    }
+
+    public static void testArgumentsActivities(boolean forceRefresh) {
+        logln("Get arguments and activities");
+        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Informatica");
+        for (Lesson a : lessons) {
+            logln(a.toString());
+        }
     }
 
     /*public static void testReportCard(boolean forceRefresh) {
@@ -502,6 +511,9 @@ class TestClasses {
         System.out.println("--------DOCUMENTI--------");
         testDocuments(true);
 
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(true);
+
         t2 = nanoTime();
         tPhase1 = t2 - t1;
         System.out.println("---------------------------------------------------");
@@ -560,6 +572,9 @@ class TestClasses {
 
         System.out.println("--------DOCUMENTI--------");
         testDocuments(false);
+
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(false);
 
         t2 = nanoTime();
         tPhase2 = t2 - t1;
@@ -620,6 +635,9 @@ class TestClasses {
 
         System.out.println("--------DOCUMENTI--------");
         testDocuments(true);
+
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(true);
 
         t2 = nanoTime();
         tPhase3 = t2 - t1;

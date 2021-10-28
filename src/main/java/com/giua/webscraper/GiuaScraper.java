@@ -704,8 +704,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			startDate = format1.parse(start);
 			endDate = format2.parse(end);
 		} catch (Exception e) {
-			//TODO: throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
-			return null;
+			throw new MaintenanceHasEmptyDates("Maintenance info did not find dates");
 		}
 
 		logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());

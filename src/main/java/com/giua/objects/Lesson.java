@@ -19,7 +19,6 @@
 
 package com.giua.objects;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +30,7 @@ public class Lesson {
     public final String arguments;
     public final String activities;
     public final boolean exists;
-    public static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
+    public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
 
     public Lesson(Date date, String time, String subject, String arguments, String activities, boolean exists) {
         this.date = date;

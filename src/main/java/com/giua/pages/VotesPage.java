@@ -64,23 +64,23 @@ public class VotesPage implements IPage {
             final String type = getDetailOfVote(voteHTML, 1);
             final String args = getDetailOfVote(voteHTML, 2);
             final String judg = getDetailOfVote(voteHTML, 3);
-            final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
+            final String quart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text();
 
             if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
                 if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
                     List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
+                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false));
                 } else {
                     returnVotes.put(materiaName, new Vector<Vote>() {{
-                        add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
+                        add(new Vote(voteAsString, voteDate, type, args, judg, quart, false));    //il voto lo aggiungo direttamente
                     }});
                 }
             } else {        //è un asterisco
                 if (returnVotes.containsKey(materiaName)) {
-                    returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+                    returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, quart, true));
                 } else {
                     returnVotes.put(materiaName, new Vector<>() {{
-                        add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
+                        add(new Vote("", voteDate, type, args, judg, quart, true));
                     }});
                 }
             }
@@ -138,7 +138,7 @@ public class VotesPage implements IPage {
                                 el.child(1).text(),
                                 el.child(2).text(),
                                 el.child(4).text(),
-                                i == 0,
+                                "Primo quadrimestre", //FIXME: non so cosa devo mettere, prima era i=0
                                 el.child(3).text().equals("")
                         ));
                     }

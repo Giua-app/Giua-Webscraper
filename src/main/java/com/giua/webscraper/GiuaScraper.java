@@ -274,42 +274,65 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	public ArgumentsActivitiesPage getArgumentsActivitiesPage(boolean forceRefresh) {
-		return new ArgumentsActivitiesPage(this);
+		if (argumentsActivitiesPageCache == null || forceRefresh)
+			return new ArgumentsActivitiesPage(this);
+		else
+			return argumentsActivitiesPageCache;
 	}
 
 	public DocumentsPage getDocumentsPage(boolean forceRefresh) {
-		return new DocumentsPage(this);
+		if (documentsPageCache == null || forceRefresh)
+			return new DocumentsPage(this);
+		else
+			return documentsPageCache;
 	}
 
 	public AuthorizationsPage getAuthorizationsPage(boolean forceRefresh) {
-		return new AuthorizationsPage(this);
+		if (authorizationsPageCache == null || forceRefresh)
+			return new AuthorizationsPage(this);
+		else
+			return authorizationsPageCache;
 	}
 
 	public AlertsPage getAlertsPage(boolean forceRefresh) {
-		return new AlertsPage(this);
+		if (alertsPageCache == null || forceRefresh)
+			return new AlertsPage(this);
+		else
+			return alertsPageCache;
 	}
 
 	public AbsencesPage getAbsencesPage(boolean forceRefresh) {
-		return new AbsencesPage(this);
+		if (absencesPageCache == null || forceRefresh)
+			return new AbsencesPage(this);
+		else
+			return absencesPageCache;
 	}
 
 	public DisciplinaryNoticesPage getDisciplinaryNotesPage(boolean forceRefresh) {
-		return new DisciplinaryNoticesPage(this);
+		if (disciplinaryNotesPageCache == null || forceRefresh)
+			return new DisciplinaryNoticesPage(this);
+		else
+			return disciplinaryNotesPageCache;
 	}
 
 	public NewslettersPage getNewslettersPage(boolean forceRefresh) {
-		return new NewslettersPage(this);
+		if (newslettersPageCache == null || forceRefresh)
+			return new NewslettersPage(this);
+		else
+			return newslettersPageCache;
+	}
+
+	public PinBoardPage getPinBoardPage(boolean forceRefresh) {
+		if (pinBoardPageCache == null || forceRefresh)
+			return new PinBoardPage(this);
+		else
+			return pinBoardPageCache;
 	}
 
 
 	//region Funzioni per ottenere dati dal registro
 
 	/*
-
-
-
-
-
 
 	/**
 	 * Ottiene il banner della login page se presente

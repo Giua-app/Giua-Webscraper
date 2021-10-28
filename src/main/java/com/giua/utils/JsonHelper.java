@@ -30,6 +30,7 @@ import com.giua.webscraper.GiuaScraper;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -57,6 +58,11 @@ public class JsonHelper {
             logln("loadDataFromJSON: Impossibile leggere json");
             e.printStackTrace();
         }
+        int ver = Objects.requireNonNull(rootNode).findPath("version").asInt();
+        if (ver != jsonVer) {
+            logln("ERRORE: JSON VECCHIO!");
+        }
+
         return rootNode;
     }
 
@@ -355,13 +361,14 @@ public class JsonHelper {
 
                 String value = vote.findPath("value").asText();
                 boolean isFirstQuarterly = vote.findPath("isFirstQuarterly").asBoolean();
+                String quart = vote.findPath("Quarterly").asText();
                 boolean isAsterisk = vote.findPath("isAsterisk").asBoolean();
                 String date = vote.findPath("date").asText();
                 String judgement = vote.findPath("judgement").asText();
                 String type = vote.findPath("type").asText();
                 String arguments = vote.findPath("arguments").asText();
 
-                votes.add(new Vote(value, date, type, arguments, judgement, isFirstQuarterly, isAsterisk));
+                votes.add(new Vote(value, date, type, arguments, judgement, quart, isAsterisk));
 
                 i++;
             }

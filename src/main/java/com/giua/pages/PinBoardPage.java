@@ -54,7 +54,7 @@ public class PinBoardPage implements IPage{
      * @param forceRefresh Ricarica effettivamente tutti le verifiche
      * @return Lista di {@link Test} del mese specificato oppure del mese attuale
      */
-    public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh) {
+    public List<Test> getAllTestsWithoutDetails(String date) {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllTestsWithoutDetails();
 
@@ -130,11 +130,10 @@ public class PinBoardPage implements IPage{
      * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
      * Serve solo a capire in quali giorni ci sono compiti.
      *
-     * @param date         puo essere {@code null}. Formato: anno-mese
-     * @param forceRefresh Ricarica effettivamente tutti i compiti
+     * @param date puo essere {@code null}. Formato: anno-mese
      * @return Lista di Homework del mese specificato oppure del mese attuale
      */
-    public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
+    public List<Homework> getAllHomeworksWithoutDetails(String date) {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllHomeworksWithoutDetails();
 

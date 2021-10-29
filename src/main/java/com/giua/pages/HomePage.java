@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HomePage implements IPage {
     private GiuaScraper gS;
@@ -129,5 +131,71 @@ public class HomePage implements IPage {
 
         return 0;
     }
+
+    /**
+     * Permette di controllare se ci sono assenze o ritardi da giustificare
+     * dalle news
+     *
+     * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
+     */
+    public boolean checkForAbsenceUpdate() {
+        List<News> news = getAllNewsFromHome();
+
+        for (News nw : news) {
+            if (nw.newsText.contains("assenze")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Ottiene il numero dei compiti del giorno dopo
+     * facendo una richiesta alle news
+     *
+     * @return Il numero dei compiti
+     */
+    public int getNearHomeworks() {
+        List<News> news = getAllNewsFromHome();
+
+        for (News nw : news) {
+            if (nw.newsText.contains("compito") && nw.newsText.contains("un") && !nw.newsText.contains("oggi"))
+                return 1;
+            else if (nw.newsText.contains("compiti") && !nw.newsText.contains("oggi")) {
+                Pattern pattern = Pattern.compile("[0-9]+");
+                Matcher matcher = pattern.matcher(nw.newsText);
+                if (matcher.find())
+                    return Integer.parseInt(matcher.group());
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Ottiene il numero di verifiche dei prossimi giorni (3 giorni)
+     * facendo una richiesta alle news
+     *
+     * @return Il numero dei compiti
+     */
+    public int getNearTests() {
+        List<News> news = getAllNewsFromHome();
+
+        for (News nw : news) {
+            if (nw.newsText.contains("verifica") && nw.newsText.contains("una") && !nw.newsText.contains("oggi"))
+                return 1;
+            else if (nw.newsText.contains("verifiche") && !nw.newsText.contains("oggi")) {
+                Pattern pattern = Pattern.compile("[0-9]+");
+                Matcher matcher = pattern.matcher(nw.newsText);
+                if (matcher.find())
+                    return Integer.parseInt(matcher.group());
+                return 0;
+            }
+        }
+
+        return 0;
+    }
+
 
 }

@@ -356,70 +356,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Controllo aggiornamenti oggetti
 
-	/**
-	 * Permette di controllare se ci sono assenze o ritardi da giustificare
-	 * dalle news
-	 *
-	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
-	 *0/
-	public boolean checkForAbsenceUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
 
-		for (News nw : news) {
-			if (nw.newsText.contains("assenze")) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Ottiene il numero dei compiti del giorno dopo
-	 * facendo una richiesta alle news
-	 *
-	 * @return Il numero dei compiti
-	 *0/
-	public int getNearHomeworks(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-
-		for (News nw : news) {
-			if (nw.newsText.contains("compito") && nw.newsText.contains("un") && !nw.newsText.contains("oggi"))
-				return 1;
-			else if (nw.newsText.contains("compiti") && !nw.newsText.contains("oggi")) {
-				Pattern pattern = Pattern.compile("[0-9]+");
-				Matcher matcher = pattern.matcher(nw.newsText);
-				if (matcher.find())
-					return Integer.parseInt(matcher.group());
-				return 0;
-			}
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Ottiene il numero di verifiche dei prossimi giorni (3 giorni)
-	 * facendo una richiesta alle news
-	 *
-	 * @return Il numero dei compiti
-	 *0/
-	public int getNearTests(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-
-		for (News nw : news) {
-			if (nw.newsText.contains("verifica") && nw.newsText.contains("una") && !nw.newsText.contains("oggi"))
-				return 1;
-			else if (nw.newsText.contains("verifiche") && !nw.newsText.contains("oggi")) {
-				Pattern pattern = Pattern.compile("[0-9]+");
-				Matcher matcher = pattern.matcher(nw.newsText);
-				if (matcher.find())
-					return Integer.parseInt(matcher.group());
-				return 0;
-			}
-		}
-
-		return 0;
-	}
 
 
 
@@ -459,77 +396,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
-	//endregion
-
-	//region Confronto tra oggetti
-
-	/**
-	 * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi
-	 *
-	 * Attenzione: per evitare di spammare il sito con richieste, questa
-	 * funzione non prende i dettagli dei homework, quindi non può distinguere
-	 * tra più homework nello stesso giorno
-	 *
-	 * @param oldHomework Homeworks vecchi con cui controllare
-	 * @param newHomework Homeworks nuovi
-	 * @return Una lista di homework diversi/nuovi
-	 *0/
-	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
-		List<Homework> homeworkDiff = new Vector<>();
-
-		if(!oldHomework.get(0).month.equals(newHomework.get(0).month) && !oldHomework.get(1).month.equals(newHomework.get(1).month)){
-			logln("Il mese dei compiti è diverso!");
-		}
-
-
-		for(int i = 0; i < newHomework.size(); i++){
-			try {
-				if (!newHomework.get(i).day.equals(oldHomework.get(i).day) && !newHomework.get(i).date.equals(oldHomework.get(i).date)) {
-					homeworkDiff.add(newHomework.get(i));
-				}
-			} catch (ArrayIndexOutOfBoundsException e){
-				homeworkDiff.add(newHomework.get(i));
-			}
-		}
-
-		return homeworkDiff;
-	}
-
-    /**
-     * Fa il confronto tra due test e restituisce i test diversi/nuovi
-     *
-     * Attenzione: per evitare di spammare il sito con richieste, questa
-     * funzione non prende i dettagli dei test, quindi non può distinguere
-     * tra più test nello stesso giorno
-     *
-     * @param oldTest Test vecchi con cui controllare
-     * @param newTest Test nuovi
-     * @return Una lista di test diversi/nuovi
-     *0/
-	public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
-		List<Test> testDiff = new Vector<>();
-
-		if(!oldTest.get(0).month.equals(newTest.get(0).month) && !oldTest.get(1).month.equals(newTest.get(1).month)){
-			logln("Il mese delle verifiche è diverso!");
-		}
-
-
-		for(int i = 0; i < newTest.size(); i++){
-			try {
-				if (!newTest.get(i).day.equals(oldTest.get(i).day) && !newTest.get(i).date.equals(oldTest.get(i).date)) {
-					testDiff.add(newTest.get(i));
-				}
-			} catch (ArrayIndexOutOfBoundsException e) {
-				testDiff.add(newTest.get(i));
-			}
-		}
-
-		return testDiff;
-	}
-
-	//endregion
-
-	//#endregion
 
 	//region ReportCard
 
@@ -587,42 +453,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return reportCardCache;
 
 	}
-
-	//#endregion
-
-	//region Alerts
-
-
-
-	//#endregion
-
-	//region Newsletter
-
-
-
-	//#endregion
-
-	//region Homework
-
-
-
-
-
-	//#endregion
-
-	//region Test
-
-
-
-
-
-	//#endregion
-
-
-	//region Lesson
-
-
-
 
 	//endregion
 

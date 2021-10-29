@@ -255,79 +255,123 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Ottiene la pagina dei voti
 	 */
 	public VotesPage getVotesPage(boolean forceRefresh) {
-		if (votesPageCache == null || forceRefresh)
-			return new VotesPage(this);
-		else
+		if (votesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				votesPageCache = new VotesPage(this);
+				return votesPageCache;
+			} else
+				return new VotesPage(this);
+		} else
 			return votesPageCache;
 	}
 
 	public HomePage getHomePage(boolean forceRefresh) {
-		if (homePageCache == null || forceRefresh)
-			return new HomePage(this);
-		else
+		if (homePageCache == null || forceRefresh) {
+			if (cacheable) {
+				homePageCache = new HomePage(this);
+				return homePageCache;
+			} else
+				return new HomePage(this);
+		} else
 			return homePageCache;
 	}
 
 	public LessonsPage getLessonsPage(boolean forceRefresh) {
-		if (lessonsPageCache == null || forceRefresh)
-			return new LessonsPage(this);
-		else
+		if (lessonsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				lessonsPageCache = new LessonsPage(this);
+				return lessonsPageCache;
+			} else
+				return new LessonsPage(this);
+		} else
 			return lessonsPageCache;
 	}
 
 	public ArgumentsActivitiesPage getArgumentsActivitiesPage(boolean forceRefresh) {
-		if (argumentsActivitiesPageCache == null || forceRefresh)
-			return new ArgumentsActivitiesPage(this);
-		else
+		if (argumentsActivitiesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				argumentsActivitiesPageCache = new ArgumentsActivitiesPage(this);
+				return argumentsActivitiesPageCache;
+			} else
+				return new ArgumentsActivitiesPage(this);
+		} else
 			return argumentsActivitiesPageCache;
 	}
 
 	public DocumentsPage getDocumentsPage(boolean forceRefresh) {
-		if (documentsPageCache == null || forceRefresh)
-			return new DocumentsPage(this);
-		else
+		if (documentsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				documentsPageCache = new DocumentsPage(this);
+				return documentsPageCache;
+			} else
+				return new DocumentsPage(this);
+		} else
 			return documentsPageCache;
 	}
 
 	public AuthorizationsPage getAuthorizationsPage(boolean forceRefresh) {
-		if (authorizationsPageCache == null || forceRefresh)
-			return new AuthorizationsPage(this);
-		else
+		if (authorizationsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				authorizationsPageCache = new AuthorizationsPage(this);
+				return authorizationsPageCache;
+			} else
+				return new AuthorizationsPage(this);
+		} else
 			return authorizationsPageCache;
 	}
 
 	public AlertsPage getAlertsPage(boolean forceRefresh) {
-		if (alertsPageCache == null || forceRefresh)
-			return new AlertsPage(this);
-		else
+		if (alertsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				alertsPageCache = new AlertsPage(this);
+				return alertsPageCache;
+			} else
+				return new AlertsPage(this);
+		} else
 			return alertsPageCache;
 	}
 
 	public AbsencesPage getAbsencesPage(boolean forceRefresh) {
-		if (absencesPageCache == null || forceRefresh)
-			return new AbsencesPage(this);
-		else
+		if (absencesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				absencesPageCache = new AbsencesPage(this);
+				return absencesPageCache;
+			} else
+				return new AbsencesPage(this);
+		} else
 			return absencesPageCache;
 	}
 
 	public DisciplinaryNoticesPage getDisciplinaryNotesPage(boolean forceRefresh) {
-		if (disciplinaryNotesPageCache == null || forceRefresh)
-			return new DisciplinaryNoticesPage(this);
-		else
+		if (disciplinaryNotesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				disciplinaryNotesPageCache = new DisciplinaryNoticesPage(this);
+				return disciplinaryNotesPageCache;
+			} else
+				return new DisciplinaryNoticesPage(this);
+		} else
 			return disciplinaryNotesPageCache;
 	}
 
 	public NewslettersPage getNewslettersPage(boolean forceRefresh) {
-		if (newslettersPageCache == null || forceRefresh)
-			return new NewslettersPage(this);
-		else
+		if (newslettersPageCache == null || forceRefresh) {
+			if (cacheable) {
+				newslettersPageCache = new NewslettersPage(this);
+				return newslettersPageCache;
+			} else
+				return new NewslettersPage(this);
+		} else
 			return newslettersPageCache;
 	}
 
 	public PinBoardPage getPinBoardPage(boolean forceRefresh) {
-		if (pinBoardPageCache == null || forceRefresh)
-			return new PinBoardPage(this);
-		else
+		if (pinBoardPageCache == null || forceRefresh) {
+			if (cacheable) {
+				pinBoardPageCache = new PinBoardPage(this);
+				return pinBoardPageCache;
+			} else
+				return new PinBoardPage(this);
+		} else
 			return pinBoardPageCache;
 	}
 

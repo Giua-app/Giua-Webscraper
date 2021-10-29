@@ -23,6 +23,7 @@ package com.giua.webscraper;
 import com.giua.objects.Maintenance;
 import com.giua.objects.ReportCard;
 import com.giua.pages.*;
+import com.giua.utils.LoggerManager;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -50,6 +51,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private Connection session;
 	private long lastGetPageTime = 0;
 	private final boolean demoMode;
+	private static LoggerManager loggerManager = new LoggerManager("GiuaScraper");
 
 	public enum userTypes {
 		STUDENT,
@@ -942,7 +944,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	protected static void logln(Object message) {
 		if (GiuaScraper.debugMode)
-			System.out.println(message);
+			loggerManager.d(message.toString());
+		//System.out.println(message);
+
 	}
 
 	/**

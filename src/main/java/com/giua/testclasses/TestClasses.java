@@ -23,6 +23,7 @@ import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
+import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 
 import java.util.List;
@@ -690,6 +691,10 @@ class TestClasses {
         GiuaScraper.setDebugMode(logEnabled);
         GiuaScraper.setSiteURL("https://registro.giua.edu.it");
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+
+        LoggerManager loggerManager = new LoggerManager("TestClasses");
+        loggerManager.d("Test");
+        loggerManager.w("AAAAAAAAAAAAAA");
 
         testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }

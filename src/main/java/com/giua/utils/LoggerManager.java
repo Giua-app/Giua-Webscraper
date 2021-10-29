@@ -20,14 +20,12 @@
 package com.giua.utils;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 public class LoggerManager {
     protected String tag;
     protected List<Log> logs;
+    private List<OnSaveLogListener> listeners;
     //Context c;
     //@SuppressLint("SimpleDateFormat")
     protected SimpleDateFormat logDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -35,6 +33,7 @@ public class LoggerManager {
     public LoggerManager(String tag) {
         this.tag = tag;
         logs = new Vector<>();
+        listeners = new LinkedList<>();
     }
 
     public void d(String text) {
@@ -58,8 +57,20 @@ public class LoggerManager {
         saveToData(log);
     }
 
+
+    public void addOnSaveLogEventListener(OnSaveLogListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyListeners() {
+        for (OnSaveLogListener listener : listeners) {
+            listener.onSaveLog();
+        }
+    }
+
     protected void saveToData(Log log) {
         System.out.println(log.type + " | " + log.tag + ": " + log.text);
+        notifyListeners();
     }
 
     public List<Log> getLogs() {
@@ -106,3 +117,5 @@ public class LoggerManager {
         }
     }
 }
+
+

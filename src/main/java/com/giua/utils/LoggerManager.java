@@ -62,15 +62,15 @@ public class LoggerManager {
         listeners.add(listener);
     }
 
-    private void notifyListeners() {
+    private void notifyListeners(Log log) {
         for (OnSaveLogListener listener : listeners) {
-            listener.onSaveLog();
+            listener.onSaveLog(log);
         }
     }
 
     protected void saveToData(Log log) {
         System.out.println(log.type + " | " + log.tag + ": " + log.text);
-        notifyListeners();
+        notifyListeners(log);
     }
 
     public List<Log> getLogs() {
@@ -115,6 +115,10 @@ public class LoggerManager {
         public String toString() {
             return this.tag + "$" + this.type + "$" + logDateFormat.format(this.date) + "$" + this.text + "#";
         }
+    }
+
+    public interface OnSaveLogListener {
+        void onSaveLog(Log log);
     }
 }
 

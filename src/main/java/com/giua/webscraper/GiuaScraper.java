@@ -24,7 +24,6 @@ import com.giua.objects.Maintenance;
 import com.giua.objects.ReportCard;
 import com.giua.pages.*;
 import com.giua.utils.LoggerManager;
-import com.giua.utils.OnSaveLogListener;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -944,7 +943,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Stampa una stringa e va a capo.
 	 */
 	protected static void logln(Object message) {
-		loggerManager.addOnSaveLogEventListener(() -> System.out.println("SEI BRTT"));
+		loggerManager.addOnSaveLogEventListener((log) -> System.out.println("SEI BRTT"));
 		if (GiuaScraper.debugMode)
 			loggerManager.d(message.toString());
 		//System.out.println(message);

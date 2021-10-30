@@ -662,8 +662,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				logln("\t Done!");
 
-				if (response.statusCode() == 302)
-					throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");
+				if (response.statusCode() == 302) {    //Se è true vuol dire che non siamo loggati
+					logln("getPage: Site answered with 302, probably we are not logged in");
+					try {
+						log("getPage: Trying to relogin in");
+						login();    //Prova a riloggarti
+						logln("\tDONE!");
+					} catch (Exception e) {
+						logln("getPage: Relogging didn't work throwing error");
+						throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
+					}
+				}
 
 				getPageCache = doc;
 				lastGetPageTime = System.nanoTime();

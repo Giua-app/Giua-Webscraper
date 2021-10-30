@@ -943,7 +943,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Stampa una stringa e va a capo.
 	 */
 	protected static void logln(Object message) {
-		loggerManager.addOnSaveLogEventListener((log) -> System.out.println("SEI BRTT"));
 		if (GiuaScraper.debugMode)
 			loggerManager.d(message.toString());
 		//System.out.println(message);

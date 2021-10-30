@@ -19,21 +19,22 @@
 
 package com.giua.utils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class LoggerManager {
     protected String tag;
     protected List<Log> logs;
-    private List<OnSaveLogListener> listeners;
-    //Context c;
-    //@SuppressLint("SimpleDateFormat")
+    public String filePath;
     protected SimpleDateFormat logDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     public LoggerManager(String tag) {
         this.tag = tag;
         logs = new Vector<>();
-        listeners = new LinkedList<>();
+        filePath = "out.log";
     }
 
     public void d(String text) {
@@ -57,20 +58,16 @@ public class LoggerManager {
         saveToData(log);
     }
 
-
-    public void addOnSaveLogEventListener(OnSaveLogListener listener) {
-        listeners.add(listener);
-    }
-
-    private void notifyListeners(Log log) {
-        for (OnSaveLogListener listener : listeners) {
-            listener.onSaveLog(log);
-        }
-    }
-
     protected void saveToData(Log log) {
-        System.out.println(log.type + " | " + log.tag + ": " + log.text);
-        notifyListeners(log);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true));
+
+            writer.append(log.toString());
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<Log> getLogs() {

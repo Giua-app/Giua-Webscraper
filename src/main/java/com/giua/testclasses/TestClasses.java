@@ -98,6 +98,8 @@ class TestClasses {
         for (Alert a : allAvvisi) {
             logln(a.toString());
         }
+        logln("Get first alert with filter");
+        logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "b", 2).get(0).toString());
         logln("Get details of first alert");
         allAvvisi.get(0).getDetails(gS);
         logln(allAvvisi.get(0).toString());
@@ -141,7 +143,6 @@ class TestClasses {
         }
         logln("Get activities second lesson");
         logln(lessons.get(0).activities);
-        //logln(gS.getAllLessonsOfSubject("Informatica", true).get(0).toString());
     }
 
     public static void testArgumentsActivities(boolean forceRefresh) {

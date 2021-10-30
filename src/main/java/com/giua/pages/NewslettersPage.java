@@ -43,6 +43,7 @@ public class NewslettersPage implements IPage{
 
     @Override
     public void refreshPage() {
+        getAllNewslettersWithFilter(false, "", "", 1);
         doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE);
     }
 
@@ -83,7 +84,7 @@ public class NewslettersPage implements IPage{
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllNewsletters();
 
-        if (page < 0) {
+        if (page <= 0) {
             throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
         List<Newsletter> allNewsletters = new Vector<>();
@@ -113,6 +114,7 @@ public class NewslettersPage implements IPage{
     /**
      * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata con i filtri specificati.
      * Le stringhe possono anche essere lasciate vuote.
+     * ATTENZIONE: Utilizza una richiesta HTTP
      *
      * @param onlyNotRead {@code true} per avere solo le circolari non lette
      * @param date        Mettere la data del mese nel formato: anno-mese
@@ -128,7 +130,7 @@ public class NewslettersPage implements IPage{
         try {
 
             Document doc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/circolari/genitori/" + page)
+                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE + "/" + page)
                     .data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
                     .data("circolari_genitori[mese]", date)
                     .data("circolari_genitori[oggetto]", text)

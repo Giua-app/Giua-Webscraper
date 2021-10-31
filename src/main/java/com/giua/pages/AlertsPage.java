@@ -23,6 +23,7 @@ import com.giua.objects.Alert;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import com.giua.webscraper.GiuaScraperExceptions;
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -43,15 +44,32 @@ public class AlertsPage implements IPage {
 
     @Override
     public void refreshPage() {
-        getAllAlertsWithFilters(false, "", 0);  //Serve a resettare il filtro che altrimenti rimane sempre attivo
         doc = gS.getPage(UrlPaths.ALERTS_PAGE);
+        resetFiltersAndRefreshPage();
+    }
+
+    public void resetFiltersAndRefreshPage() {
+        try {
+            doc = gS.getSession().newRequest()
+                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.ALERTS_PAGE)
+                    .data("bacheca_avvisi_genitori[visualizza]", "T")
+                    .data("bacheca_avvisi_genitori[oggetto]", "")
+                    .data("bacheca_avvisi_genitori[submit]", "")
+                    .data("bacheca_avvisi_genitori[_token]", getFilterToken())
+                    .post();
+        } catch (IOException e) {
+            if (!GiuaScraper.isSiteWorking()) {
+                throw new GiuaScraperExceptions.SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
     }
 
     /**
      * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
      * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
      *
-     * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
+     * @param page La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
      * @return Lista di Alert
      * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
      */
@@ -84,24 +102,22 @@ public class AlertsPage implements IPage {
     /**
      * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
      * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
+     * Una volta applicato il filtro {@link #getAllAlerts(int)} ritornerà i risultati con il filtro.
+     * Utilizzare {@link #resetFiltersAndRefreshPage()} per resettare il filtro
      * ATTENZIONE: Utilizza una richiesta HTTP
      *
-     * @param page La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
      * @return Lista di Alert
      * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
      */
-    public List<Alert> getAllAlertsWithFilters(boolean onlyNotRead, String text, int page) throws IndexOutOfBoundsException {
+    public List<Alert> getAllAlertsWithFilters(boolean onlyNotRead, String text) throws IndexOutOfBoundsException {
         if (gS.isDemoMode()) {
             return GiuaScraperDemo.getAllAlerts();
-        }
-        if (page <= 0) {
-            throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
         List<Alert> allAlerts = new Vector<>();
 
         try {
             Document newDoc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.ALERTS_PAGE + "/" + page)
+                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.ALERTS_PAGE)
                     .data("bacheca_avvisi_genitori[visualizza]", onlyNotRead ? "D" : "T")
                     .data("bacheca_avvisi_genitori[oggetto]", text)
                     .data("bacheca_avvisi_genitori[submit]", "")
@@ -121,7 +137,7 @@ public class AlertsPage implements IPage {
                         alertHTML.child(2).text(),
                         alertHTML.child(3).text(),
                         alertHTML.child(4).child(0).attr("data-href"),
-                        page
+                        1
                 ));
             }
         } catch (IOException e) {
@@ -135,5 +151,25 @@ public class AlertsPage implements IPage {
 
     private String getFilterToken() {
         return doc.getElementById("bacheca_avvisi_genitori__token").attr("value");
+    }
+
+    /**
+     * Segna la circolare come già letta
+     * ATTENZIONE: Usa una richiesta HTTP
+     */
+    public void markAlertAsRead(Alert alert) {
+        try {
+            gS.getSession().newRequest()
+                    .url(GiuaScraper.getSiteURL() + alert.detailsUrl)
+                    .method(Connection.Method.GET)
+                    .ignoreContentType(true)
+                    .maxBodySize(1)
+                    .execute();
+        } catch (IOException e) {
+            if (!GiuaScraper.isSiteWorking()) {
+                throw new GiuaScraperExceptions.SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
     }
 }

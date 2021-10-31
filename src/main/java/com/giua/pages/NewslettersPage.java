@@ -23,12 +23,13 @@ import com.giua.objects.Newsletter;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import com.giua.webscraper.GiuaScraperExceptions;
+import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Vector;
 
 public class NewslettersPage implements IPage{
@@ -43,10 +44,27 @@ public class NewslettersPage implements IPage{
 
     @Override
     public void refreshPage() {
-        getAllNewslettersWithFilter(false, "", "", 1);
         doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE);
+        resetFiltersAndRefreshPage();
     }
 
+    public void resetFiltersAndRefreshPage() {
+        try {
+            doc = gS.getSession().newRequest()
+                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE)
+                    .data("circolari_genitori[visualizza]", "P")
+                    .data("circolari_genitori[mese]", "")
+                    .data("circolari_genitori[oggetto]", "")
+                    .data("circolari_genitori[submit]", "")
+                    .data("circolari_genitori[_token]", getFilterToken())
+                    .post();
+        } catch (IOException e) {
+            if (!GiuaScraper.isSiteWorking()) {
+                throw new GiuaScraperExceptions.SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Serve solo a {@code #getAllNewsletters} per prendere gli allegati dalle circolari
@@ -69,8 +87,8 @@ public class NewslettersPage implements IPage{
         return r;
     }
 
-    private String getNewsletterFilterToken() {
-        return Objects.requireNonNull(doc.getElementById("circolari_genitori__token")).attr("value");
+    private String getFilterToken() {
+        return doc.getElementById("circolari_genitori__token").attr("value");
     }
 
     /**
@@ -113,32 +131,33 @@ public class NewslettersPage implements IPage{
 
     /**
      * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata con i filtri specificati.
+     * Una volta applicato il filtro {@link #getAllNewsletters(int)} ritornerà i risultati con il filtro.
+     * Utilizzare {@link #resetFiltersAndRefreshPage()} per resettare il filtro
      * Le stringhe possono anche essere lasciate vuote.
      * ATTENZIONE: Utilizza una richiesta HTTP
      *
      * @param onlyNotRead {@code true} per avere solo le circolari non lette
      * @param date        Mettere la data del mese nel formato: anno-mese
      * @param text        Il testo da cercare tra le circolari
-     * @param page        Indica a quale pagina andare. Le pagine partono da 1
      * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
      */
-    public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page) {
+    public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text) {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllNewslettersWithFilter();
 
         List<Newsletter> allNewsletters = new Vector<>();
         try {
 
-            Document doc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE + "/" + page)
+            Document newDoc = gS.getSession().newRequest()
+                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE)
                     .data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
                     .data("circolari_genitori[mese]", date)
                     .data("circolari_genitori[oggetto]", text)
                     .data("circolari_genitori[submit]", "")
-                    .data("circolari_genitori[_token]", getNewsletterFilterToken())
+                    .data("circolari_genitori[_token]", getFilterToken())
                     .post();
 
-            Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
+            Elements allNewslettersStatusHTML = newDoc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
 
             for (Element el : allNewslettersStatusHTML) {
                 allNewsletters.add(new Newsletter(
@@ -148,7 +167,7 @@ public class NewslettersPage implements IPage{
                         el.child(3).text(),
                         el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
                         attachmentsUrls(el.child(4)),
-                        page));
+                        1));
             }
 
             return allNewsletters;
@@ -162,6 +181,26 @@ public class NewslettersPage implements IPage{
             e.printStackTrace();
         }
         return new Vector<>();
+    }
+
+    /**
+     * Segna la circolare come già letta senza scaricarne il contenuto
+     * ATTENZIONE: Usa una richiesta HTTP
+     */
+    public void markNewsletterAsRead(Newsletter newsletter) {
+        try {
+            gS.getSession().newRequest()
+                    .url(GiuaScraper.getSiteURL() + newsletter.detailsUrl)
+                    .method(Connection.Method.GET)
+                    .ignoreContentType(true)
+                    .maxBodySize(1)
+                    .execute();
+        } catch (IOException e) {
+            if (!GiuaScraper.isSiteWorking()) {
+                throw new GiuaScraperExceptions.SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
     }
 
 }

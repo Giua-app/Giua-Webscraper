@@ -19,8 +19,6 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
-
 public class News{
     public final String newsText;
     public final String url;

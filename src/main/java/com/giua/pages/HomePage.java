@@ -58,7 +58,9 @@ public class HomePage implements IPage {
         Elements allNewsHTML = els.children();
 
         for (Element news : allNewsHTML) {
-            String url = news.child(0).child(0).attr("href");
+            String url = "";
+            if (news.child(0).childNodeSize() > 1)
+                url = news.child(0).child(0).attr("href");
             returnAllNews.add(new News(news.text(), url));
         }
 

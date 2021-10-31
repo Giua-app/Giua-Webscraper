@@ -28,6 +28,7 @@ import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
@@ -375,17 +376,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return pinBoardPageCache;
 	}
 
-
-	//region Funzioni per ottenere dati dal registro
-
-	/*
-
 	/**
 	 * Ottiene il banner della login page se presente
 	 *
 	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
 	 * @throws LoginPageBannerNotFound se non esiste il banner
-	 *0/
+	 */
 	public String getLoginPageBanner() {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
@@ -399,14 +395,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return els.child(0).html();
 	}
 
-
+/*
 	//region Controllo aggiornamenti oggetti
-
-
-
-
-
-
 
 	/**
 	 * Controlla se ci sono nuove verifiche presenti
@@ -499,8 +489,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return reportCardCache;
 
 	}
-
-	//endregion
 
 	//endregion
 

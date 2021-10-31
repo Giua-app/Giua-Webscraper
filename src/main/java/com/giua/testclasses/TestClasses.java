@@ -23,7 +23,6 @@ import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
-import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 
 import java.util.List;
@@ -98,8 +97,10 @@ class TestClasses {
         for (Alert a : allAvvisi) {
             logln(a.toString());
         }
+        logln("Marking first alert as read");
+        gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
         logln("Get first alert with filter");
-        logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "b", 2).get(0).toString());
+        logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
         logln("Get details of first alert");
         allAvvisi.get(0).getDetails(gS);
         logln(allAvvisi.get(0).toString());
@@ -125,14 +126,16 @@ class TestClasses {
 
     private static void testNewsletters(boolean forceRefresh) {
         logln("Get newsletters");
-        List<Newsletter> allNewsletters = gS.getNewslettersPage(forceRefresh).getAllNewsletters(0);
+        List<Newsletter> allNewsletters = gS.getNewslettersPage(forceRefresh).getAllNewsletters(1);
         for (Newsletter a : allNewsletters) {
             logln(a.toString());
         }
+        logln("Marking first newsletter as read");
+        gS.getNewslettersPage(false).markNewsletterAsRead(allNewsletters.get(0));
         logln("First newsletter has attachments?");
-        logln(String.valueOf(allNewsletters.get(0).attachments != null));
+        logln(String.valueOf(allNewsletters.get(0).attachmentsUrl != null));
         logln("Get newsletters with a filter");
-        logln(gS.getNewslettersPage(forceRefresh).getAllNewslettersWithFilter(false, "2020-09", "Comunicazione", 1).toString());
+        logln(gS.getNewslettersPage(false).getAllNewslettersWithFilter(false, "", "f").toString());
     }
 
     public static void testLessons(boolean forceRefresh) {
@@ -690,13 +693,14 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        LoggerManager loggerManager = new LoggerManager("TestClasses");
+        /*LoggerManager loggerManager = new LoggerManager("TestClasses");
         loggerManager.d("Test");
-        loggerManager.w("AAAAAAAAAAAAAA");
+        loggerManager.w("AAAAAAAAAAAAAA");*/
 
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        startLogin();
+        testNewsletters(true); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

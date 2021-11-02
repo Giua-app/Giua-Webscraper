@@ -151,6 +151,90 @@ public class VotesPage implements IPage {
             return new Vector<>();
     }
 
+    /**
+     * Ottiene la media di tutti i voti di tutti i quadrimestri e li ritorna in un {@code float[]}
+     *
+     * @return la media dei voti dei quadrimestri in ordine. Quindi al primo indice (valore 0) si troverà
+     * la media dei voti del primo quadrimestre, al secondo indice (valore 1) la media dei voti del secondo
+     * quadrimestre e cosi via.
+     */
+    public float[] getAllQuartersMeans() {
+        Map<String, List<Vote>> allVotes = getAllVotes();
+        VariableArray allMeans = new VariableArray();
+        VariableArray votesCounter = new VariableArray();
+
+        for (String subject : allVotes.keySet()) {
+            for (Vote vote : allVotes.get(subject)) {
+                int index = vote.quarterlyToInt() - 1;
+
+                float currentMean = allMeans.get(index);
+                if (currentMean != -1f)
+                    allMeans.set(index, currentMean + vote.toFloat());
+                else
+                    allMeans.set(index, vote.toFloat());
+
+                float currentCounter = votesCounter.get(index);
+                if (currentCounter != -1f)
+                    votesCounter.set(index, currentCounter + 1);
+                else
+                    votesCounter.set(index, 1);
+            }
+        }
+
+        for (int i = 0; i < allMeans.length; i++) {
+            float currentMean = allMeans.get(i);
+            if (currentMean != -1f)
+                allMeans.set(i, currentMean / votesCounter.get(i));
+            else
+                allMeans.set(i, -1f);
+        }
+
+        return allMeans.array;
+    }
+
+    /**
+     * Ottieni la media dei voti richiesti.
+     *
+     * @param votes {@code List} dei voti di cui fare la media
+     * @return La media dei voti
+     */
+    public float getMeanOf(List<Vote> votes) {
+        float mean = 0f;
+        int counter = 0;
+
+        for (Vote vote : votes) {
+            mean += vote.toFloat();
+            counter++;
+        }
+
+        return mean / counter;
+    }
+
+    /**
+     * Ottieni la media dei voti richiesti SOLO del quadrimestre specificato
+     *
+     * @param votes     {@code List} dei voti di cui fare la media
+     * @param quarterly il quadrimestre a cui fare riferimento
+     * @return La media dei voti di quel quadrimestre. Ritorna -1f se non sono stati trovati
+     * voti di quel quadrimestre
+     */
+    public float getMeanOf(List<Vote> votes, int quarterly) {
+        float mean = -1f;
+        int counter = 0;
+
+        for (Vote vote : votes) {
+            if (vote.quarterlyToInt() == quarterly) {
+                mean += vote.toFloat();
+                counter++;
+            }
+        }
+
+        if (counter == 0)
+            return -1f;
+
+        return mean / counter;
+    }
+
     private String getQuarterName(int n) {
         switch (n) {
             case 1:
@@ -167,4 +251,64 @@ public class VotesPage implements IPage {
                 return "";
         }
     }
+}
+
+/**
+ * Questa classe permette di avere un array variabile mantenendo comunque l' accesso,
+ * sia in lettura che scrittura, dei singoli elementi come se si stesse utilizzando
+ * un array normale
+ */
+class VariableArray {
+    public float[] array;
+    public int length;
+
+    VariableArray() {
+        array = new float[0];
+        length = 0;
+    }
+
+    /**
+     * Imposta un valore
+     *
+     * @param index l'indice in cui mettere il valore
+     * @param value il valore
+     */
+    public void set(int index, float value) {
+        if (index < array.length && index >= 0)
+            array[index] = value;
+        else if (index >= array.length) {
+            addIndexes(index - array.length + 1);
+            array[index] = value;
+        }
+    }
+
+    /**
+     * Ottiene il valore di una casella
+     *
+     * @param index l' indice a cui fare riferimento
+     * @return il valore della casella in posizione {@code index}
+     */
+    public float get(int index) {
+        if (index < array.length && index >= 0)
+            return array[index];
+        else
+            return -1f;
+    }
+
+    /**
+     * Aggiunge nuovi indici all' array e quindi lo ridimensiona
+     *
+     * @param indexes quanti nuovi indici aggiungere
+     */
+    private void addIndexes(int indexes) {
+        float[] newArray = new float[array.length + indexes];
+        length = array.length + indexes;
+
+        for (int i = 0; i < array.length; i++) {
+            newArray[i] = array[i];
+        }
+
+        array = newArray;
+    }
+
 }

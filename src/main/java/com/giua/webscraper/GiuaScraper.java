@@ -151,7 +151,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param user     es. nome.utente.f1
 	 * @param password password
 	 */
-	public GiuaScraper(String user, String password) {
+	public GiuaScraper(String user, String password, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;
@@ -164,11 +167,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
 	 *
-	 * @param user es. nome.utente.f1
-	 * @param password password
+	 * @param user      es. nome.utente.f1
+	 * @param password  password
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, boolean cacheable){
+	public GiuaScraper(String user, String password, boolean cacheable, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
@@ -180,12 +186,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
 	 * effettuato con le credenziali
-	 * @param user es. nome.utente.f1
-	 * @param password    password
+	 *
+	 * @param user      es. nome.utente.f1
+	 * @param password  password
 	 * @param newCookie il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable) {
+	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
@@ -203,7 +213,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode) {
+	public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
@@ -222,7 +235,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param newCookie il cookie della sessione
 	 * @param cacheable true se deve usare la cache, false altrimenti
 	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode) {
+	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = cacheable;
@@ -237,10 +253,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * effettuato con le credenziali
 	 *
 	 * @param user      es. nome.utente.f1
-	 * @param password    password
+	 * @param password  password
 	 * @param newCookie il cookie della sessione
 	 */
-	public GiuaScraper(String user, String password, String newCookie) {
+	public GiuaScraper(String user, String password, String newCookie, LoggerManager lm) {
+		if (lm != null) {
+			loggerManager = lm;
+		}
 		this.user = user;
 		this.password = password;
 		this.cacheable = true;

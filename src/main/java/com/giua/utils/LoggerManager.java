@@ -19,22 +19,18 @@
 
 package com.giua.utils;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class LoggerManager {
     protected String tag;
     protected List<Log> logs;
-    public String filePath;
     protected SimpleDateFormat logDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     public LoggerManager(String tag) {
         this.tag = tag;
         logs = new Vector<>();
-        filePath = "out.log";
     }
 
     public void d(String text) {
@@ -59,15 +55,7 @@ public class LoggerManager {
     }
 
     protected void saveToData(Log log) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true));
-
-            writer.append(log.toString());
-
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println(log.toString());
     }
 
     public List<Log> getLogs() {
@@ -86,9 +74,9 @@ public class LoggerManager {
 
             try {
                 this.logs.add(new Log(logsSub[0], logsSub[1], logDateFormat.parse(logsSub[2]), logsSub[3]));
-            } catch (Exception e) {
-                e.printStackTrace();
-                //android.util.Log.e("LogDog", "ERRORE CRITICO! LOGDOG PARSING FALLITO", e);
+            } catch (ParseException e) {
+                this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura della data sul prossimo log con tag: " + logsSub[0]));
+                this.logs.add(new Log(logsSub[0], logsSub[1], new Date(0), logsSub[3]));
             }
 
         }
@@ -112,10 +100,7 @@ public class LoggerManager {
         public String toString() {
             return this.tag + "$" + this.type + "$" + logDateFormat.format(this.date) + "$" + this.text + "#";
         }
-    }
 
-    public interface OnSaveLogListener {
-        void onSaveLog(Log log);
     }
 }
 

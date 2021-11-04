@@ -23,7 +23,6 @@ import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
-import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 
 import java.util.List;
@@ -198,7 +197,7 @@ class TestClasses {
 
 
     private static void startLogin() {
-        gS = new GiuaScraper(user, password, true);
+        gS = new GiuaScraper(user, password, true, null);
         gS.login();
 
         //Document doc = gS.getPage("");
@@ -596,7 +595,7 @@ class TestClasses {
         System.out.println("Logout...");
         String phpsessid = gS.getCookie();
 
-        gS = new GiuaScraper(user, password, phpsessid, true);
+        gS = new GiuaScraper(user, password, phpsessid, true, null);
         gS.login();
         System.out.println("Created new gS variable");
 
@@ -697,11 +696,7 @@ class TestClasses {
         //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        /*LoggerManager loggerManager = new LoggerManager("TestClasses");
-        loggerManager.d("Test");
-        loggerManager.w("AAAAAAAAAAAAAA");*/
-
         startLogin();
-        testNewsletters(true); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testNewsletters(true); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

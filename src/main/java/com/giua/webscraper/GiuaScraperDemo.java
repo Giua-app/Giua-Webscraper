@@ -22,10 +22,7 @@ package com.giua.webscraper;
 import com.giua.objects.*;
 import org.jsoup.nodes.Document;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class GiuaScraperDemo {
 
@@ -182,6 +179,10 @@ public class GiuaScraperDemo {
         lessons.add(new Lesson("2021-11-01", "10:30-11:30", "Storia", "", "Guardato un film", true));
         lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));
         return lessons;
+    }
+
+    public static Date getLastAccessTime() {
+        return new Date();
     }
 
     public static Document getPage(String page) {

@@ -48,6 +48,55 @@ public class GiuaScraperUtils {
         return -1;
     }
 
+    /**
+     * Ottieni il nome del quadrimestre dal suo numero. Es:
+     * n vale 1 output vale "Primo Quadrimestre"
+     *
+     * @param n Il numero del quadrimestre (parte da 1 e arriva sino a 5)
+     * @return Una stringa con il nome del quadrimestre. Se il numero non viene riconosciuto viene restituita una
+     * stringa vuota. Es: "Primo quadrimestre"
+     */
+    public static String getQuarterName(int n) {
+        switch (n) {
+            case 1:
+                return "Primo Quadrimestre";
+            case 2:
+                return "Secondo Quadrimestre";
+            case 3:
+                return "Terzo Quadrimestre";
+            case 4:
+                return "Quarto Quadrimestre";
+            case 5:
+                return "Quinto Quadrimestre";
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Ottieni il nome del quadrimestre dal suo numero. Es:
+     * n vale 1 output vale "1° Quadrimestre"
+     *
+     * @param n Il numero del quadrimestre (parte da 1 e arriva sino a 5)
+     * @return Una stringa con il nome del quadrimestre e il suo numero. Se il numero in input non viene riconosciuto viene restituita una
+     * stringa vuota. Es: "1° quadrimestre"
+     */
+    public static String getQuarterNameWithNumbers(int n) {
+        switch (n) {
+            case 1:
+                return "1° Quadrimestre";
+            case 2:
+                return "2° Quadrimestre";
+            case 3:
+                return "3° Quadrimestre";
+            case 4:
+                return "4° Quadrimestre";
+            case 5:
+                return "5° Quadrimestre";
+            default:
+                return "";
+        }
+    }
 
     /**
      * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi

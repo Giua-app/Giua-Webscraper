@@ -838,7 +838,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
      */
     public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
-        lm.e("login: richiesta procedura di login");
+        lm.d("login: richiesta procedura di login");
         if (demoMode)
             return;
         try {

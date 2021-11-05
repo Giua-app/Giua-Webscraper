@@ -23,11 +23,13 @@ import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
+import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Vector;
 
 import static java.lang.System.nanoTime;
 
@@ -39,7 +41,6 @@ class TestClasses {
     public static boolean logEnabled = true;
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
-
 
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
@@ -77,8 +78,10 @@ class TestClasses {
         GiuaScraper.setSiteURL("https://registro.giua.edu.it");
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
-        startLogin();
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
+        //startLogin();
         //testNewsletters(true);
     }
 
@@ -199,13 +202,14 @@ class TestClasses {
         }
     }
 
-    /*public static void testReportCard(boolean forceRefresh) {
-        logln("Get report card");
+    public static void testReportCard(boolean forceRefresh) {
+        logln("ReportCard disponibile in futuro");
+        /*logln("Get report card");
         ReportCard reportCard = gS.getReportCard(false, forceRefresh);
         if (reportCard.exists) {
             logln(reportCard.toString());
-        }
-    }*/ //TODO: completare una volta finito ReportCardPage
+        }*/
+    } //TODO: completare una volta finito ReportCardPage
 
     public static void testDocuments(boolean forceRefresh) {
         logln("Get documents");
@@ -240,7 +244,11 @@ class TestClasses {
 
 
     private static void startLogin() {
-        gS = new GiuaScraper(user, password, true, null);
+        startLogin(null);
+    }
+
+    private static void startLogin(com.giua.utils.LoggerManager lm) {
+        gS = new GiuaScraper(user, password, true, lm);
         gS.login();
 
         //Document doc = gS.getPage("");
@@ -250,9 +258,7 @@ class TestClasses {
     //endregion
 
 
-
-/*
-    private static void testSpeed(){
+    private static void testSpeed() {
 
         logEnabled = false;
         List<Long> tSite = new Vector<>();
@@ -263,17 +269,18 @@ class TestClasses {
         List<Long> tPhasesTot = new Vector<>();
         int errors = 0;
 
+        LoggerManager loggerManager = new LoggerManager("GiuaScraper-silent");
+
+        System.out.println("Legenda:  |   LOGIN    |  CACHE   | SESSIONE |");
+        System.out.println("          [############|##########|##########]");
 
         int i = 0;
 
-        while(i < speedTestAmount) {
-
-
-
+        while (i < speedTestAmount) {
             long t1;
             long t2;
 
-            System.out.println("Test " + (i+1) + "/" + speedTestAmount);
+            System.out.println("Test " + (i + 1) + "/" + speedTestAmount);
             System.out.print("Progress: [");
 
             try {
@@ -298,7 +305,7 @@ class TestClasses {
 
 
                 t1 = nanoTime();
-                startLogin();
+                startLogin(loggerManager);
 
                 testNews(true);
                 System.out.print("#");
@@ -330,7 +337,6 @@ class TestClasses {
 
 
                 t1 = nanoTime();
-
                 System.out.print("|");
                 testNews(false);
                 System.out.print("#");
@@ -360,7 +366,7 @@ class TestClasses {
                 t1 = nanoTime();
                 String phpsessid = gS.getCookie();
 
-                gS = new GiuaScraper(user, password, phpsessid, true);
+                gS = new GiuaScraper(user, password, phpsessid, true, loggerManager);
                 gS.login();
 
                 System.out.print("|");
@@ -483,13 +489,13 @@ class TestClasses {
 
 
     }
-*/
+
 
     private static void testAll() {
 
         if(speedTest){
             System.out.println("--------STARTING SPEED TEST-----");
-            //testSpeed();
+            testSpeed();
             return;
         }
 
@@ -701,5 +707,18 @@ class TestClasses {
         System.out.println("|");
         System.out.println("|    Totale:                         " + (tPhase1 / 1000000 + tPhase2 / 1000000 + tPhase3 / 1000000) + "ms");
         System.out.println("\\--------------------------------------------------------");
+    }
+
+
+    private static class LoggerManager extends com.giua.utils.LoggerManager {
+
+        public LoggerManager(String tag) {
+            super(tag);
+        }
+
+        @Override
+        protected void saveToData(Log log) {
+            //Do nothing
+        }
     }
 }

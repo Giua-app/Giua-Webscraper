@@ -81,8 +81,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private ReportCard reportCardCache = null;
 	private VotesPage votesPageCache = null;
 	private Document getPageCache = null;
-
-
 	//endregion
 
 	//endregion
@@ -273,8 +271,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
             lm = newLm;
         }
         this.user = user;
-        this.password = password;
-        this.cacheable = true;
+		this.password = password;
+		this.cacheable = true;
 		this.demoMode = false;
 		lm.d("---GiuaScraper avviato---");
 		PHPSESSID = newCookie;
@@ -282,6 +280,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	//endregion
+
+	//region Metodi pages
 
 	/**
 	 * Ottiene la pagina dei voti
@@ -407,15 +407,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return pinBoardPageCache;
 	}
 
+	//endregion
+
 	/**
 	 * Ottiene il banner della login page se presente
 	 *
 	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
-     * @throws LoginPageBannerNotFound se non esiste il banner
-     */
-    public String getLoginPageBanner() {
-        Document doc = getPageNoCookie(""); //pagina di login
-        Element els;
+	 * @throws LoginPageBannerNotFound se non esiste il banner
+	 */
+	public String getLoginPageBanner() {
+		Document doc = getPageNoCookie(""); //pagina di login
+		Element els;
 
         //TODO: se non trova il banner ritorna vuoto, tanto anche nel registro se è vuoto non mette il banner
         try {

@@ -62,7 +62,7 @@ public class AbsencesPage implements IPage {
      */
     public void justifyAbsence(Absence ab, String type, String reason) {
         if (gS.getUserTypeEnum() != GiuaScraper.userTypes.PARENT) {
-            GiuaScraper.logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
+            //GiuaScraper.logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
             throw new GiuaScraperExceptions.UnsupportedAccount("Può giustificare solo il genitore!");
         }
         try {
@@ -80,7 +80,7 @@ public class AbsencesPage implements IPage {
                         .post();
             }
         } catch (Exception e) {
-            GiuaScraper.logErrorLn("Qualcosa è andato storto");
+            //GiuaScraper.logErrorLn("Qualcosa è andato storto");
             e.printStackTrace();
         }
     }
@@ -92,7 +92,7 @@ public class AbsencesPage implements IPage {
      */
     public void deleteJustificationAbsence(Absence ab) {
         if (gS.getUserTypeEnum() != GiuaScraper.userTypes.PARENT) {
-            GiuaScraper.logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
+            //GiuaScraper.logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
             throw new GiuaScraperExceptions.UnsupportedAccount("Può giustificare solo il genitore!");
         }
         try {
@@ -110,7 +110,7 @@ public class AbsencesPage implements IPage {
                         .post();
             }
         } catch (Exception e) {
-            GiuaScraper.logErrorLn("Qualcosa è andato storto");
+            //GiuaScraper.logErrorLn("Qualcosa è andato storto");
             e.printStackTrace();
         }
     }

@@ -40,13 +40,56 @@ class TestClasses {
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
 
-    private static void logln(String msg){
+
+    //Main function, only used on the console version for testing
+    public static void main(String[] args) {
+        try {
+            user = args[0];
+            password = args[1];
+        } catch (Exception e) {
+
+            Scanner sc = new Scanner(System.in);
+
+            if (user.equals("") && password.equals("")) {
+                logln("Please enter username: ");
+                user = sc.nextLine();
+                logln("Password: ");
+                password = sc.nextLine();
+            }
+        }
+
+        try {
+            logEnabled = Boolean.parseBoolean(args[2]);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            speedTest = Boolean.parseBoolean(args[3]);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            speedTestAmount = Integer.parseInt(args[4]);
+        } catch (Exception ignored) {
+        }
+
+        GiuaScraper.setDebugMode(logEnabled);
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+
+        startLogin();
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testNewsletters(true);
+    }
+
+
+    private static void logln(String msg) {
         if (logEnabled) {
             System.out.println(msg);
         }
     }
 
-    private static void println(String msg){
+    private static void println(String msg) {
         if (!speedTest) {
             System.out.println(msg);
         }
@@ -658,45 +701,5 @@ class TestClasses {
         System.out.println("|");
         System.out.println("|    Totale:                         " + (tPhase1 / 1000000 + tPhase2 / 1000000 + tPhase3 / 1000000) + "ms");
         System.out.println("\\--------------------------------------------------------");
-    }
-
-    //Main function, only used on the console version for testing
-    public static void main(String[] args) {
-        try {
-            user = args[0];
-            password = args[1];
-        } catch (Exception e) {
-
-            Scanner sc = new Scanner(System.in);
-
-            if (user.equals("") && password.equals("")) {
-                logln("Please enter username: ");
-                user = sc.nextLine();
-                logln("Password: ");
-                password = sc.nextLine();
-            }
-        }
-
-        try {
-            logEnabled = Boolean.parseBoolean(args[2]);
-        } catch (Exception ignored) {
-        }
-
-        try {
-            speedTest = Boolean.parseBoolean(args[3]);
-        } catch (Exception ignored) {
-        }
-
-        try {
-            speedTestAmount = Integer.parseInt(args[4]);
-        } catch (Exception ignored) {
-        }
-
-        GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
-
-        startLogin();
-        //testNewsletters(true); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 }

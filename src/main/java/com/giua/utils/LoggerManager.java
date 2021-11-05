@@ -55,7 +55,14 @@ public class LoggerManager {
     }
 
     protected void saveToData(Log log) {
-        System.out.println(log.toString());
+        String color = "";
+
+        if (log.type.equals("WARNING"))
+            color = "\u001B[33m";
+        if (log.type.equals("ERROR"))
+            color = "\u001B[31m";
+
+        System.out.println(log.tag + " | " + color + log.type + ": " + log.text + "\u001B[0m");
     }
 
     public List<Log> getLogs() {

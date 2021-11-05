@@ -42,27 +42,27 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
 	private String user;
-	private String realUsername;
-	private final String password;
-	private String userType = "";
-	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
-	private static boolean debugMode;
-	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-	private String PHPSESSID = "";
-	private Connection session;
-	private long lastGetPageTime = 0;
-	private final boolean demoMode;
-	private static LoggerManager loggerManager = new LoggerManager("GiuaScraper");
+    private String realUsername;
+    private final String password;
+    private String userType = "";
+    private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
+    private static boolean debugMode;
+    final public boolean cacheable;        //Indica se si possono utilizzare le cache
+    private String PHPSESSID = "";
+    private Connection session;
+    private long lastGetPageTime = 0;
+    private final boolean demoMode;
+    private static LoggerManager lm = new LoggerManager("GiuaScraper");
 
-	public enum userTypes {
-		STUDENT,
-		PARENT,
-		TEACHER,
-		ADMIN,
-		PRINCIPAL,
-		ATA,
-		DEMO
-	}
+    public enum userTypes {
+        STUDENT,
+        PARENT,
+        TEACHER,
+        ADMIN,
+        PRINCIPAL,
+        ATA,
+        DEMO
+    }
 
 
 	//region Cache
@@ -145,126 +145,138 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Costruttori della classe
 
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user     es. nome.utente.f1
-	 * @param password password
-	 */
-	public GiuaScraper(String user, String password, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = true;
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user     es. nome.utente.f1
+     * @param password password
+     * @param newLm    istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                 Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = true;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, boolean cacheable, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param newCookie il cookie della sessione
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, boolean cacheable, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        PHPSESSID = newCookie;
+        initiateSession(newCookie);
+    }
+
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user      es. nome.utente.f1
+     * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+     *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = demoMode;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+     *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+     * @param newCookie il cookie della sessione
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = demoMode;
+        lm.d("---GiuaScraper avviato---");
+        PHPSESSID = newCookie;
+        initiateSession(newCookie);
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param newCookie il cookie della sessione
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = true;
 		this.demoMode = false;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param password  password
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, boolean cacheable, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param password  password
-	 * @param newCookie il cookie della sessione
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
-		PHPSESSID = newCookie;
-		initiateSession(newCookie);
-	}
-
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
-	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = demoMode;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
-	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
-	 * @param newCookie il cookie della sessione
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = demoMode;
-		logln("GiuaScraper: started");
-		PHPSESSID = newCookie;
-		initiateSession(newCookie);
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param password  password
-	 * @param newCookie il cookie della sessione
-	 */
-	public GiuaScraper(String user, String password, String newCookie, LoggerManager lm) {
-		if (lm != null) {
-			loggerManager = lm;
-		}
-		this.user = user;
-		this.password = password;
-		this.cacheable = true;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
+		lm.d("---GiuaScraper avviato---");
 		PHPSESSID = newCookie;
 		initiateSession(newCookie);
 	}
@@ -399,20 +411,21 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Ottiene il banner della login page se presente
 	 *
 	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
-	 * @throws LoginPageBannerNotFound se non esiste il banner
-	 */
-	public String getLoginPageBanner() {
-		Document doc = getPageNoCookie(""); //pagina di login
-		Element els;
+     * @throws LoginPageBannerNotFound se non esiste il banner
+     */
+    public String getLoginPageBanner() {
+        Document doc = getPageNoCookie(""); //pagina di login
+        Element els;
 
-		try {
-			els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
-		} catch (IndexOutOfBoundsException e) {
-			throw new LoginPageBannerNotFound("Cant find banner in login page", e);
-		}
+        //TODO: se non trova il banner ritorna vuoto, tanto anche nel registro se è vuoto non mette il banner
+        try {
+            els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
+        } catch (IndexOutOfBoundsException e) {
+            throw new LoginPageBannerNotFound("Cant find banner in login page", e);
+        }
 
-		return els.child(0).html();
-	}
+        return els.child(0).html();
+    }
 
 /*
 	//region Controllo aggiornamenti oggetti
@@ -514,45 +527,45 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 
 
-	//region Funzioni fondamentali
+    //region Funzioni fondamentali
 
-	private void initiateSession() {
+    private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
-		logln("initSession: creating new session");
-		session = Jsoup.newSession();
-	}
+        session = Jsoup.newSession();
+        lm.d("Nuova sessione creata");
+    }
 
-	private void initiateSession(String cookie) {
-		session = null; //Per sicurezza azzeriamo la variabile
-		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
-	}
+    private void initiateSession(String cookie) {
+        session = null; //Per sicurezza azzeriamo la variabile
+        session = Jsoup.newSession().cookie("PHPSESSID", cookie);
+        lm.d("Nuova sessione da cookie creata");
+    }
 
-	public boolean isMaintenanceScheduled() {
-		Document doc = getPage("login/form/");
-		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+    public boolean isMaintenanceScheduled() {
+        Document doc = getPage("login/form/");
+        Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
 
-		if (!els.isEmpty()) {
-			logln("isMaintenanceScheduled: Manutenzione programmata trovata");
+        if (!els.isEmpty()) {
+			lm.d("Trovata manutenzione programmata");
+            return true;
+        }
+        lm.d("Nessuna manutenzione programmata trovata");
+        return false;
+    }
+
+    public boolean isMaintenanceActive() {
+        if (demoMode)
+            return GiuaScraperDemo.isMaintenanceActive();
+        Document doc = getPage("login/form/");
+        Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
+        Elements topBar = doc.getElementsByClass("col-sm-6");
+
+        if (loginForm.isEmpty() && !topBar.isEmpty()) {
+			lm.w("Manutenzione del registro in corso");
 			return true;
 		}
-		logln("isMaintenanceScheduled: Manutenzione non trovata");
-		return false;
-	}
 
-	public boolean isMaintenanceActive() {
-		if (demoMode)
-			return GiuaScraperDemo.isMaintenanceActive();
-		Document doc = getPage("login/form/");
-		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
-		Elements topBar = doc.getElementsByClass("col-sm-6");
-
-		if (loginForm.isEmpty() && !topBar.isEmpty()) {
-			logln("isMaintenanceActive: Manutenzione attiva");
-			return true;
-		}
-
-		logln("isMaintenanceActive: Manutenzione non attiva");
+		lm.d("Nessuna manutenzione in corso trovata");
 		return false;
 	}
 
@@ -560,44 +573,44 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		Maintenance maintenance;
 
 		if (!isMaintenanceScheduled()) {
-			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
-			return maintenance;
-		}
+            maintenance = new Maintenance(new Date(), new Date(), false, false, false);
+            return maintenance;
+        }
 
-		Document doc = getPage("login/form/");
-		Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
-		Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
+        Document doc = getPage("login/form/");
+        Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+        Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
 
-		// Togli dalla scritta tutto tranne le date
-		String dateTxt = dateEl.get(0).text();
-		String[] a = dateTxt.split("ore");
-		String start = a[1].replace("del", "").replace("alle", "");
-		String end = a[2].replace("del", "");
+        // Togli dalla scritta tutto tranne le date
+        String dateTxt = dateEl.get(0).text();
+        String[] a = dateTxt.split("ore");
+        String start = a[1].replace("del", "").replace("alle", "");
+        String end = a[2].replace("del", "");
 
 
-		logln("getMaintenanceInfo: Non formattate: Inizio " + start + " | Fine " + end);
+        //logln("getMaintenanceInfo: Non formattate: Inizio " + start + " | Fine " + end);
 
-		//Crea dei format per fare il parsing di quelle stringhe
-		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
-		SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
+        //Crea dei format per fare il parsing di quelle stringhe
+        SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
+        SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
 
-		Date startDate;
-		Date endDate;
-		try {
-			startDate = format1.parse(start);
-			endDate = format2.parse(end);
-		} catch (Exception e) {
-			throw new MaintenanceHasEmptyDates("Maintenance info did not find dates");
-		}
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = format1.parse(start);
+            endDate = format2.parse(end);
+        } catch (Exception e) {
+            throw new MaintenanceHasEmptyDates("Maintenance info did not find dates");
+        }
 
-		logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());
+        //logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());
 
-		Date currentDate = new Date();
-		boolean isActive = false;
-		boolean shouldBeActive = false;
+        Date currentDate = new Date();
+        boolean isActive = false;
+        boolean shouldBeActive = false;
 
-		if (currentDate.after(startDate) && currentDate.before(endDate)) {
-			logln("getMaintenanceInfo: Secondo l'orario la manutenzione dovrebbe essere attiva");
+        if (currentDate.after(startDate) && currentDate.before(endDate)) {
+			lm.d("Secondo l'orario di inizio la manutenzione dovrebbe essere in corso");
 			shouldBeActive = true;
 		}
 
@@ -614,16 +627,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Effettua il download di una risorsa di qualunque tipo dal registro
 	 *
 	 * @param url percorso della risorsa nel sito. IMPORTANTE: mettere lo "/" prima. Es: /bacheca/circolari/0/0/
-	 * @return Un oggetto {@code DownloadedFile}
-	 */
-	public DownloadedFile download(String url) {
-		try {
-			Connection.Response r = session.newRequest()
-					.url(GiuaScraper.SiteURL + url)
-					.ignoreContentType(true)
-					.execute();
+     * @return Un oggetto {@code DownloadedFile}
+     */
+    public DownloadedFile download(String url) {
+        lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
+        try {
+            Connection.Response r = session.newRequest()
+                    .url(GiuaScraper.SiteURL + url)
+                    .ignoreContentType(true)
+                    .execute();
 
-			return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
+            return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
@@ -643,59 +657,62 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
 	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
-		if (demoMode)
-			return GiuaScraperDemo.getPage(page);
-		try {
-			if (page.startsWith("/"))
-				page = page.substring(1);
-			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
-				return getPageCache;
-			if (page.equals("login/form/")) {
-				return getPageNoCookie("login/form/");
-			} else {
-				if (isMaintenanceActive()) {
-					throw new MaintenanceIsActiveException("The website is in maintenance");
-				}
+        if (demoMode)
+            return GiuaScraperDemo.getPage(page);
+        try {
+            if (page.startsWith("/"))
+                page = page.substring(1);
 
-				log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
+            //Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+            if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+                lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
+                return getPageCache;
+            }
 
-				Connection.Response response = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/" + page)
-						.method(Method.GET)
-						.execute();
+            if (page.equals("login/form/")) {
+                return getPageNoCookie("login/form/");
+            } else {
+                if (isMaintenanceActive()) {
+                    throw new MaintenanceIsActiveException("The website is in maintenance");
+                }
 
-				Document doc = response.parse();
 
-				logln("\t Done!");
+                Connection.Response response = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/" + page)
+                        .method(Method.GET)
+                        .execute();
 
-				if (response.statusCode() == 302) {    //Se è true vuol dire che non siamo loggati
-					logln("getPage: Site answered with 302, probably we are not logged in");
-					try {
-						log("getPage: Trying to relogin in");
-						login();    //Prova a riloggarti
-						logln("\tDONE!");
-					} catch (Exception e) {
-						logln("getPage: Relogging didn't work throwing error");
-						throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
-					}
-				}
+                lm.d("getPage: " + GiuaScraper.SiteURL + "/ caricato");
 
-				getPageCache = doc;
-				lastGetPageTime = System.nanoTime();
-				return doc;
-			}
+                Document doc = response.parse();
 
-		} catch (IOException e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-			}
-			e.printStackTrace();
-		}
-		//Qui ci si arriva solo in rari casi di connessioni molto lente
-		logln("getPage: I reached the end, this is NOT a good thing");
-		if (!isSiteWorking()) {
-			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+                if (response.statusCode() == 302) {    //Se è true vuol dire che non siamo loggati
+                    lm.d("getPage: Pagina ha risposto con codice 302, probabilmente non siamo loggati");
+                    try {
+                        lm.d("getPage: Rieseguo login...");
+                        login();    //Prova a riloggarti
+                        lm.d("getPage: Login eseguito correttamente");
+                    } catch (Exception e) {
+                        lm.e("Impossibile eseguire login da getPage");
+                        throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
+                    }
+                }
+
+                getPageCache = doc;
+                lastGetPageTime = System.nanoTime();
+                return doc;
+            }
+
+        } catch (IOException e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
+        //Qui ci si arriva solo in rari casi di connessioni molto lente
+        lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
+        if (!isSiteWorking()) {
+            throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
 		}
 		return new Document(GiuaScraper.SiteURL + "/" + page);
 	}
@@ -707,18 +724,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
-		if (page.startsWith("/"))
-			page = page.substring(1);
-		if (demoMode)
-			return GiuaScraperDemo.getPage(page);
-		try {
+        if (page.startsWith("/"))
+            page = page.substring(1);
+        if (demoMode)
+            return GiuaScraperDemo.getPage(page);
+        try {
 
-			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
-
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+            Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.get();
 
-			logln("\t Done!");
+			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/ caricato");
 
 			return doc;
 
@@ -736,17 +751,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param url l' url da cui prendere la pagina
 	 * @return Una pagina HTML come {@link Document}
-	 */
-	public Document getExtPage(String url) {
-		if (demoMode)
-			return GiuaScraperDemo.getExtPage(url);
+     */
+    public Document getExtPage(String url) {
+        if (demoMode)
+            return GiuaScraperDemo.getExtPage(url);
 		try {
-			log("getExtPage: Getting external page " + url);
 
 			Document doc = Jsoup.connect(url)
 					.get();
 
-			logln("\t Done!");
+			lm.d("getExtPage: pagina esterna " + url + " caricata");
+
 			return doc;
 
 		} catch (IOException e) {
@@ -759,21 +774,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Controlla se si è loggati dentro il registro
-	 * @return true se e' loggato altrimenti false
-	 */
-	public Boolean checkLogin() {
-		if (demoMode)
-			return GiuaScraperDemo.checkLogin();
-		try {
-			log("checkLogin: the site answered with status code: ");
-			Connection.Response res = session.newRequest()
-					.url(GiuaScraper.SiteURL)
-					.execute();
+     * @return true se e' loggato altrimenti false
+     */
+    public Boolean checkLogin() {
+        if (demoMode)
+            return GiuaScraperDemo.checkLogin();
+        try {
+            Connection.Response res = session.newRequest()
+                    .url(GiuaScraper.SiteURL)
+                    .execute();
 
-			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
-			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
-			//Attenzione: Il sito ritorna 200 anche quando è in manutenzione!
-			logln("\t" + res.statusCode());
+            //Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
+            //con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
+            //Attenzione: Il sito ritorna 200 anche quando è in manutenzione!
+            lm.d("checkLogin: Registro risponde con codice " + res.statusCode() + ": " + (res.statusCode() != 302 ? "utente non loggato" : "utente loggato"));
 			return res.statusCode() != 302;
 
 		} catch (IOException e) {
@@ -781,34 +795,38 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	public boolean isSessionValid(String phpsessid) {
-		if (demoMode)
-			return GiuaScraperDemo.isSessionValid();
-		try {
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
-					.cookie("PHPSESSID", phpsessid)
-					.get();
+    public boolean isSessionValid(String phpsessid) {
+        if (demoMode)
+            return GiuaScraperDemo.isSessionValid();
+        try {
+            Document doc = Jsoup.connect(GiuaScraper.SiteURL)
+                    .cookie("PHPSESSID", phpsessid)
+                    .get();
 
-			if (realUsername != null && realUsername.equals(""))
-				loadUserFromDocument(doc);
-			// --- Ottieni tipo account
-			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			userType = elm.text().split(".+\\(|\\)")[1];
+            //lm.d("isSessionValid: Cerco di ottenere il tipo di account");
 
-		} catch (Exception e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
-			}
+            if (realUsername != null && realUsername.equals(""))
+                loadUserFromDocument(doc);
+            // --- Ottieni tipo account
+            final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+            userType = elm.text().split(".+\\(|\\)")[1];
 
-			//Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
-			// e quindi, la sessione non è valida
-			return false;
-		}
-		// Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
+        } catch (Exception e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
+            }
+
+            //Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
+            // e quindi, la sessione non è valida
+            lm.w("isSessionValid: Sessione non valida. Causa: " + e.getMessage());
+            return false;
+        }
+        // Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
+		//lm.d("isSessionValid: Sessione valida. Tipo account ottenuto: " + userType);
 		return true;
 	}
 
@@ -818,68 +836,69 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws UnableToLogin                Il login è andato male e il sito non ha detto cosa è andato storto
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non ci si può loggare
 	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
-	 */
-	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
-		if (demoMode)
-			return;
-		try {
-			if (isMaintenanceActive())
-				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
-			if (isSessionValid(PHPSESSID)) {
-				//Il cookie esistente è ancora valido, niente login.
-				logln("login: Session still valid, ignoring");
-			} else {
-				logln("login: Session expired, creating a new one");
-				initiateSession();
+     */
+    public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
+        lm.e("login: richiesta procedura di login");
+        if (demoMode)
+            return;
+        try {
+            if (isMaintenanceActive())
+                throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
-				//logln("login: First connection (login form)");
+            lm.d("login: Controllo validità sessione");
+            if (isSessionValid(PHPSESSID)) {
+                //Il cookie esistente è ancora valido, niente login.
+                lm.d("login: Sessione ancora valida, ignoro...");
+            } else {
+                lm.d("login: Sessione non valida, ne creo una nuova");
+                initiateSession();
 
-				Document firstRequestDoc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/login/form/")
-						.get();
+                //logln("login: First connection (login form)");
 
-				//logln("login: Second connection (authenticate)");
+                Document firstRequestDoc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/login/form/")
+                        .get();
 
-				Document doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
-						.ignoreContentType(true)
-						.get();
+                //logln("login: Second connection (authenticate)");
 
-				//logln("\n\nCSRF HTML: \n" + doc + "\n\n");
+                Document doc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
+                        .ignoreContentType(true)
+                        .get();
 
-				logln("login: get csrf token");
+                //logln("\n\nCSRF HTML: \n" + doc + "\n\n");
 
-				String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
+                String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
-				logln("login: CSRF Token: " + CSRFToken);
+                lm.d("login: Token CSRF: " + CSRFToken);
 
-				//logln("login: Third connection (login form)");
+                //logln("login: Third connection (login form)");
 
-				doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/login/form/")
-						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-						.post();
+                doc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/login/form/")
+                        .data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
+                        .post();
 
-				Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
-				if (!err.isEmpty()) {
-					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
-				} else {
-					PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
-					if (isSessionValid(PHPSESSID)) {
-						logln("login: Cookie: " + PHPSESSID);
-						logln("login: Logged in as " + this.user);
-					} else {
-						throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
-					}
-				}
-			}
-		} catch (IOException e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
-			} else {
-				throw new UnableToLogin("Something unexpected happened", e);
-			}
-		}
+                Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
+                if (!err.isEmpty()) {
+                    throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
+                } else {
+                    PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
+                    if (isSessionValid(PHPSESSID)) {
+                        lm.d("login: Cookie: " + PHPSESSID);
+                        lm.d("Login riuscito con account " + this.user);
+                    } else {
+                        throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
+            } else {
+                throw new UnableToLogin("Something unexpected happened", e);
+            }
+        }
 	}
 
 	public static boolean isMyInternetWorking(){
@@ -901,19 +920,18 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			} else {
 				throw new YourConnectionProblems("Your internet may not work properly", io);
 			}
-		}
-	}
+        }
+    }
 
-	/**
-	 * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
-	 * @return Il nome utente.
-	 */
+    /**
+     * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
+     * @return Il nome utente.
+     */
 	public String loadUserFromDocument() {
 		if (demoMode)
 			return GiuaScraperDemo.loadUserFromDocument();
-		final Document doc = getPage("");
-		realUsername = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
-		return realUsername;
+
+		return loadUserFromDocument(getPage(""));
 	}
 
 	/**
@@ -963,27 +981,28 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public String getUserTypeString() {
 		String text;
-		try {
-			if (userType.equals("")) {
-				final Document doc = getPage("");
-				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-				text = elm.text().split(".+\\(|\\)")[1];
-				userType = text;
-				return text;
-			} else {
-				return userType;
-			}
-		} catch (Exception e) {
-			throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
-		}
-	}
+        try {
+            if (userType.equals("")) {
+                final Document doc = getPage("");
+                final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+                text = elm.text().split(".+\\(|\\)")[1];
+                userType = text;
+                return text;
+            } else {
+                return userType;
+            }
+        } catch (Exception e) {
+            throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
+        }
+    }
 
-	public void clearCache() {
-		absencesPageCache = null;
-		alertsPageCache = null;
-		argumentsActivitiesPageCache = null;
-		authorizationsPageCache = null;
-		documentsPageCache = null;
+    public void clearCache() {
+        lm.d("Pulizia cache pages in corso...");
+        absencesPageCache = null;
+        alertsPageCache = null;
+        argumentsActivitiesPageCache = null;
+        authorizationsPageCache = null;
+        documentsPageCache = null;
 		homePageCache = null;
 		interviewsPageCache = null;
 		lessonsPageCache = null;
@@ -998,40 +1017,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	//endregion
 
 	//region Funzioni di debug
-
-	/**
-	 * Stampa una stringa e va a capo.
-	 */
-	protected static void logln(Object message) {
-		if (GiuaScraper.debugMode)
-			loggerManager.d(message.toString());
-		//System.out.println(message);
-
-	}
-
-	/**
-	 * Stampa una stringa.
-	 */
-	protected static void log(Object message) {
-		if (GiuaScraper.debugMode)
-			System.out.print(message);
-	}
-
-	/**
-	 * Stampa una stringa come un errore, quindi rosso.
-	 */
-	public static void logError(Object message) {
-		if (GiuaScraper.debugMode)
-			System.err.print(message);
-	}
-
-	/**
-	 * Stampa una stringa come un errore e va a capo.
-	 */
-	public static void logErrorLn(Object message) {
-		if (GiuaScraper.debugMode)
-			System.err.println(message);
-	}
 
 	public static void setDebugMode(boolean mode) {
 		GiuaScraper.debugMode = mode;

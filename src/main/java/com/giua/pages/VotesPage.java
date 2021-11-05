@@ -20,6 +20,7 @@
 package com.giua.pages;
 
 import com.giua.objects.Vote;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -138,7 +139,7 @@ public class VotesPage implements IPage {
                                 el.child(1).text(),
                                 el.child(2).text(),
                                 el.child(4).text(),
-                                getQuarterName(i + 1),
+                                GiuaScraperUtils.getQuarterName(i + 1),
                                 el.child(3).text().equals("")
                         ));
                     }
@@ -233,23 +234,6 @@ public class VotesPage implements IPage {
             return -1f;
 
         return mean / counter;
-    }
-
-    private String getQuarterName(int n) {
-        switch (n) {
-            case 1:
-                return "Primo Quadrimestre";
-            case 2:
-                return "Secondo Quadrimestre";
-            case 3:
-                return "Terzo Quadrimestre";
-            case 4:
-                return "Quarto Quadrimestre";
-            case 5:
-                return "Quinto Quadrimestre";
-            default:
-                return "";
-        }
     }
 }
 

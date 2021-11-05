@@ -21,6 +21,7 @@ package com.giua.pages;
 
 import com.giua.objects.News;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -53,6 +54,8 @@ public class HomePage implements IPage {
      * @return Una lista di stringhe contenenti le news
      */
     public List<News> getAllNewsFromHome() {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getAllNewsFromHome();
         List<News> returnAllNews = new Vector<>();
         Element els = doc.getElementsByClass("panel-body").get(0);
         Elements allNewsHTML = els.children();
@@ -68,6 +71,8 @@ public class HomePage implements IPage {
     }
 
     public Date getLastAccessTime() {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getLastAccessTime();
         Element top = doc.getElementsByClass("panel-title").get(0).child(1);
         String date = top.text().substring(16);
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

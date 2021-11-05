@@ -220,7 +220,7 @@ public class VotesPage implements IPage {
      * voti di quel quadrimestre
      */
     public float getMeanOf(List<Vote> votes, int quarterly) {
-        float mean = -1f;
+        float mean = 0f;
         int counter = 0;
 
         for (Vote vote : votes) {

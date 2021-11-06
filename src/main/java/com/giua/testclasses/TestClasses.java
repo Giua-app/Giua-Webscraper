@@ -20,11 +20,12 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.webscraper.DownloadedFile;
+import com.giua.pages.AbsencesPage;
+import com.giua.pages.HomePage;
+import com.giua.pages.VotesPage;
+import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -41,19 +42,64 @@ class TestClasses {
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
 
-    private static void logln(String msg){
+    //Main function, only used on the console version for testing
+    public static void main(String[] args) {
+        try {
+            user = args[0];
+            password = args[1];
+        } catch (Exception e) {
+
+            Scanner sc = new Scanner(System.in);
+
+            if (user.equals("") && password.equals("")) {
+                logln("Please enter username: ");
+                user = sc.nextLine();
+                logln("Password: ");
+                password = sc.nextLine();
+            }
+        }
+
+        try {
+            logEnabled = Boolean.parseBoolean(args[2]);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            speedTest = Boolean.parseBoolean(args[3]);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            speedTestAmount = Integer.parseInt(args[4]);
+        } catch (Exception ignored) {
+        }
+
+        GiuaScraper.setDebugMode(logEnabled);
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+
+
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+
+        //startLogin();
+        //testNewsletters(true);
+    }
+
+
+    private static void logln(String msg) {
         if (logEnabled) {
             System.out.println(msg);
         }
     }
 
-    private static void println(String msg){
+    private static void println(String msg) {
         if (!speedTest) {
             System.out.println(msg);
         }
     }
-    
+
     //region Funzioni
+    /*
     private static void testDownload() {
         try {
             DownloadedFile downloadedFile = gS.download("/circolari/download/393/0");
@@ -65,10 +111,12 @@ class TestClasses {
         }
 
     }
-
+*/
     private static void testNews(boolean forceRefresh) {
         logln("Get news");
-        List<News> allNews = gS.getAllNewsFromHome(forceRefresh);
+        HomePage homePage = gS.getHomePage(forceRefresh);
+        logln("News:");
+        List<News> allNews = homePage.getAllNewsFromHome();
         for (News news : allNews) {
             logln(news.toString());
         }
@@ -76,112 +124,141 @@ class TestClasses {
 
     private static void testVotes(boolean forceRefresh) {
         logln("Get votes");
-        Map<String, List<Vote>> votes = gS.getAllVotes(forceRefresh);
+        VotesPage votesPage = gS.getVotesPage(forceRefresh);
+        Map<String, List<Vote>> votes = votesPage.getAllVotes();
         for (String m : votes.keySet()) {
             logln(m + ": " + votes.get(m).toString());
         }
-        logln(votes.get("Ed. civica").get(0).allToString());
-        logln(votes.get("Ed. civica").get(1).allToString());
+        logln("Get votes with subject filter");
+        List<List<Vote>> filterVotes = votesPage.getAllVotes("Italiano");
+        for (Vote vote : filterVotes.get(0)) { //Prendo i voti del primo quadrimestre
+            logln(vote.toString());
+            logln(vote.quarterly);
+        }
     }
 
     private static void testAlerts(boolean forceRefresh) {
         logln("Get avvisi");
-        List<Alert> allAvvisi = gS.getAllAlerts(1, forceRefresh);
+        List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
         for (Alert a : allAvvisi) {
             logln(a.toString());
         }
+        logln("Marking first alert as read");
+        gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
+        logln("Get first alert with filter");
+        logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
+        logln("Get details of first alert");
         allAvvisi.get(0).getDetails(gS);
         logln(allAvvisi.get(0).toString());
     }
 
     private static void testHomeworks(boolean forceRefresh) {
         logln("Get homeworks");
-        List<Homework> allHomework = gS.getAllHomeworksWithoutDetails("2021-03", forceRefresh);
+        List<Homework> allHomework = gS.getPinBoardPage(forceRefresh).getAllHomeworksWithoutDetails("2021-03");
         for (Homework a : allHomework) {
             logln(a.toString());
         }
-        logln(gS.getHomework("2021-03-07").toString());
+        //logln(gS.getHomework("2021-03-07").toString());
     }
 
     private static void testTests(boolean forceRefresh) {
         logln("Get tests");
-        List<Test> allTests = gS.getAllTestsWithoutDetails("2021-03", forceRefresh);
+        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails("2021-03");
         for (Test a : allTests) {
             logln(a.toString());
         }
-        logln(gS.getTest("2021-03-07").toString());
+        //logln(gS.getTest("2021-03-07").toString());
     }
 
     private static void testNewsletters(boolean forceRefresh) {
         logln("Get newsletters");
-        List<Newsletter> allNewsletters = gS.getAllNewsletters(0, forceRefresh);
+        List<Newsletter> allNewsletters = gS.getNewslettersPage(forceRefresh).getAllNewsletters(1);
         for (Newsletter a : allNewsletters) {
             logln(a.toString());
         }
-        logln(String.valueOf(allNewsletters.get(0).attachments != null));
-        logln(gS.getAllNewslettersWithFilter(false, "2020-09", "Comunicazione", 1, true).toString());
+        logln("Marking first newsletter as read");
+        gS.getNewslettersPage(false).markNewsletterAsRead(allNewsletters.get(0));
+        logln("First newsletter has attachments?");
+        logln(String.valueOf(allNewsletters.get(0).attachmentsUrl != null));
+        logln("Get newsletters with a filter");
+        logln(gS.getNewslettersPage(false).getAllNewslettersWithFilter(false, "", "f").toString());
     }
 
     public static void testLessons(boolean forceRefresh) {
         logln("Get lessons");
-        List<Lesson> lessons = gS.getAllLessons("2021-05-22", forceRefresh);
+        List<Lesson> lessons = gS.getLessonsPage(forceRefresh).getAllLessonsFromDate("2021-05-22");
         for (Lesson a : lessons) {
             logln(a.toString());
         }
-        logln(lessons.get(2).activities);
-        logln(gS.getAllLessonsOfSubject("Informatica", true).get(0).toString());
+        logln("Get activities second lesson");
+        logln(lessons.get(0).activities);
     }
 
-    public static void testReportCard(boolean forceRefresh) {
-        logln("Get report card");
-        ReportCard reportCard = gS.getReportCard(false, forceRefresh);
-        if (reportCard.exists) {
-            logln(reportCard.toString());
+    public static void testArgumentsActivities(boolean forceRefresh) {
+        logln("Get arguments and activities");
+        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Informatica");
+        for (Lesson a : lessons) {
+            logln(a.toString());
         }
     }
 
+    public static void testReportCard(boolean forceRefresh) {
+        logln("ReportCard disponibile in futuro");
+        /*logln("Get report card");
+        ReportCard reportCard = gS.getReportCard(false, forceRefresh);
+        if (reportCard.exists) {
+            logln(reportCard.toString());
+        }*/
+    } //TODO: completare una volta finito ReportCardPage
+
     public static void testDocuments(boolean forceRefresh) {
         logln("Get documents");
-        List<Document> documents = gS.getDocuments(forceRefresh);
+        List<Document> documents = gS.getDocumentsPage(forceRefresh).getDocuments();
         for (Document doc : documents)
             logln(doc.toString());
     }
 
-    public static void testAutorization(boolean forceRefresh) {
-        logln("Get autorization");
-        Autorization autorization = gS.getAutorizations(forceRefresh);
-        logln(autorization.toString());
+    public static void testAuthorization(boolean forceRefresh) {
+        logln("Get authorization");
+        Authorization authorization = gS.getAuthorizationsPage(forceRefresh).getAuthorizations();
+        logln(authorization.toString());
     }
 
     public static void testNotes(boolean forceRefresh) {
         logln("Get disciplinary notes");
-        List<DisciplNotice> allDN = gS.getAllDisciplNotices(forceRefresh);
-        for (DisciplNotice a : allDN) {
+        List<DisciplinaryNotices> allDN = gS.getDisciplinaryNotesPage(forceRefresh).getAllDisciplinaryNotices();
+        for (DisciplinaryNotices a : allDN) {
             logln(a.toString());
         }
     }
 
     public static void testAbsences(boolean forceRefresh) {
         logln("Get absences");
-        List<Absence> allAbsences = gS.getAllAbsences(forceRefresh);
+        AbsencesPage absencesPage = gS.getAbsencesPage(forceRefresh);
+        List<Absence> allAbsences = absencesPage.getAllAbsences();
         for (Absence a : allAbsences) {
             logln(a.toString());
         }
+        logln(absencesPage.getAllExtraInfo());
     }
 
+
     private static void startLogin() {
-        gS = new GiuaScraper(user, password, true);
+        startLogin(null);
+    }
+
+    private static void startLogin(com.giua.utils.LoggerManager lm) {
+        gS = new GiuaScraper(user, password, true, lm);
         gS.login();
 
         //Document doc = gS.getPage("");
         logln("Account type: " + gS.getUserTypeEnum());
+        logln("Ultimo accesso: " + gS.getHomePage(false).getLastAccessTime().toString());
     }
     //endregion
-    
-    
-    
-    
-    private static void testSpeed(){
+
+
+    private static void testSpeed() {
 
         logEnabled = false;
         List<Long> tSite = new Vector<>();
@@ -192,17 +269,18 @@ class TestClasses {
         List<Long> tPhasesTot = new Vector<>();
         int errors = 0;
 
+        LoggerManager loggerManager = new LoggerManager("GiuaScraper-silent");
+
+        System.out.println("Legenda:  |   LOGIN    |  CACHE   | SESSIONE |");
+        System.out.println("          [############|##########|##########]");
 
         int i = 0;
 
-        while(i < speedTestAmount) {
-
-
-
+        while (i < speedTestAmount) {
             long t1;
             long t2;
 
-            System.out.println("Test " + (i+1) + "/" + speedTestAmount);
+            System.out.println("Test " + (i + 1) + "/" + speedTestAmount);
             System.out.print("Progress: [");
 
             try {
@@ -227,7 +305,7 @@ class TestClasses {
 
 
                 t1 = nanoTime();
-                startLogin();
+                startLogin(loggerManager);
 
                 testNews(true);
                 System.out.print("#");
@@ -259,7 +337,6 @@ class TestClasses {
 
 
                 t1 = nanoTime();
-
                 System.out.print("|");
                 testNews(false);
                 System.out.print("#");
@@ -289,7 +366,7 @@ class TestClasses {
                 t1 = nanoTime();
                 String phpsessid = gS.getCookie();
 
-                gS = new GiuaScraper(user, password, phpsessid, true);
+                gS = new GiuaScraper(user, password, phpsessid, true, loggerManager);
                 gS.login();
 
                 System.out.print("|");
@@ -415,7 +492,7 @@ class TestClasses {
 
 
     private static void testAll() {
-        
+
         if(speedTest){
             System.out.println("--------STARTING SPEED TEST-----");
             testSpeed();
@@ -473,7 +550,8 @@ class TestClasses {
         testLessons(true);
 
         System.out.println("--------PAGELLA--------");
-        testReportCard(true);
+        System.out.println("Non disponibile");
+        //testReportCard(true);
 
         System.out.println("--------NOTE--------");
         testNotes(true);
@@ -482,10 +560,13 @@ class TestClasses {
         testAbsences(true);
 
         System.out.println("--------AUTORIZZAZIONI--------");
-        testAutorization(true);
+        testAuthorization(true);
 
         System.out.println("--------DOCUMENTI--------");
         testDocuments(true);
+
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(true);
 
         t2 = nanoTime();
         tPhase1 = t2 - t1;
@@ -505,6 +586,7 @@ class TestClasses {
 
         //Document doc = gS.getPage("");
         System.out.println("Account type: " + gS.getUserTypeEnum());
+        logln("Ultimo accesso: " + gS.getHomePage(false).getLastAccessTime().toString());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
@@ -530,7 +612,8 @@ class TestClasses {
         testLessons(false);
 
         System.out.println("--------PAGELLA--------");
-        testReportCard(false);
+        System.out.println("Non disponibile");
+        //testReportCard(false);
 
         System.out.println("--------NOTE--------");
         testNotes(false);
@@ -539,10 +622,13 @@ class TestClasses {
         testAbsences(false);
 
         System.out.println("--------AUTORIZZAZIONI--------");
-        testAutorization(false);
+        testAuthorization(false);
 
         System.out.println("--------DOCUMENTI--------");
         testDocuments(false);
+
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(false);
 
         t2 = nanoTime();
         tPhase2 = t2 - t1;
@@ -558,12 +644,13 @@ class TestClasses {
         System.out.println("Logout...");
         String phpsessid = gS.getCookie();
 
-        gS = new GiuaScraper(user, password, phpsessid, true);
+        gS = new GiuaScraper(user, password, phpsessid, true, null);
         gS.login();
         System.out.println("Created new gS variable");
 
 
         System.out.println("Account type: " + gS.getUserTypeEnum());
+        logln("Ultimo accesso: " + gS.getHomePage(false).getLastAccessTime().toString());
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
@@ -589,7 +676,7 @@ class TestClasses {
         testLessons(true);
 
         System.out.println("--------PAGELLA--------");
-        testReportCard(true);
+        //testReportCard(true);
 
         System.out.println("--------NOTE--------");
         testNotes(true);
@@ -598,10 +685,13 @@ class TestClasses {
         testAbsences(true);
 
         System.out.println("--------AUTORIZZAZIONI--------");
-        testAutorization(true);
+        testAuthorization(true);
 
         System.out.println("--------DOCUMENTI--------");
         testDocuments(true);
+
+        System.out.println("--------ARGOMENTI E ATTIVITA--------");
+        testArgumentsActivities(true);
 
         t2 = nanoTime();
         tPhase3 = t2 - t1;
@@ -619,99 +709,16 @@ class TestClasses {
         System.out.println("\\--------------------------------------------------------");
     }
 
-    //Main function, only used on the console version for testing
-    public static void main(String[] args) {
-        try {
-            user = args[0];
-            password = args[1];
-        } catch(Exception e) {
 
-            Scanner sc = new Scanner(System.in);
+    private static class LoggerManager extends com.giua.utils.LoggerManager {
 
-            if (user.equals("") && password.equals("")) {
-                logln("Please enter username: ");
-                user = sc.nextLine();
-                logln("Password: ");
-                password = sc.nextLine();
-            }
+        public LoggerManager(String tag) {
+            super(tag);
         }
 
-        try {
-            logEnabled = Boolean.parseBoolean(args[2]);
-        } catch (Exception ignored) {
+        @Override
+        protected void saveToData(Log log) {
+            //Do nothing
         }
-
-        try {
-            speedTest = Boolean.parseBoolean(args[3]);
-        } catch (Exception ignored) {
-        }
-
-        try {
-            speedTestAmount = Integer.parseInt(args[4]);
-        } catch (Exception ignored) {
-        }
-
-        GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
-
-        startLogin();
-        //gS = new GiuaScraper(user, password, true);
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-
-        System.out.println(gS.getNearHomeworks(true));
-        System.out.println(gS.getNearTests(true));
-
-        //logln(gS.getAllObservations(true).toString());
-
-
-        /*List<Newsletter> nl = gS.getAllNewsletters(0, false);
-        List<Alert> al = gS.getAllAlerts(0, false);
-        Map<String, List<Vote>> vot = gS.getAllVotes(false);
-        List<Homework> hw = gS.getAllHomeworksWithoutDetails("2021-03", false);
-
-        al.get(0).getDetails(gS);
-
-
-        //logln(nl.toJSON());
-        //logln(gS.getAllVotes(false).get("Italiano").get(0).toJSON());
-
-        long t1 = nanoTime();
-        try {
-            new JsonHelper().saveNewslettersToFile("newsletters.json",nl);
-            new JsonHelper().saveVotesToFile("votes.json",vot);
-            new JsonHelper().saveAlertsToFile("alerts.json", al);
-            new JsonHelper().saveHomeworksToFile("homeworks.json", hw);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        long t2 = nanoTime();
-
-        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
-
-        t1 = nanoTime();
-        List<Newsletter> robe = new JsonHelper().parseJsonForNewsletters(Paths.get("newsletters.json"));
-        Map<String, List<Vote>> votesOut = new JsonHelper().parseJsonForVotes(Paths.get("votes.json"));
-        List<Alert> alertsOut = new JsonHelper().parseJsonForAlerts(Paths.get("alerts.json"));
-        t2 = nanoTime();
-
-        logln("---- HO IMPIEGATO " + (t2 / 1000000 - t1 / 1000000) + "ms");
-
-        for(Newsletter n : robe){
-            logln(n.toString());
-        }
-
-        for (String m : votesOut.keySet()) {
-            logln(m + ": " + votesOut.get(m).toString());
-        }
-
-        for (Alert a : alertsOut) {
-            logln(a.toString());
-        }
-
-        /*JsonHelper jsonHelper = new JsonHelper();
-        jsonHelper.saveVotesToString(vot);*/
-
-
     }
 }

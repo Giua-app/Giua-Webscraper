@@ -17,18 +17,23 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.objects;
+package com.giua.pages;
 
-public class News{
-    public final String newsText;
-    public final String url;
+import com.giua.webscraper.GiuaScraper;
+import org.jsoup.nodes.Document;
 
-    public News(String newsText, String url) {
-        this.newsText = newsText;
-        this.url = url;
+public class ReportcardPage implements IPage{
+    private GiuaScraper gS;
+    private Document doc;
+
+    public ReportcardPage(GiuaScraper gS){
+        this.gS = gS;
+        refreshPage();
     }
 
-    public String toString() {
-        return newsText + "; " + url;
+
+    @Override
+    public void refreshPage() {
+        doc = gS.getPage(UrlPaths.REPORTCARD_PAGE);
     }
 }

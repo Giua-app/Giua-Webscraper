@@ -17,18 +17,18 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.objects;
+package com.giua.objects.interviews;
 
-public class News{
-    public final String newsText;
-    public final String url;
+public class BookingOption {
+    public final String text;
+    public final String value;
 
-    public News(String newsText, String url) {
-        this.newsText = newsText;
-        this.url = url;
+    public BookingOption(String text, String value) {
+        this.text = text;
+        this.value = value;
     }
 
     public String toString() {
-        return newsText + "; " + url;
+        return "Testo: " + text + " ; Valore: " + value;
     }
 }

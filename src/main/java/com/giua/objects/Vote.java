@@ -19,24 +19,25 @@
 
 package com.giua.objects;
 
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.JsonBuilder;
 
 public class Vote{
     public final String value;
-    public final boolean isFirstQuarterly;
+    public final String quarterly;
     public final boolean isAsterisk;
     public final String date;
     public final String judgement;
     public final String testType;
     public final String arguments;
 
-    public Vote(String value, String date, String testType, String arguments, String judgement, boolean isFirstQuarterly, boolean isAsterisk) {
+    public Vote(String value, String date, String testType, String arguments, String judgement, String quarterly, boolean isAsterisk) {
         this.value = value;
         this.date = date;
         this.testType = testType;
         this.arguments = arguments;
         this.judgement = judgement;
-        this.isFirstQuarterly = isFirstQuarterly;
+        this.quarterly = quarterly;
         this.isAsterisk = isAsterisk;
     }
 
@@ -74,12 +75,16 @@ public class Vote{
     public String toJSON() {
         return new JsonBuilder("[{")
                 .addValue("value", this.value)
-                .addValue("isFirstQuarterly", this.isFirstQuarterly)
+                .addValue("isFirstQuarterly", this.quarterly)
                 .addValue("isAsterisk", this.isAsterisk)
                 .addValue("date", this.date)
                 .addValue("judgement", JsonBuilder.escape(this.judgement))
                 .addValue("type", this.testType)
                 .addValue("arguments", JsonBuilder.escape(this.arguments))
                 .build("}]");
+    }
+
+    public int quarterlyToInt() {
+        return GiuaScraperUtils.quarterlyToInt(quarterly);
     }
 }

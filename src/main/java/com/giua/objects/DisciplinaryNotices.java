@@ -19,23 +19,29 @@
 
 package com.giua.objects;
 
-import java.io.Serializable;
+import com.giua.utils.GiuaScraperUtils;
 
-public class DisciplNotice{
-    public String date;
-    public String type;
-    public String details;
-    public String countermeasures;
-    public String authorOfDetails;
-    public String authorOfCountermeasures;
+public class DisciplinaryNotices {
+    public final String date;
+    public final String type;
+    public final String details;
+    public final String countermeasures;
+    public final String authorOfDetails;
+    public final String authorOfCountermeasures;
+    public final String quarterly;
 
-    public DisciplNotice(String date, String type, String details, String countermeasures, String authorOfDetails, String authorOfCountermeasures) {
+    public DisciplinaryNotices(String date, String type, String details, String countermeasures, String authorOfDetails, String authorOfCountermeasures, String quarter) {
         this.date = date;
         this.type = type;
         this.details = details;
         this.countermeasures = countermeasures;
         this.authorOfDetails = authorOfDetails;
         this.authorOfCountermeasures = authorOfCountermeasures;
+        this.quarterly = quarter;
+    }
+
+    public int quarterlyToInt() {
+        return GiuaScraperUtils.quarterlyToInt(quarterly);
     }
 
     public String toString() {

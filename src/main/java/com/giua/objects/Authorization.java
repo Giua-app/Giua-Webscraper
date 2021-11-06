@@ -19,16 +19,16 @@
 
 package com.giua.objects;
 
-public class News{
-    public final String newsText;
-    public final String url;
+public class Authorization {
+    public final String entry;
+    public final String exit;
 
-    public News(String newsText, String url) {
-        this.newsText = newsText;
-        this.url = url;
+    public Authorization(String entry, String exit) {
+        this.entry = entry;
+        this.exit = exit;
     }
 
     public String toString() {
-        return newsText + "; " + url;
+        return entry + "; " + exit;
     }
 }

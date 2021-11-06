@@ -17,18 +17,11 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.objects;
+package com.giua.pages;
 
-public class News{
-    public final String newsText;
-    public final String url;
-
-    public News(String newsText, String url) {
-        this.newsText = newsText;
-        this.url = url;
-    }
-
-    public String toString() {
-        return newsText + "; " + url;
-    }
+public interface IPage {
+    /**
+     * Ricarica la pagina attuale e quindi aggiorna i dati con una richiesta HTTP
+     */
+    void refreshPage();
 }

@@ -19,15 +19,20 @@
 
 package com.giua.objects;
 
-public class Lesson{
-    public final String date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Lesson {
+    public final Date date;
     public final String time;
     public final String subject;
     public final String arguments;
     public final String activities;
     public final boolean exists;
+    public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
 
-    public Lesson(String date, String time, String subject, String arguments, String activities, boolean exists) {
+    public Lesson(Date date, String time, String subject, String arguments, String activities, boolean exists) {
         this.date = date;
         this.time = time;
         this.subject = subject;
@@ -36,8 +41,25 @@ public class Lesson{
         this.exists = exists;
     }
 
-    public String toString(){
-        return this.date + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists;
+    public Lesson(String date, String time, String subject, String arguments, String activities, boolean exists) {
+        try {
+            this.date = dateFormat.parse(date);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Impossibile fare parsing della stringa per una data", e);
+        }
+        this.time = time;
+        this.subject = subject;
+        this.arguments = arguments;
+        this.activities = activities;
+        this.exists = exists;
+    }
+
+    public String toString() {
+        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists;
+    }
+
+    public String getDateToString() {
+        return dateFormat.format(date);
     }
 
 }

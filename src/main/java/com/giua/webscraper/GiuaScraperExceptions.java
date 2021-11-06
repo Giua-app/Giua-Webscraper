@@ -28,10 +28,21 @@ public class GiuaScraperExceptions implements Serializable {
 
     public static class UnableToLogin extends RuntimeException {
         public UnableToLogin(String errorMessage, Throwable err) {
-            super("Unable to login: " + errorMessage,err);
+            super("Unable to login: " + errorMessage, err);
         }
+
         public UnableToLogin(String errorMessage) {
             super("Unable to login: " + errorMessage);
+        }
+    }
+
+    public static class MaintenanceHasEmptyDates extends RuntimeException {
+        public MaintenanceHasEmptyDates(String errorMessage) {
+            super(errorMessage);
+        }
+
+        public MaintenanceHasEmptyDates(String errorMessage, Throwable err) {
+            super(errorMessage, err);
         }
     }
 

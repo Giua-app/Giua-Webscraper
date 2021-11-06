@@ -17,18 +17,23 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.objects;
+package com.giua.objects.interviews;
 
-public class Autorization {
-    public final String entry;
-    public final String exit;
+public class Interview {
 
-    public Autorization(String entry, String exit) {
-        this.entry = entry;
-        this.exit = exit;
+    public final String teacher;
+    public final String subject;
+    public final String meet;
+    public final String bookingLink;
+
+    public Interview(String teacher, String subject, String meet, String bookingLink) {
+        this.teacher = teacher;
+        this.subject = subject;
+        this.meet = meet;
+        this.bookingLink = bookingLink;
     }
 
     public String toString() {
-        return entry + "; " + exit;
+        return "Docente: " + teacher + " ; Materia: " + subject + " ; Ricevimento: " + meet + " ; Link prenotazione: " + bookingLink;
     }
 }

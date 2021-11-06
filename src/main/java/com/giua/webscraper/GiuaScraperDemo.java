@@ -22,21 +22,18 @@ package com.giua.webscraper;
 import com.giua.objects.*;
 import org.jsoup.nodes.Document;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class GiuaScraperDemo {
 
-    public static Autorization getAutorizations() {
-        return new Autorization("08:40", "12:20");
+    public static Authorization getAutorizations() {
+        return new Authorization("08:40", "12:20");
     }
 
     public static List<Observations> getAllObservations() throws GiuaScraperExceptions.UnsupportedAccount {
         List<Observations> obs = new Vector<>();
-        obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo"));
-        obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia"));
+        obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo", "Primo Quadrimestre"));
+        obs.add(new Observations("2021-11-18", "Storia", "Taziano Napolitani", "L'alunno ha fatto un brutto compito di storia", "Secondo Quadrimestre"));
         return obs;
 
     }
@@ -60,10 +57,10 @@ public class GiuaScraperDemo {
 
     }
 
-    public static List<DisciplNotice> getAllDisciplNotices() {
-        List<DisciplNotice> disciplNotices = new Vector<>();
-        disciplNotices.add(new DisciplNotice("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa"));
-        disciplNotices.add(new DisciplNotice("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa"));
+    public static List<DisciplinaryNotices> getAllDisciplNotices() {
+        List<DisciplinaryNotices> disciplNotices = new Vector<>();
+        disciplNotices.add(new DisciplinaryNotices("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa", "Primo quadrimestre"));
+        disciplNotices.add(new DisciplinaryNotices("2021-10-23", "Nota di classe", "Gli alunni mi guardano mentre spiego", "Espulsione dalla scuola per tutta la classe", "Quartilla Costa", "Quartilla Costa", "Secondo quadrimestre"));
         return disciplNotices;
 
     }
@@ -77,7 +74,7 @@ public class GiuaScraperDemo {
         votes.put("Geografia", List.of("5", "8"));
         votes.put("Sistemi", List.of("6", "8"));
         votes.put("Scienze", List.of("4", "8"));
-        return new ReportCard(true, votes, "AMMESSO", "2", true);
+        return new ReportCard("Primo quadrimestre", votes, "AMMESSO", "2", true);
 
 
     }
@@ -145,24 +142,24 @@ public class GiuaScraperDemo {
     public static Map<String, List<Vote>> getAllVotes() {
         Map<String, List<Vote>> votes = new HashMap<>();
         List<Vote> itaVotes = new Vector<>();
-        itaVotes.add(new Vote("9-", "10 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
-        itaVotes.add(new Vote("2+", "11 Ottobre", "Orale", "Poeti medievali parte 2", "", true, false));
-        itaVotes.add(new Vote("4", "12 Ottobre", "Scritto", "", "", true, false));
-        itaVotes.add(new Vote("7", "13 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
-        itaVotes.add(new Vote("*", "14 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
-        itaVotes.add(new Vote("4", "15 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
-        itaVotes.add(new Vote("2", "16 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
-        itaVotes.add(new Vote("9", "17 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
+        itaVotes.add(new Vote("9-", "10 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", "Primo Quadrimestre", false));
+        itaVotes.add(new Vote("2+", "11 Ottobre", "Orale", "Poeti medievali parte 2", "", "Primo Quadrimestre", false));
+        itaVotes.add(new Vote("4", "12 Ottobre", "Scritto", "", "", "Primo Quadrimestre", false));
+        itaVotes.add(new Vote("7", "13 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", "Primo Quadrimestre", false));
+        itaVotes.add(new Vote("*", "14 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", "Secondo Quadrimestre", true));
+        itaVotes.add(new Vote("4", "15 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", "Secondo Quadrimestre", false));
+        itaVotes.add(new Vote("2", "16 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", "Secondo Quadrimestre", false));
+        itaVotes.add(new Vote("9", "17 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", "Secondo Quadrimestre", false));
         votes.put("Italiano", itaVotes);
         List<Vote> storiaVotes = new Vector<>();
-        storiaVotes.add(new Vote("9-", "18 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", true, false));
-        storiaVotes.add(new Vote("2+", "18 Ottobre", "Orale", "Poeti medievali parte 2", "", true, false));
-        storiaVotes.add(new Vote("4", "18 Ottobre", "Scritto", "", "", true, false));
-        storiaVotes.add(new Vote("7", "18 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", true, false));
-        storiaVotes.add(new Vote("*", "19 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", true, true));
-        storiaVotes.add(new Vote("4", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", false, false));
-        storiaVotes.add(new Vote("2", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", false, false));
-        storiaVotes.add(new Vote("9", "20 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", false, false));
+        storiaVotes.add(new Vote("9-", "18 Ottobre", "Scritto", "Poeti medievali", "L'alunno e' stato bravo", "Primo Quadrimestre", false));
+        storiaVotes.add(new Vote("2+", "18 Ottobre", "Orale", "Poeti medievali parte 2", "", "Primo Quadrimestre", false));
+        storiaVotes.add(new Vote("4", "18 Ottobre", "Scritto", "", "", "Primo Quadrimestre", false));
+        storiaVotes.add(new Vote("7", "18 Ottobre", "Pratico", "", "E' stato giudizioso (non so piu cosa scrivere)", "Primo Quadrimestre", false));
+        storiaVotes.add(new Vote("*", "19 Ottobre", "Scritto", "Poeti medievali la vendetta", "L'alunno e' stato bravo", "Secondo Quadrimestre", true));
+        storiaVotes.add(new Vote("4", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 2", "Bravo!", "Secondo Quadrimestre", false));
+        storiaVotes.add(new Vote("2", "19 Ottobre", "Scritto", "Poeti medievali la vendetta 3 ", "", "Secondo Quadrimestre", false));
+        storiaVotes.add(new Vote("9", "20 Ottobre", "Scritto", "Poeti medievali la vendetta 4", "", "Secondo Quadrimestre", false));
         votes.put("Italiano", storiaVotes);
         return votes;
     }
@@ -182,6 +179,10 @@ public class GiuaScraperDemo {
         lessons.add(new Lesson("2021-11-01", "10:30-11:30", "Storia", "", "Guardato un film", true));
         lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));
         return lessons;
+    }
+
+    public static Date getLastAccessTime() {
+        return new Date();
     }
 
     public static Document getPage(String page) {
@@ -215,4 +216,5 @@ public class GiuaScraperDemo {
     public static GiuaScraper.userTypes getUserTypeEnum() {
         return GiuaScraper.userTypes.DEMO;
     }
+
 }

@@ -20,7 +20,10 @@
 
 package com.giua.webscraper;
 
-import com.giua.objects.*;
+import com.giua.objects.Maintenance;
+import com.giua.objects.ReportCard;
+import com.giua.pages.*;
+import com.giua.utils.LoggerManager;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -30,9 +33,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.Objects;
 
 /* -- Giua Webscraper ALPHA -- */
 // Tested with version 1.4.0 of giua@school
@@ -40,42 +42,45 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
 	private String user;
-	private final String password;
-	private String userType = "";
-	private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
-	private static boolean debugMode;
-	final public boolean cacheable;        //Indica se si possono utilizzare le cache
-	private String PHPSESSID = "";
-	private Connection session;
-	private long lastGetPageTime = 0;
-	public final boolean demoMode;
+    private String realUsername;
+    private final String password;
+    private String userType = "";
+    private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
+    private static boolean debugMode;
+    final public boolean cacheable;        //Indica se si possono utilizzare le cache
+    private String PHPSESSID = "";
+    private Connection session;
+    private long lastGetPageTime = 0;
+    private final boolean demoMode;
+    private static LoggerManager lm = new LoggerManager("GiuaScraper");
 
-	public enum userTypes {
-		STUDENT,
-		PARENT,
-		TEACHER,
-		ADMIN,
-		PRINCIPAL,
-		ATA,
-		DEMO
-	}
+    public enum userTypes {
+        STUDENT,
+        PARENT,
+        TEACHER,
+        ADMIN,
+        PRINCIPAL,
+        ATA,
+        DEMO
+    }
 
 
 	//region Cache
-	private Map<String, List<Vote>> allVotesCache = null;
-	private List<Newsletter> allNewslettersCache = null;
-	private List<Alert> allAlertsCache = null;
-	private List<Test> allTestsCache = null;
-	private List<Homework> allHomeworksCache = null;
-	private List<Lesson> allLessonsCache = null;
+	private AbsencesPage absencesPageCache = null;
+	private AlertsPage alertsPageCache = null;
+	private ArgumentsActivitiesPage argumentsActivitiesPageCache = null;
+	private AuthorizationsPage authorizationsPageCache = null;
+	private DocumentsPage documentsPageCache = null;
+	private HomePage homePageCache = null;
+	private InterviewsPage interviewsPageCache = null;
+	private LessonsPage lessonsPageCache = null;
+	private NewslettersPage newslettersPageCache = null;
+	private DisciplinaryNoticesPage disciplinaryNotesPageCache = null;
+	private ObservationsPage observationsPageCache = null;
+	private PinBoardPage pinBoardPageCache = null;
 	private ReportCard reportCardCache = null;
-	private List<DisciplNotice> allDisciplNoticesCache = null;
-	private List<Absence> allAbsencesCache = null;
-	private List<News> allNewsFromHomeCache = null;
+	private VotesPage votesPageCache = null;
 	private Document getPageCache = null;
-	private List<Observations> allObservationsCache = null;
-	private Autorization autorizationCache = null;
-	private List<com.giua.objects.Document> documentsCache = null;
 	//endregion
 
 	//endregion
@@ -103,311 +108,306 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return GiuaScraper.SiteURL;
 	}
 
-    /**
-     * Permette di ottenere il cookie della sessione "PHPSESSID"
-     *
-     * @return il cookie "PHPSESSID"
-     */
+	/**
+	 * Permette di ottenere il cookie della sessione "PHPSESSID"
+	 *
+	 * @return il cookie "PHPSESSID"
+	 */
 	public String getCookie() {
-		//FIXME: quando viene usata nell app è come se la sessione non avesse cookie salvati, comunque funziona bene anche ritornando il PHPSESSID
-		//return session.cookieStore().getCookies().get(0).getValue();
 		return PHPSESSID;
 	}
 
-    /**
-     * Permette di ottenere il nome utente
-     *
-     * @return user
-     */
+	/**
+	 * Ottiene il nome utente utilizzato per loggarsi
+	 */
 	public String getUser() {
 		return user;
+	}
+
+	/**
+	 * Ottiene il nome utente reale della persona se caricato.
+	 */
+	public String getRealUsername(){
+		return realUsername;
+	}
+
+	public Connection getSession(){
+		return session;
+	}
+
+	public boolean isDemoMode(){
+		return demoMode;
 	}
 
 	//endregion
 
 	//region Costruttori della classe
 
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user es. nome.utente.f1
-	 * @param password
-	 */
-	public GiuaScraper(String user, String password) {
-		this.user = user;
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user     es. nome.utente.f1
+     * @param password password
+     * @param newLm    istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                 Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = true;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, boolean cacheable, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param newCookie il cookie della sessione
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, boolean cacheable, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = false;
+        lm.d("---GiuaScraper avviato---");
+        PHPSESSID = newCookie;
+        initiateSession(newCookie);
+    }
+
+    /**
+     * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
+     *
+     * @param user      es. nome.utente.f1
+     * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+     *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = demoMode;
+        lm.d("---GiuaScraper avviato---");
+        initiateSession();
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
+     *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
+     * @param newCookie il cookie della sessione
+     * @param cacheable true se deve usare la cache, false altrimenti
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
+        this.password = password;
+        this.cacheable = cacheable;
+        this.demoMode = demoMode;
+        lm.d("---GiuaScraper avviato---");
+        PHPSESSID = newCookie;
+        initiateSession(newCookie);
+    }
+
+    /**
+     * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
+     * effettuato con le credenziali
+     *
+     * @param user      es. nome.utente.f1
+     * @param password  password
+     * @param newCookie il cookie della sessione
+     * @param newLm     istanza {@link LoggerManager} che lo scraper deve usare per scrivere i suoi log.
+     *                  Mettere {@code null} per usare il LoggerManager di default che stampa i log su console
+     */
+    public GiuaScraper(String user, String password, String newCookie, LoggerManager newLm) {
+        if (newLm != null) {
+            lm = newLm;
+        }
+        this.user = user;
 		this.password = password;
 		this.cacheable = true;
 		this.demoMode = false;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user es. nome.utente.f1
-	 * @param password
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, boolean cacheable){
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 * @param user es. nome.utente.f1
-	 * @param password
-	 * @param newCookie il cookie della sessione
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable) {
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
-		PHPSESSID = newCookie;
-		initiateSession(newCookie);
-	}
-
-	/**
-	 * Costruttore della classe {@link GiuaScraper} che permette lo scraping della pagina del Giua
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
-	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, boolean cacheable, boolean demoMode) {
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = demoMode;
-		logln("GiuaScraper: started");
-		initiateSession();
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param demoMode  Indica se la modalità demo è attiva o no. Nella demo mode vengono generati dati non basati sulla realtà.
-	 *                  In questa modalità si tiene conto come giorno attuale il 01-11-2021
-	 * @param newCookie il cookie della sessione
-	 * @param cacheable true se deve usare la cache, false altrimenti
-	 */
-	public GiuaScraper(String user, String password, String newCookie, boolean cacheable, boolean demoMode) {
-		this.user = user;
-		this.password = password;
-		this.cacheable = cacheable;
-		this.demoMode = demoMode;
-		logln("GiuaScraper: started");
-		PHPSESSID = newCookie;
-		initiateSession(newCookie);
-	}
-
-	/**
-	 * Puoi usare questo per fare il login diretto con il phpsessid. Nel caso sia invalido, il login verrà
-	 * effettuato con le credenziali
-	 *
-	 * @param user      es. nome.utente.f1
-	 * @param password
-	 * @param newCookie il cookie della sessione
-	 */
-	public GiuaScraper(String user, String password, String newCookie) {
-		this.user = user;
-		this.password = password;
-		this.cacheable = true;
-		this.demoMode = false;
-		logln("GiuaScraper: started");
+		lm.d("---GiuaScraper avviato---");
 		PHPSESSID = newCookie;
 		initiateSession(newCookie);
 	}
 
 	//endregion
 
-	//region Funzioni per ottenere dati dal registro
-
-	private String getDocumentsToken() {
-		return Objects.requireNonNull(getPage("documenti/bacheca").getElementById("documento__token")).attr("value");
-	}
+	//region Metodi pages
 
 	/**
-	 * Ottiene una lista di {@code Document} con i filtri indicati nei parametri
-	 *
-	 * @param filterType Indica con un numero che filtro si vuole applicare:
-	 *                   0 - tutti i documenti;
-	 *                   1 - solo da leggere;
-	 *                   2 - programmi svolti;
-	 *                   3 - documenti del 15 maggio;
-	 *                   4 - altro
-	 * @param filterText Indica il testo da filtrare
-	 * @return Una lista di {@code Document}
+	 * Ottiene la pagina dei voti
 	 */
-	public List<com.giua.objects.Document> getDocumentsWithFilter(int filterType, String filterText, boolean forceRefresh) {
-		if (isMaintenanceActive())
-			throw new MaintenanceIsActiveException("The website is in maintenance");
-		if (documentsCache == null || forceRefresh) {
-			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
-			Document doc = null;
-
-			String filter;
-			if (filterType == 1)
-				filter = "X";
-			else if (filterType == 2)
-				filter = "P";
-			else if (filterType == 3)
-				filter = "M";
-			else if (filterType == 4)
-				filter = "G";
-			else
-				filter = "";
-
-			try {
-				doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/documenti/bacheca")
-						.data("documento[tipo]", filter)
-						.data("documento[titolo]", filterText)
-						.data("documento[_token]", getDocumentsToken())
-						.post();
-			} catch (IOException e) {
-				if (!isSiteWorking()) {
-					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-				}
-				e.printStackTrace();
-			}
-			Elements allDocumentsHTML = Objects.requireNonNull(doc).getElementsByTag("tbody");
-			if (!allDocumentsHTML.isEmpty())
-				allDocumentsHTML = allDocumentsHTML.get(0).children();
-			else {
-				if (cacheable)
-					documentsCache = returnAllDocuments;
-				return returnAllDocuments;
-			}
-
-			for (Element documentHTML : allDocumentsHTML) {
-				returnAllDocuments.add(new com.giua.objects.Document(
-						documentHTML.child(0).text(),
-						documentHTML.child(1).text().split(" - ")[0].split(" Classe: ")[0],
-						documentHTML.child(1).text().split(" - ")[2].split(" Materia: ")[0],
-						documentHTML.child(1).text().split(" - ")[1].replace(" ", ""),
-						documentHTML.child(3).child(0).attr("href")
-				));
-			}
-
-			if (cacheable)
-				documentsCache = returnAllDocuments;
-			return returnAllDocuments;
-		} else
-			return documentsCache;
-
-	}
-
-	/**
-	 * Ottiene una lista di {@code Document}
-	 *
-	 * @param forceRefresh
-	 * @return Una lista di {@code Document}
-	 */
-	public List<com.giua.objects.Document> getDocuments(boolean forceRefresh) {
-		if (documentsCache == null || forceRefresh) {
-			List<com.giua.objects.Document> returnAllDocuments = new Vector<>();
-			Document doc = getPage("documenti/bacheca");
-			Elements allDocumentsHTML = doc.getElementsByTag("tbody");
-			if (!allDocumentsHTML.isEmpty())
-				allDocumentsHTML = allDocumentsHTML.get(0).children();
-			else {
-				if (cacheable)
-					documentsCache = returnAllDocuments;
-				return returnAllDocuments;
-			}
-
-			for (Element documentHTML : allDocumentsHTML) {
-				returnAllDocuments.add(new com.giua.objects.Document(
-						documentHTML.child(0).text(),
-						documentHTML.child(1).text().split(" - ")[0].split("Classe: ")[1],
-						documentHTML.child(1).text().split(" - ")[2].split(" Materia: ")[0],
-						documentHTML.child(1).text().split(" - ")[1].replace(" ", ""),
-						documentHTML.child(3).child(0).attr("href")
-				));
-			}
-
-			if (cacheable)
-				documentsCache = returnAllDocuments;
-			return returnAllDocuments;
-		} else
-			return documentsCache;
-
-	}
-
-	@Deprecated
-	public Autorization getAutorizations(boolean forceRefresh) {
-		if (demoMode)
-			return GiuaScraperDemo.getAutorizations();
-		if (autorizationCache == null || forceRefresh) {
-			Document doc = getPage("genitori/deroghe/");
-			Elements textsHTML = doc.getElementsByClass("gs-text-normal gs-big");
-			String entry = textsHTML.get(0).text();
-			String exit = textsHTML.get(1).text();
-
-			if (cacheable)
-				autorizationCache = new Autorization(entry, exit);
-			return new Autorization(entry, exit);
-		} else
-			return autorizationCache;
-	}
-
-	/**
-	 * Ottiene le osservazioni e le ritorna in una lista.
-	 * ATTENZIONE! Solo il genitore può accedervi
-	 *
-	 * @return Una lista di {@code Observations} contenente le osservazioni
-	 * @throws UnsupportedAccount Quando si è un genitore
-	 */
-	public List<Observations> getAllObservations(boolean forceRefresh) throws UnsupportedAccount {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllObservations();
-		}
-		if (getUserTypeEnum() != userTypes.PARENT)
-			throw new UnsupportedAccount("Only PARENT account type can request observations page");
-		if (allObservationsCache == null || forceRefresh) {
-			List<Observations> returnAllObs = new Vector<>();
-			Document doc = getPage("genitori/osservazioni/");
-			Elements obsTables = doc.getElementsByTag("tbody"); //Primo e Secondo quadrimestre
-			//TODO: aggiungere supporto per quadrimestri
-
-			for (Element el : obsTables) {
-				logln("robe prima - " + el.html());
-
-				for (Element el2 : el.children()) {
-					returnAllObs.add(new Observations(
-							el2.child(0).child(0).text(), //Data
-							el2.child(1).child(0).text(), //Materia
-							el2.child(1).child(2).text(), //Insegnante
-							el2.child(2).text()           //Testo
-					));
-
-				}
-			}
-
+	public VotesPage getVotesPage(boolean forceRefresh) {
+		if (votesPageCache == null || forceRefresh) {
 			if (cacheable) {
-				allObservationsCache = returnAllObs;
-			}
-			return returnAllObs;
-
-		} else {
-			return allObservationsCache;
-		}
+				votesPageCache = new VotesPage(this);
+				return votesPageCache;
+			} else
+				return new VotesPage(this);
+		} else
+			return votesPageCache;
 	}
 
+	public HomePage getHomePage(boolean forceRefresh) {
+		if (homePageCache == null || forceRefresh) {
+			if (cacheable) {
+				homePageCache = new HomePage(this);
+				return homePageCache;
+			} else
+				return new HomePage(this);
+		} else
+			return homePageCache;
+	}
+
+	public LessonsPage getLessonsPage(boolean forceRefresh) {
+		if (lessonsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				lessonsPageCache = new LessonsPage(this);
+				return lessonsPageCache;
+			} else
+				return new LessonsPage(this);
+		} else
+			return lessonsPageCache;
+	}
+
+	public ArgumentsActivitiesPage getArgumentsActivitiesPage(boolean forceRefresh) {
+		if (argumentsActivitiesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				argumentsActivitiesPageCache = new ArgumentsActivitiesPage(this);
+				return argumentsActivitiesPageCache;
+			} else
+				return new ArgumentsActivitiesPage(this);
+		} else
+			return argumentsActivitiesPageCache;
+	}
+
+	public DocumentsPage getDocumentsPage(boolean forceRefresh) {
+		if (documentsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				documentsPageCache = new DocumentsPage(this);
+				return documentsPageCache;
+			} else
+				return new DocumentsPage(this);
+		} else
+			return documentsPageCache;
+	}
+
+	public AuthorizationsPage getAuthorizationsPage(boolean forceRefresh) {
+		if (authorizationsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				authorizationsPageCache = new AuthorizationsPage(this);
+				return authorizationsPageCache;
+			} else
+				return new AuthorizationsPage(this);
+		} else
+			return authorizationsPageCache;
+	}
+
+	public AlertsPage getAlertsPage(boolean forceRefresh) {
+		if (alertsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				alertsPageCache = new AlertsPage(this);
+				return alertsPageCache;
+			} else
+				return new AlertsPage(this);
+		} else
+			return alertsPageCache;
+	}
+
+	public AbsencesPage getAbsencesPage(boolean forceRefresh) {
+		if (absencesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				absencesPageCache = new AbsencesPage(this);
+				return absencesPageCache;
+			} else
+				return new AbsencesPage(this);
+		} else
+			return absencesPageCache;
+	}
+
+	public DisciplinaryNoticesPage getDisciplinaryNotesPage(boolean forceRefresh) {
+		if (disciplinaryNotesPageCache == null || forceRefresh) {
+			if (cacheable) {
+				disciplinaryNotesPageCache = new DisciplinaryNoticesPage(this);
+				return disciplinaryNotesPageCache;
+			} else
+				return new DisciplinaryNoticesPage(this);
+		} else
+			return disciplinaryNotesPageCache;
+	}
+
+	public NewslettersPage getNewslettersPage(boolean forceRefresh) {
+		if (newslettersPageCache == null || forceRefresh) {
+			if (cacheable) {
+				newslettersPageCache = new NewslettersPage(this);
+				return newslettersPageCache;
+			} else
+				return new NewslettersPage(this);
+		} else
+			return newslettersPageCache;
+	}
+
+	public PinBoardPage getPinBoardPage(boolean forceRefresh) {
+		if (pinBoardPageCache == null || forceRefresh) {
+			if (cacheable) {
+				pinBoardPageCache = new PinBoardPage(this);
+				return pinBoardPageCache;
+			} else
+				return new PinBoardPage(this);
+		} else
+			return pinBoardPageCache;
+	}
+
+	//endregion
 
 	/**
 	 * Ottiene il banner della login page se presente
@@ -419,138 +419,18 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
 
-		try {
-			els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
-		} catch (IndexOutOfBoundsException e) {
-			throw new LoginPageBannerNotFound("Cant find banner in login page", e);
-		}
+        //TODO: se non trova il banner ritorna vuoto, tanto anche nel registro se è vuoto non mette il banner
+        try {
+            els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
+        } catch (IndexOutOfBoundsException e) {
+            throw new LoginPageBannerNotFound("Cant find banner in login page", e);
+        }
 
-		return els.child(0).html();
-	}
+        return els.child(0).html();
+    }
 
-
+/*
 	//region Controllo aggiornamenti oggetti
-
-	/**
-	 * Permette di controllare se ci sono assenze o ritardi da giustificare
-	 * dalle news
-	 *
-	 * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
-	 */
-	public boolean checkForAbsenceUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-
-		for (News nw : news) {
-			if (nw.newsText.contains("assenze")) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Ottiene il numero dei compiti del giorno dopo
-	 * facendo una richiesta alle news
-	 *
-	 * @return Il numero dei compiti
-	 */
-	public int getNearHomeworks(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-
-		for (News nw : news) {
-			if (nw.newsText.contains("compito") && nw.newsText.contains("un") && !nw.newsText.contains("oggi"))
-				return 1;
-			else if (nw.newsText.contains("compiti") && !nw.newsText.contains("oggi")) {
-				Pattern pattern = Pattern.compile("[0-9]+");
-				Matcher matcher = pattern.matcher(nw.newsText);
-				if (matcher.find())
-					return Integer.parseInt(matcher.group());
-				return 0;
-			}
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Ottiene il numero di verifiche dei prossimi giorni (3 giorni)
-	 * facendo una richiesta alle news
-	 *
-	 * @return Il numero dei compiti
-	 */
-	public int getNearTests(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-
-		for (News nw : news) {
-			if (nw.newsText.contains("verifica") && nw.newsText.contains("una") && !nw.newsText.contains("oggi"))
-				return 1;
-			else if (nw.newsText.contains("verifiche") && !nw.newsText.contains("oggi")) {
-				Pattern pattern = Pattern.compile("[0-9]+");
-				Matcher matcher = pattern.matcher(nw.newsText);
-				if (matcher.find())
-					return Integer.parseInt(matcher.group());
-				return 0;
-			}
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Restituisce il numero di circolari da leggere preso dalle notizie
-	 * nella home
-	 * <p>
-	 * Per ottenere il numero di circolari nuove basta memorizzare il risultato
-	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
-	 * e fare la differenza valore2 - valore1.
-	 *
-	 * @return numero di circolari da leggere
-	 */
-	public int checkForNewsletterUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-		String text;
-
-		for (News nw : news) {
-			if (nw.newsText.contains("circolari")) {
-				text = nw.newsText;
-				text = text.split("nuove")[0].split("presenti")[1].charAt(1) + "";
-
-				return Integer.parseInt(text);
-			} else if (nw.newsText.contains("circolare")) {
-				return 1;
-			}
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Restituisce il numero di avvisi da leggere preso dalle notizie
-	 * nella home
-	 * <p>
-	 * Per ottenere il numero di avvisi nuove basta memorizzare il risultato
-	 * di questa funzione (valore1), poi richiamarla un altra volta (valore2)
-	 * e fare la differenza valore2 - valore1.
-	 *
-	 * @return numero di avvisi da leggere
-	 */
-	public int checkForAlertsUpdate(boolean forceRefresh) {
-		List<News> news = getAllNewsFromHome(forceRefresh);
-		String text;
-
-		for (News nw : news) {
-			if (nw.newsText.contains("avvisi")) {
-				text = nw.newsText;
-				text = text.split("nuovi")[0].split("presenti")[1].charAt(1) + "";
-
-				return Integer.parseInt(text);
-			} else if (nw.newsText.contains("avviso")){
-				return 1;
-			}
-		}
-
-		return 0;
-	}
 
 	/**
 	 * Controlla se ci sono nuove verifiche presenti
@@ -560,7 +440,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param yearmonth Anno-Mese in cui controllare
 	 * @return Una lista di Test nuovi
-	 */
+	 *0/
 	public List<Test> checkForTestsUpdate(String yearmonth) {
 		List<Test> cache = allTestsCache;
 		List<Test> test = getAllTestsWithoutDetails(yearmonth,true);
@@ -577,7 +457,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param yearmonth Anno-Mese in cui controllare
 	 * @return Una lista di Homework nuovi
-	 */
+	 *0/
 	public List<Homework> checkForHomeworksUpdate(String yearmonth) {
 		List<Homework> cache = allHomeworksCache;
 		List<Homework> homework = getAllHomeworksWithoutDetails(yearmonth, true);
@@ -586,295 +466,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
-	//endregion
-
-	//region Confronto tra oggetti
-
-	/**
-	 * Fa il confronto tra due homework e restituisce gli homework diversi/nuovi
-	 *
-	 * Attenzione: per evitare di spammare il sito con richieste, questa
-	 * funzione non prende i dettagli dei homework, quindi non può distinguere
-	 * tra più homework nello stesso giorno
-	 *
-	 * @param oldHomework Homeworks vecchi con cui controllare
-	 * @param newHomework Homeworks nuovi
-	 * @return Una lista di homework diversi/nuovi
-	 */
-	public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
-		List<Homework> homeworkDiff = new Vector<>();
-
-		if(!oldHomework.get(0).month.equals(newHomework.get(0).month) && !oldHomework.get(1).month.equals(newHomework.get(1).month)){
-			logln("Il mese dei compiti è diverso!");
-		}
-
-
-		for(int i = 0; i < newHomework.size(); i++){
-			try {
-				if (!newHomework.get(i).day.equals(oldHomework.get(i).day) && !newHomework.get(i).date.equals(oldHomework.get(i).date)) {
-					homeworkDiff.add(newHomework.get(i));
-				}
-			} catch (ArrayIndexOutOfBoundsException e){
-				homeworkDiff.add(newHomework.get(i));
-			}
-		}
-
-		return homeworkDiff;
-	}
-
-    /**
-     * Fa il confronto tra due test e restituisce i test diversi/nuovi
-     *
-     * Attenzione: per evitare di spammare il sito con richieste, questa
-     * funzione non prende i dettagli dei test, quindi non può distinguere
-     * tra più test nello stesso giorno
-     *
-     * @param oldTest Test vecchi con cui controllare
-     * @param newTest Test nuovi
-     * @return Una lista di test diversi/nuovi
-     */
-	public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
-		List<Test> testDiff = new Vector<>();
-
-		if(!oldTest.get(0).month.equals(newTest.get(0).month) && !oldTest.get(1).month.equals(newTest.get(1).month)){
-			logln("Il mese delle verifiche è diverso!");
-		}
-
-
-		for(int i = 0; i < newTest.size(); i++){
-			try {
-				if (!newTest.get(i).day.equals(oldTest.get(i).day) && !newTest.get(i).date.equals(oldTest.get(i).date)) {
-					testDiff.add(newTest.get(i));
-				}
-			} catch (ArrayIndexOutOfBoundsException e) {
-				testDiff.add(newTest.get(i));
-			}
-		}
-
-		return testDiff;
-	}
-
-	//endregion
-
-	//region Absence
-
-	/**
-	 * Permette di giustificare una assenza da un account genitore.
-	 *
-	 * @param ab     l'assenza da giustificare
-	 * @param type   il tipo di assenza, può anche essere vuoto (""):
-	 *               1 - Motivi di salute;
-	 *               2 - Esigenze di famiglia;
-	 *               3 - Problemi di trasporto;
-	 *               4 - Attività sportiva;
-	 *               5 - Problemi di connessione nella modalità a distanza;
-	 *               9 - Altro
-	 * @param reason la motivazione dell'assenza
-	 */
-	public void justifyAbsence(Absence ab, String type, String reason) {
-		if (getUserTypeEnum() != userTypes.PARENT) {
-			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
-			throw new UnsupportedAccount("Può giustificare solo il genitore!");
-		}
-		try {
-			if (ab.justifyUrl.equals(""))
-				return;
-			if (ab.justifyUrl.contains("assenza")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
-						.post();
-			} else if (ab.justifyUrl.contains("ritardo")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_ritardo[tipo]", type, "giustifica_ritardo[motivazione]", reason, "giustifica_ritardo[submit]", "")
-						.post();
-			}
-		} catch (Exception e) {
-			logErrorLn("Qualcosa è andato storto");
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Permette di giustificare una assenza da un account genitore.
-	 *
-	 * @param ab l' assenza a cui togliere la giustificazione
-	 */
-	public void deleteJustificationAbsence(Absence ab) {
-		if (getUserTypeEnum() != userTypes.PARENT) {
-			logErrorLn("justifyAbsence: Tipo account non supportato, impossibile giustificare");
-			throw new UnsupportedAccount("Può giustificare solo il genitore!");
-		}
-		try {
-			if (ab.justifyUrl.equals(""))
-				return;
-			if (ab.justifyUrl.contains("assenza")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_assenza[tipo]", "", "giustifica_assenza[motivazione]", "", "giustifica_assenza[delete]", "")
-						.post();
-			} else if (ab.justifyUrl.contains("ritardo")) {
-				session.newRequest()
-						.url(GiuaScraper.SiteURL + ab.justifyUrl)
-						.data("giustifica_ritardo[tipo]", "", "giustifica_ritardo[motivazione]", "", "giustifica_ritardo[delete]", "")
-						.post();
-			}
-		} catch (Exception e) {
-			logErrorLn("Qualcosa è andato storto");
-			e.printStackTrace();
-		}
-	}
-
-
-
-
-	/**
-	 * Permette di ottenere tutte le assenze presenti
-	 *
-	 * @param forceRefresh
-	 * @return Una lista di Absence
-	 */
-	public List<Absence> getAllAbsences(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllAbsences();
-		}
-		if (allAbsencesCache == null || forceRefresh) {
-			List<Absence> allAbsences = new Vector<>();
-			Document doc = getPage("genitori/assenze/");
-
-			Elements allAbsencesTBodyHTML = doc.getElementsByClass("table table-bordered table-hover table-striped");
-			allAbsencesTBodyHTML.remove(0); //Rimuovi tabella "Da giustificare" (oppure quella "Situazione globale")
-
-			for (Element el : allAbsencesTBodyHTML) {
-				el = el.child(2);
-				for (Element el2 : el.children()) {
-					String urlJ = "";
-
-					Elements button = el2.child(3).getElementsByClass("btn btn-primary btn-xs gs-button-remote");
-					boolean isJustified = false;
-					boolean isModificable = false;
-
-					if (!button.isEmpty()) {    //Controlla se esiste il bottone Giustifica
-						urlJ = button.first().attr("data-href");
-						//isJustified = false;
-						//isModificable = false;
-					} else {
-						button = el2.child(3).getElementsByClass("btn btn-default btn-xs gs-button-remote");
-						if (!button.isEmpty()) {    //Controlla se esiste il bottone Modifica
-							urlJ = button.first().attr("data-href");
-							isJustified = true;
-							isModificable = true;
-						} else {
-							button = el2.child(3).getElementsByClass("label label-danger");
-							if (!button.isEmpty())    //Controlla se cè il testo "Da giustificare"
-								isJustified = false;
-							else
-								isJustified = true;
-							//isModificable = false;
-						}
-					}
-
-					allAbsences.add(new Absence(el2.child(0).text(), el2.child(1).text(), el2.child(2).text(), isJustified, isModificable, urlJ));
-				}
-			}
-
-			if (cacheable) {
-				allAbsencesCache = allAbsences;
-			}
-			return allAbsences;
-		} else {
-			return allAbsencesCache;
-		}
-	}
-
-	//#endregione
-
-	//region News From Home
-
-	/**
-	 * Permette di ottenere le news dalla home
-	 *
-	 * @return Una lista di stringhe contenenti le news
-	 */
-	public List<News> getAllNewsFromHome(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllNewsFromHome();
-		}
-		if (allNewsFromHomeCache == null || forceRefresh) {
-			List<News> returnAllNews = new Vector<>();
-			Document doc = getPage("");
-			Element els = doc.getElementsByClass("panel-body").get(0);
-			Elements allNewsHTML = els.children();
-
-			for (Element news : allNewsHTML) {
-				String url = news.child(0).child(0).attr("href");
-				returnAllNews.add(new News(news.text(), url));
-			}
-
-			if (cacheable) {
-				allNewsFromHomeCache = returnAllNews;
-			}
-			return returnAllNews;
-
-		} else {
-			return allNewsFromHomeCache;
-		}
-	}
-
-	//endregion
-
-	//region DisciplNotices
-
-	/**
-	 * Permette di ottenere tutte le note presenti
-	 *
-	 * @param forceRefresh
-	 * @return Una lista di DisciplNotice
-	 */
-	public List<DisciplNotice> getAllDisciplNotices(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllDisciplNotices();
-		}
-		if (allDisciplNoticesCache == null || forceRefresh) {
-			List<DisciplNotice> allDisciplNotices = new Vector<>();
-			Document doc = getPage("genitori/note/");
-			Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
-			//TODO: aggiungere supporto per far vedere di che quadrimestre fa parte
-
-			for (Element el : allDisciplNoticeTBodyHTML) {
-
-
-				for (Element el2 : el.children()) {
-					//logln(" -------\n" + el2.toString());
-					//logln(el2.child(0).text() + " ; " + el2.child(1).text() + " ; " + el2.child(2).text() + " ; " + el2.child(3).text());
-					String author1 = el2.child(2).child(1).text();
-					String author2;
-					try {
-						author2 = el2.child(3).child(1).text();
-					} catch (IndexOutOfBoundsException e){
-						author2 = ""; }
-
-					el2.child(2).child(1).remove();
-					allDisciplNotices.add(new DisciplNotice(el2.child(0).text(),
-							el2.child(1).text(),
-							el2.child(2).text(),
-							el2.child(3).text(),
-							author1,
-							author2));
-				}
-			}
-
-			if (cacheable) {
-				allDisciplNoticesCache = allDisciplNotices;
-			}
-			return allDisciplNotices;
-		} else {
-			return allDisciplNoticesCache;
-		}
-	}
-
-	//#endregion
 
 	//region ReportCard
 
@@ -884,7 +475,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param firstQuarterly
 	 * @param forceRefresh
 	 * @return La pagella del quadrimestre indicato
-	 */
+	 *0/
 	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
 		if (demoMode) {
 			return GiuaScraperDemo.getReportCard();
@@ -933,575 +524,50 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	}
 
-	//#endregion
-
-	//region Alerts
-
-	/**
-	 * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
-	 * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
-	 *
-	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di Alert
-	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 */
-	public List<Alert> getAllAlerts(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllAlerts();
-		}
-		if (allAlertsCache == null || forceRefresh) {
-			if (page < 0) {
-				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
-			}
-			List<Alert> allAlerts = new Vector<>();
-			Document doc = getPage("genitori/avvisi/" + page);
-			Elements allAlertsHTML = doc.getElementsByTag("tbody");
-			if (allAlertsHTML.isEmpty())
-				return allAlerts;
-			allAlertsHTML = allAlertsHTML.get(0).children();
-
-			for (Element alertHTML : allAlertsHTML) {
-				allAlerts.add(new Alert(
-						alertHTML.child(0).text(),
-						alertHTML.child(1).text(),
-						alertHTML.child(2).text(),
-						alertHTML.child(3).text(),
-						alertHTML.child(4).child(0).attr("data-href"),
-						page
-				));
-			}
-
-			if (cacheable) {
-				allAlertsCache = allAlerts;
-			}
-			return allAlerts;
-		} else {
-			return allAlertsCache;
-		}
-	}
-
-	//#endregion
-
-	//region Newsletter
-
-	/**
-	 * Serve solo a {@code #getAllNewsletters} per prendere gli allegati dalle circolari
-	 *
-	 * @param el
-	 * @return Lista di Stringa con tutti gli URL degli allegati
-	 */
-	private List<String> attachmentsUrls(Element el) {
-		Elements els = el.child(1).children();
-		List<String> r = new Vector<>();
-		if (els.size() > 2) {     //Ci sono allegati
-			Elements allAttachments = els.get(1).child(0).children();
-			for (Element attachment : allAttachments) {
-				r.add(attachment.child(1).attr("href"));
-			}
-		} else {        //Non ha allegati
-			return null;
-		}
-
-		return r;
-	}
-
-	private String getNewsletterFilterToken() {
-		return Objects.requireNonNull(getPage("circolari/genitori").getElementById("circolari_genitori__token")).attr("value");
-	}
-
-	/**
-	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
-	 *
-	 * @param page         La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
-	 * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
-	 */
-	public List<Newsletter> getAllNewsletters(int page, boolean forceRefresh) throws IndexOutOfBoundsException {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllNewsletters();
-		}
-		if (allNewslettersCache == null || forceRefresh) {
-			if (page < 0) {
-				throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
-			}
-			List<Newsletter> allNewsletters = new Vector<>();
-			try {
-				Document doc = getPage("circolari/genitori/" + page);
-
-				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
-
-				for (Element el : allNewslettersStatusHTML) {
-					allNewsletters.add(new Newsletter(
-							el.child(0).text(),
-							Integer.parseInt(el.child(1).text()),
-							el.child(2).text(),
-							el.child(3).text(),
-							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-							attachmentsUrls(el.child(4)),
-							page));
-				}
-
-				if (cacheable) {
-					allNewslettersCache = allNewsletters;
-				}
-				return allNewsletters;
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				return allNewsletters;
-			}
-		} else {
-			return allNewslettersCache;
-		}
-	}
-
-	/**
-	 * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata con i filtri specificati.
-	 * Le stringhe possono anche essere lasciate vuote.
-	 *
-	 * @param onlyNotRead  {@code true} per avere solo le circolari non lette
-	 * @param date         Mettere la data del mese nel formato: anno-mese
-	 * @param text         Il testo da cercare tra le circolari
-	 * @param page         Indica a quale pagina andare. Le pagine partono da 1
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
-	 */
-	public List<Newsletter> getAllNewslettersWithFilter(boolean onlyNotRead, String date, String text, int page, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllNewslettersWithFilter();
-		}
-		if (allNewslettersCache == null || forceRefresh) {
-			List<Newsletter> allNewsletters = new Vector<>();
-			try {
-
-				Document doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/circolari/genitori/" + page)
-						.data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
-						.data("circolari_genitori[mese]", date)
-						.data("circolari_genitori[oggetto]", text)
-						.data("circolari_genitori[submit]", "")
-						.data("circolari_genitori[_token]", getNewsletterFilterToken())
-						.post();
-
-				Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
-
-				for (Element el : allNewslettersStatusHTML) {
-					allNewsletters.add(new Newsletter(
-							el.child(0).text(),
-							Integer.parseInt(el.child(1).text()),
-							el.child(2).text(),
-							el.child(3).text(),
-							el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
-							attachmentsUrls(el.child(4)),
-							page));
-				}
-
-				if (cacheable) {
-					allNewslettersCache = allNewsletters;
-				}
-				return allNewsletters;
-
-			} catch (NullPointerException | IndexOutOfBoundsException e) {
-				return new Vector<>();
-			} catch (Exception e) {
-				if (!isSiteWorking()) {
-					throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-				}
-				e.printStackTrace();
-			}
-			return new Vector<>();
-		} else {
-			return allNewslettersCache;
-		}
-	}
-
-	//#endregion
-
-	//region Homework
-
-	/**
-	 * Restituisce una lista di tutti gli {@link Homework} di una determinata data con anche i loro dettagli
-	 *
-	 * @param date Formato: anno-mese-giorno
-	 * @return Una lista di tutti gli {@link Homework} della data specificata se esiste, altrimenti una lista vuota
-	 */
-	public List<Homework> getHomework(String date) {
-		if (demoMode) {
-			return GiuaScraperDemo.getHomework(date);
-		}
-		List<Homework> allHomeworksInThisDate = new Vector<>();
-		Document doc = getPage("genitori/eventi/dettagli/" + date + "/P");
-		Elements homeworkGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
-		try {
-			for (Element homeworkGroupHTML : homeworkGroupsHTML) {
-				String subject = homeworkGroupHTML.child(0).text();
-				String creator = homeworkGroupHTML.child(1).text().split(": ")[1];
-				String details = homeworkGroupHTML.child(2).text();
-
-				allHomeworksInThisDate.add(new Homework(
-						date.split("-")[2],
-						date.split("-")[1],
-						date.split("-")[0],
-						date,
-						subject,
-						creator,
-						details,
-						true
-				));
-			}
-
-			return allHomeworksInThisDate;
-		} catch (NullPointerException | IndexOutOfBoundsException e) {        //Non ci sono compiti in questo giorno
-			return new Vector<>();
-		}
-	}
-
-	/**
-	 * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
-	 * Serve solo a capire in quali giorni ci sono compiti.
-	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param forceRefresh Ricarica effettivamente tutti i compiti
-	 * @return Lista di Homework del mese specificato oppure del mese attuale
-	 */
-	public List<Homework> getAllHomeworksWithoutDetails(String date, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllHomeworksWithoutDetails();
-		}
-		if (allHomeworksCache == null || forceRefresh) {
-			List<Homework> allHomeworks = new Vector<>();
-			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-			Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");
-			for (Element homeworkHTML : homeworksHTML) {
-				assert homeworkHTML.parent() != null;
-				assert homeworkHTML.parent().parent() != null;
-				String[] hrefSplit = homeworkHTML.attributes().get("data-href").split("/");
-				String dateFromhref = hrefSplit[4];
-				allHomeworks.add(new Homework(
-						dateFromhref.split("-")[2],
-						dateFromhref.split("-")[1],
-						dateFromhref.split("-")[0],
-						dateFromhref,
-						"",
-						"",
-						"",
-						true
-				));
-			}
-
-			if (cacheable) {
-				allHomeworksCache = allHomeworks;
-			}
-			return allHomeworks;
-		} else {
-			return allHomeworksCache;
-		}
-	}
-
-	//#endregion
-
-	//region Test
-
-	/**
-	 * Restituisce una lista di tutti i {@link Test} di una determinata data con anche i loro dettagli
-	 *
-	 * @param date Formato: anno-mese-giorno
-	 * @return Una lista di tutti i {@link Test} della data specificata se esiste, altrimenti una lista vuota
-	 */
-	public List<Test> getTest(String date) {
-		if (demoMode) {
-			return GiuaScraperDemo.getTest(date);
-		}
-		List<Test> allTests = new Vector<>();
-		Document doc = getPage("genitori/eventi/dettagli/" + date + "/V");
-		Elements testGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
-		try {
-			for (Element testGroupHTML : testGroupsHTML) {
-				String subject = testGroupHTML.child(0).text().split(": ")[1];
-				String creator = testGroupHTML.child(1).text().split(": ")[1];
-				String details = testGroupHTML.child(2).text();
-
-				allTests.add(new Test(
-						date.split("-")[2],
-						date.split("-")[1],
-						date.split("-")[0],
-						date,
-						subject,
-						creator,
-						details,
-						true
-				));
-			}
-
-			return allTests;
-		} catch (IndexOutOfBoundsException e) {        //Non ci sono verifiche in questo giorno
-			return new Vector<>();
-		}
-	}
-
-	/**
-	 * Ottiene tutti i {@link Test} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
-	 * Serve solo a capire in quali giorni ci sono verifiche.
-	 * @param date puo essere {@code null}. Formato: anno-mese
-	 * @param forceRefresh Ricarica effettivamente tutti le verifiche
-	 * @return Lista di {@link Test} del mese specificato oppure del mese attuale
-	 */
-	public List<Test> getAllTestsWithoutDetails(String date, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllTestsWithoutDetails();
-		}
-		if (allTestsCache == null || forceRefresh) {
-			List<Test> allTests = new Vector<>();
-			Document doc = (date == null) ? getPage("genitori/eventi") : getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
-			Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
-			for (Element testHTML : testsHTML) {
-
-				assert testHTML.parent() != null;
-				assert testHTML.parent().parent() != null;
-				String[] hrefSplit = testHTML.attributes().get("data-href").split("/");
-				String dateFromhref = hrefSplit[4];
-				allTests.add(new Test(
-						dateFromhref.split("-")[2],
-						dateFromhref.split("-")[1],
-						dateFromhref.split("-")[0],
-						dateFromhref,
-						"",
-						"",
-						"",
-						true
-				));
-			}
-
-			if(cacheable) {
-				allTestsCache = allTests;
-			}
-			return allTests;
-		} else {
-			return allTestsCache;
-		}
-	}
-
-	//#endregion
-
-	//region Vote
-
-	/**
-	 * Deve essere usata solo da {@link #getAllVotes(boolean)} e serve a gestire quei voti che non hanno alcuni dettagli
-	 * @param e
-	 * @param index
-	 * @return Stringa contenente i dettagli di quel voto
-	 */
-	private String getDetailOfVote(Element e, int index){
-		try {
-			return e.siblingElements().get(e.elementSiblingIndex()).child(0).child(0).child(index).text().split(": ")[1];
-		} catch (Exception err){
-			return "";
-		}
-	}
-
-	/**
-	 * Ottiene tutti i {@link Vote}
-	 * @param forceRefresh Ricarica effettivamente tutti i voti
-	 * @return {@code Map<String, List<Vote>>}. Esempio di come e' fatta: {"Italiano": [9,3,1,4,2], ...}
-	 */
-	public Map<String, List<Vote>> getAllVotes(boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllVotes();
-		}
-		if (allVotesCache == null || forceRefresh) {
-			Map<String, List<Vote>> returnVotes = new HashMap<>();
-			Document doc = getPage("genitori/voti");
-			Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
-
-			for (final Element voteHTML : votesHTML) {
-				assert voteHTML.parent() != null;
-				assert voteHTML.parent().parent() != null;
-				assert voteHTML.parent().parent().parent() != null;
-				assert voteHTML.parent().parent().parent().parent() != null;
-
-				final String voteAsString = voteHTML.text(); //prende il voto
-				final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-				final String voteDate = getDetailOfVote(voteHTML, 0);
-				final String type = getDetailOfVote(voteHTML, 1);
-				final String args = getDetailOfVote(voteHTML, 2);
-				final String judg = getDetailOfVote(voteHTML, 3);
-				final boolean isFirstQuart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text().equals("Primo Quadrimestre");
-
-				if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-					if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
-						List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-						tempList.add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));
-					} else {
-						returnVotes.put(materiaName, new Vector<Vote>() {{
-							add(new Vote(voteAsString, voteDate, type, args, judg, isFirstQuart, false));    //il voto lo aggiungo direttamente
-						}});
-					}
-				} else {        //e' un asterisco
-					if (returnVotes.containsKey(materiaName)) {
-						returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-					} else {
-						returnVotes.put(materiaName, new Vector<Vote>() {{
-							add(new Vote("", voteDate, type, args, judg, isFirstQuart, true));
-						}});
-					}
-				}
-			}
-
-			if (cacheable) {
-				allVotesCache = returnVotes;
-			}
-			return returnVotes;
-		} else {
-			return allVotesCache;
-		}
-	}
-
 	//endregion
 
-	//region Lesson
-
-	/**
-	 * Ottiene tutte le lezioni di una determinata materia
-	 *
-	 * @param subjectName  Il nome della materia che corrisponda con i nomi del sito
-	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
-	 * @return Una List delle {@link Lesson} di una determinata materia
 	 */
-	public List<Lesson> getAllLessonsOfSubject(String subjectName, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllLessonsOfSubject();
-		}
-		if (allLessonsCache == null || forceRefresh) {
-			Document doc = getPage("genitori/argomenti");
-			List<Lesson> returnLesson = new Vector<>();
-			boolean foundSubject = false;
 
-			try {
-				Elements allSubjectsHTML = doc.getElementsByAttributeValue("aria-labelledby", "gs-dropdown-menu").get(0).children();
 
-				for (Element subjectHTML : allSubjectsHTML) {
-					if (subjectHTML.text().equals(subjectName)) {
-						doc = getPage(subjectHTML.child(0).attr("href").substring(1));
-						foundSubject = true;
-						break;
-					}
-				}
+    //region Funzioni fondamentali
 
-				if (!foundSubject) {
-					throw new SubjectNameInvalid("Subject " + subjectName + " not found in genitori/argomenti");
-				}
-
-				Elements allLessonsHTML = doc.getElementsByTag("tbody");
-
-				for (int i = 0; i < allLessonsHTML.size(); i++) {
-					Elements lessonsHTML = allLessonsHTML.get(i).children();
-					for (Element lessonHTML : lessonsHTML) {
-						returnLesson.add(new Lesson(
-								lessonHTML.child(0).child(0).attr("href").substring(18, 27),
-								"",
-								subjectName,
-								lessonHTML.child(1).text(),
-								lessonHTML.child(2).text(),
-								true
-						));
-					}
-				}
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				returnLesson.add(new Lesson("", "", subjectName, "", "", false));
-			}
-
-			if (cacheable) {
-				allLessonsCache = returnLesson;
-			}
-			return returnLesson;
-		} else {
-			return allLessonsCache;
-		}
-	}
-
-	/**
-	 * Ottiene tutte le lezioni di un dato giorno
-	 *
-	 * @param date         Formato: anno-mese-giorno
-	 * @param forceRefresh Ricarica effettivamente tutte le lezioni
-	 * @return Una List delle {@link Lesson} di un dato giorno
-	 */
-	public List<Lesson> getAllLessons(String date, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getAllLessons();
-		}
-		if (allLessonsCache == null || forceRefresh) {
-			Document doc = getPage("genitori/lezioni/" + date);
-			List<Lesson> returnLesson = new Vector<>();
-
-			try {
-				Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
-
-				for (Element lessonHTML : allLessonsHTML) {
-					returnLesson.add(new Lesson(
-							date,
-							lessonHTML.child(0).text(),
-							lessonHTML.child(1).text(),
-							lessonHTML.child(2).text(),
-							lessonHTML.child(3).text(),
-							true
-					));
-				}
-			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				returnLesson.add(new Lesson(date, "", "", "", "", false));
-			}
-
-			if (cacheable) {
-				allLessonsCache = returnLesson;
-			}
-			return returnLesson;
-		} else {
-			return allLessonsCache;
-		}
-	}
-
-	//endregion
-
-	//endregion
-
-	//region Funzioni fondamentali
-
-	private void initiateSession() {
+    private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
-		logln("initSession: creating new session");
-		session = Jsoup.newSession();
-	}
+        session = Jsoup.newSession();
+        lm.d("Nuova sessione creata");
+    }
 
-	private void initiateSession(String cookie) {
-		session = null; //Per sicurezza azzeriamo la variabile
-		logln("initSession: creating new session from cookie");
-		session = Jsoup.newSession().cookie("PHPSESSID", cookie);
-	}
+    private void initiateSession(String cookie) {
+        session = null; //Per sicurezza azzeriamo la variabile
+        session = Jsoup.newSession().cookie("PHPSESSID", cookie);
+        lm.d("Nuova sessione da cookie creata");
+    }
 
-	public boolean isMaintenanceScheduled() {
-		Document doc = getPage("login/form/");
-		Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+    public boolean isMaintenanceScheduled() {
+        Document doc = getPage("login/form/");
+        Elements els = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
 
-		if (!els.isEmpty()) {
-			logln("isMaintenanceScheduled: Manutenzione programmata trovata");
-			return true;
-		}
-		logln("isMaintenanceScheduled: Manutenzione non trovata");
-		return false;
-	}
+        if (!els.isEmpty()) {
+			lm.d("Trovata manutenzione programmata");
+            return true;
+        }
+        lm.d("Nessuna manutenzione programmata trovata");
+        return false;
+    }
 
-	public boolean isMaintenanceActive() {
-		if (demoMode)
-			return GiuaScraperDemo.isMaintenanceActive();
-		Document doc = getPage("login/form/");
-		Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
-		Elements topBar = doc.getElementsByClass("col-sm-6");
+    public boolean isMaintenanceActive() {
+        if (demoMode)
+            return GiuaScraperDemo.isMaintenanceActive();
+        Document doc = getPage("login/form/");
+        Elements loginForm = doc.getElementsByAttributeValue("name", "login_form");
+        Elements topBar = doc.getElementsByClass("col-sm-6");
 
-		if (loginForm.isEmpty() && !topBar.isEmpty()) {
-			logln("isMaintenanceActive: Manutenzione attiva");
+        if (loginForm.isEmpty() && !topBar.isEmpty()) {
+			lm.w("Manutenzione del registro in corso");
 			return true;
 		}
 
-		logln("isMaintenanceActive: Manutenzione non attiva");
+		lm.d("Nessuna manutenzione in corso trovata");
 		return false;
 	}
 
@@ -1509,45 +575,44 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		Maintenance maintenance;
 
 		if (!isMaintenanceScheduled()) {
-			maintenance = new Maintenance(new Date(), new Date(), false, false, false);
-			return maintenance;
-		}
+            maintenance = new Maintenance(new Date(), new Date(), false, false, false);
+            return maintenance;
+        }
 
-		Document doc = getPage("login/form/");
-		Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
-		Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
+        Document doc = getPage("login/form/");
+        Elements maintenanceElm = doc.getElementsByClass("col-sm-12 bg-danger gs-mb-4 text-center");
+        Elements dateEl = maintenanceElm.get(0).getElementsByTag("strong");
 
-		// Togli dalla scritta tutto tranne le date
-		String dateTxt = dateEl.get(0).text();
-		String[] a = dateTxt.split("ore");
-		String start = a[1].replace("del", "").replace("alle", "");
-		String end = a[2].replace("del", "");
+        // Togli dalla scritta tutto tranne le date
+        String dateTxt = dateEl.get(0).text();
+        String[] a = dateTxt.split("ore");
+        String start = a[1].replace("del", "").replace("alle", "");
+        String end = a[2].replace("del", "");
 
 
-		logln("getMaintenanceInfo: Non formattate: Inizio " + start + " | Fine " + end);
+        //logln("getMaintenanceInfo: Non formattate: Inizio " + start + " | Fine " + end);
 
-		//Crea dei format per fare il parsing di quelle stringhe
-		SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
-		SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
+        //Crea dei format per fare il parsing di quelle stringhe
+        SimpleDateFormat format1 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy  ");
+        SimpleDateFormat format2 = new SimpleDateFormat(" HH:mm  dd/MM/yyyy");
 
-		Date startDate;
-		Date endDate;
-		try {
-			startDate = format1.parse(start);
-			endDate = format2.parse(end);
-		} catch (Exception e) {
-			//TODO: throw new errore che ci sono date sbagliate oppure improvvisamente non ci sono piu date
-			return null;
-		}
+        Date startDate;
+        Date endDate;
+        try {
+            startDate = format1.parse(start);
+            endDate = format2.parse(end);
+        } catch (Exception e) {
+            throw new MaintenanceHasEmptyDates("Maintenance info did not find dates");
+        }
 
-		logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());
+        //logln("getMaintenanceInfo: formattate: Inizio " + startDate.toString() + " | Fine " + endDate.toString());
 
-		Date currentDate = new Date();
-		boolean isActive = false;
-		boolean shouldBeActive = false;
+        Date currentDate = new Date();
+        boolean isActive = false;
+        boolean shouldBeActive = false;
 
-		if (currentDate.after(startDate) && currentDate.before(endDate)) {
-			logln("getMaintenanceInfo: Secondo l'orario la manutenzione dovrebbe essere attiva");
+        if (currentDate.after(startDate) && currentDate.before(endDate)) {
+			lm.d("Secondo l'orario di inizio la manutenzione dovrebbe essere in corso");
 			shouldBeActive = true;
 		}
 
@@ -1563,17 +628,18 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Effettua il download di una risorsa di qualunque tipo dal registro
 	 *
-	 * @param url
-	 * @return Un oggetto {@code DownloadedFile}
-	 */
-	public DownloadedFile download(String url) {
-		try {
-			Connection.Response r = session.newRequest()
-					.url(GiuaScraper.SiteURL + url)
-					.ignoreContentType(true)
-					.execute();
+	 * @param url percorso della risorsa nel sito. IMPORTANTE: mettere lo "/" prima. Es: /bacheca/circolari/0/0/
+     * @return Un oggetto {@code DownloadedFile}
+     */
+    public DownloadedFile download(String url) {
+        lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
+        try {
+            Connection.Response r = session.newRequest()
+                    .url(GiuaScraper.SiteURL + url)
+                    .ignoreContentType(true)
+                    .execute();
 
-			return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
+            return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
@@ -1587,56 +653,68 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL}
 	 * Non c'e' bisogno di inserire {@code /} prima di un URL
 	 *
-	 * @param page
+	 * @param page il percorso della pagina nel registro. Es: bacheca/circolari/
 	 * @return Una pagina HTML come {@link Document}
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non si può richiedere la pagina indicata
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
 	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
-		if (demoMode)
-			return GiuaScraperDemo.getPage(page);
-		try {
-			if (page.startsWith("/"))
-				page = page.substring(1);
-			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000)
-				return getPageCache;
-			if (page.equals("login/form/")) {
-				return getPageNoCookie("login/form/");
-			} else {
-				if (isMaintenanceActive()) {
-					throw new MaintenanceIsActiveException("The website is in maintenance");
-				}
+        if (demoMode)
+            return GiuaScraperDemo.getPage(page);
+        try {
+            if (page.startsWith("/"))
+                page = page.substring(1);
 
-				log("getPage: Getting page " + GiuaScraper.SiteURL + "/" + page);
+            //Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+            if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+                lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
+                return getPageCache;
+            }
 
-				Connection.Response response = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/" + page)
-						.method(Method.GET)
-						.execute();
+            if (page.equals("login/form/")) {
+                return getPageNoCookie("login/form/");
+            } else {
+                if (isMaintenanceActive()) {
+                    throw new MaintenanceIsActiveException("The website is in maintenance");
+                }
 
-				Document doc = response.parse();
 
-				logln("\t Done!");
+                Connection.Response response = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/" + page)
+                        .method(Method.GET)
+                        .execute();
 
-				if (response.statusCode() == 302)
-					throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");
+                lm.d("getPage: " + GiuaScraper.SiteURL + "/ caricato");
 
-				getPageCache = doc;
-				lastGetPageTime = System.nanoTime();
-				return doc;
-			}
+                Document doc = response.parse();
 
-		} catch (IOException e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-			}
-			e.printStackTrace();
-		}
-		//Qui ci si arriva solo in rari casi di connessioni molto lente
-		logln("getPage: I reached the end, this is NOT a good thing");
-		if (!isSiteWorking()) {
-			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+                if (response.statusCode() == 302) {    //Se è true vuol dire che non siamo loggati
+                    lm.d("getPage: Pagina ha risposto con codice 302, probabilmente non siamo loggati");
+                    try {
+                        lm.d("getPage: Rieseguo login...");
+                        login();    //Prova a riloggarti
+                        lm.d("getPage: Login eseguito correttamente");
+                    } catch (Exception e) {
+                        lm.e("Impossibile eseguire login da getPage");
+                        throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
+                    }
+                }
+
+                getPageCache = doc;
+                lastGetPageTime = System.nanoTime();
+                return doc;
+            }
+
+        } catch (IOException e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+            }
+            e.printStackTrace();
+        }
+        //Qui ci si arriva solo in rari casi di connessioni molto lente
+        lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
+        if (!isSiteWorking()) {
+            throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
 		}
 		return new Document(GiuaScraper.SiteURL + "/" + page);
 	}
@@ -1644,20 +722,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene una pagina del registro senza usare il cookie quindi non controlla nemmeno se si è loggati
 	 *
-	 * @param page
+	 * @param page il percorso della pagina nel registro. Es: bacheca/circolari/
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
-		if (demoMode)
-			return GiuaScraperDemo.getPage(page);
-		try {
+        if (page.startsWith("/"))
+            page = page.substring(1);
+        if (demoMode)
+            return GiuaScraperDemo.getPage(page);
+        try {
 
-			log("getPageNoCookie: Getting page " + GiuaScraper.SiteURL + "/" + page);
-
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+            Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.get();
 
-			logln("\t Done!");
+			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/ caricato");
 
 			return doc;
 
@@ -1673,19 +751,19 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene la pagina HTML specificata da un URL esterna al sito del Giua
 	 *
-	 * @param url
+	 * @param url l' url da cui prendere la pagina
 	 * @return Una pagina HTML come {@link Document}
-	 */
-	public Document getExtPage(String url) {
-		if (demoMode)
-			return GiuaScraperDemo.getExtPage(url);
+     */
+    public Document getExtPage(String url) {
+        if (demoMode)
+            return GiuaScraperDemo.getExtPage(url);
 		try {
-			log("getExtPage: Getting external page " + url);
 
 			Document doc = Jsoup.connect(url)
 					.get();
 
-			logln("\t Done!");
+			lm.d("getExtPage: pagina esterna " + url + " caricata");
+
 			return doc;
 
 		} catch (IOException e) {
@@ -1698,21 +776,20 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Controlla se si è loggati dentro il registro
-	 * @return true se e' loggato altrimenti false
-	 */
-	public Boolean checkLogin() {
-		if (demoMode)
-			return GiuaScraperDemo.checkLogin();
-		try {
-			log("checkLogin: the site answered with status code: ");
-			Connection.Response res = session.newRequest()
-					.url(GiuaScraper.SiteURL)
-					.execute();
+     * @return true se e' loggato altrimenti false
+     */
+    public Boolean checkLogin() {
+        if (demoMode)
+            return GiuaScraperDemo.checkLogin();
+        try {
+            Connection.Response res = session.newRequest()
+                    .url(GiuaScraper.SiteURL)
+                    .execute();
 
-			//Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
-			//con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
-			//Attenzione: Il sito ritorna 200 anche quando è in manutenzione!
-			logln("\t" + res.statusCode());
+            //Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
+            //con uno statusCode pari a 302 se non sei loggato altrimenti risponde con 200
+            //Attenzione: Il sito ritorna 200 anche quando è in manutenzione!
+            lm.d("checkLogin: Registro risponde con codice " + res.statusCode() + ": " + (res.statusCode() != 302 ? "utente non loggato" : "utente loggato"));
 			return res.statusCode() != 302;
 
 		} catch (IOException e) {
@@ -1720,32 +797,38 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	public boolean isSessionValid(String phpsessid) {
-		if (demoMode)
-			return GiuaScraperDemo.isSessionValid();
-		try {
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
-					.cookie("PHPSESSID", phpsessid)
-					.get();
+    public boolean isSessionValid(String phpsessid) {
+        if (demoMode)
+            return GiuaScraperDemo.isSessionValid();
+        try {
+            Document doc = Jsoup.connect(GiuaScraper.SiteURL)
+                    .cookie("PHPSESSID", phpsessid)
+                    .get();
 
-			// --- Ottieni tipo account
-			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-			userType = elm.text().split(".+\\(|\\)")[1];
+            //lm.d("isSessionValid: Cerco di ottenere il tipo di account");
 
-		} catch (Exception e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
-			}
+            if (realUsername != null && realUsername.equals(""))
+                loadUserFromDocument(doc);
+            // --- Ottieni tipo account
+            final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+            userType = elm.text().split(".+\\(|\\)")[1];
 
-			//Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
-			// e quindi, la sessione non è valida
-			return false;
-		}
-		// Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
+        } catch (Exception e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
+            }
+
+            //Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
+            // e quindi, la sessione non è valida
+            lm.w("isSessionValid: Sessione non valida. Causa: " + e.getMessage());
+            return false;
+        }
+        // Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
+		//lm.d("isSessionValid: Sessione valida. Tipo account ottenuto: " + userType);
 		return true;
 	}
 
@@ -1755,68 +838,69 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws UnableToLogin                Il login è andato male e il sito non ha detto cosa è andato storto
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non ci si può loggare
 	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
-	 */
-	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
-		if (demoMode)
-			return;
-		try {
-			if (isMaintenanceActive())
-				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
-			if (isSessionValid(PHPSESSID)) {
-				//Il cookie esistente è ancora valido, niente login.
-				logln("login: Session still valid, ignoring");
-			} else {
-				logln("login: Session expired, creating a new one");
-				initiateSession();
+     */
+    public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
+        lm.d("login: richiesta procedura di login");
+        if (demoMode)
+            return;
+        try {
+            if (isMaintenanceActive())
+                throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
-				//logln("login: First connection (login form)");
+            lm.d("login: Controllo validità sessione");
+            if (isSessionValid(PHPSESSID)) {
+                //Il cookie esistente è ancora valido, niente login.
+                lm.d("login: Sessione ancora valida, ignoro...");
+            } else {
+                lm.d("login: Sessione non valida, ne creo una nuova");
+                initiateSession();
 
-				Document firstRequestDoc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/login/form/")
-						.get();
+                //logln("login: First connection (login form)");
 
-				//logln("login: Second connection (authenticate)");
+                Document firstRequestDoc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/login/form/")
+                        .get();
 
-				Document doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
-						.ignoreContentType(true)
-						.get();
+                //logln("login: Second connection (authenticate)");
 
-				//logln("\n\nCSRF HTML: \n" + doc + "\n\n");
+                Document doc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
+                        .ignoreContentType(true)
+                        .get();
 
-				logln("login: get csrf token");
+                //logln("\n\nCSRF HTML: \n" + doc + "\n\n");
 
-				String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
+                String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
-				logln("login: CSRF Token: " + CSRFToken);
+                lm.d("login: Token CSRF: " + CSRFToken);
 
-				//logln("login: Third connection (login form)");
+                //logln("login: Third connection (login form)");
 
-				doc = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/login/form/")
-						.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-						.post();
+                doc = session.newRequest()
+                        .url(GiuaScraper.SiteURL + "/login/form/")
+                        .data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
+                        .post();
 
-				Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
-				if (!err.isEmpty()) {
-					throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
-				} else {
-					PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
-					if (isSessionValid(PHPSESSID)) {
-						logln("login: Cookie: " + PHPSESSID);
-						logln("login: Logged in as " + this.user);
-					} else {
-						throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
-					}
-				}
-			}
-		} catch (IOException e) {
-			if (!isSiteWorking()) {
-				throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
-			} else {
-				throw new UnableToLogin("Something unexpected happened", e);
-			}
-		}
+                Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
+                if (!err.isEmpty()) {
+                    throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
+                } else {
+                    PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
+                    if (isSessionValid(PHPSESSID)) {
+                        lm.d("login: Cookie: " + PHPSESSID);
+                        lm.d("Login riuscito con account " + this.user);
+                    } else {
+                        throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            if (!isSiteWorking()) {
+                throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
+            } else {
+                throw new UnableToLogin("Something unexpected happened", e);
+            }
+        }
 	}
 
 	public static boolean isMyInternetWorking(){
@@ -1838,19 +922,18 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			} else {
 				throw new YourConnectionProblems("Your internet may not work properly", io);
 			}
-		}
-	}
+        }
+    }
 
-	/**
-	 * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
-	 * @return Il nome utente.
-	 */
+    /**
+     * Prende il nome utente dalla pagina. Utilizza una chiamata a getPage
+     * @return Il nome utente.
+     */
 	public String loadUserFromDocument() {
 		if (demoMode)
 			return GiuaScraperDemo.loadUserFromDocument();
-		final Document doc = getPage("");
-		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
-		return user;
+
+		return loadUserFromDocument(getPage(""));
 	}
 
 	/**
@@ -1861,8 +944,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public String loadUserFromDocument(Document doc) {
 		if (demoMode)
 			return GiuaScraperDemo.loadUserFromDocument();
-		user = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
-		return user;
+		realUsername = doc.getElementsByClass("col-sm-5 col-xs-8 text-right").get(0).text().split(" [(]")[0];
+		return realUsername;
 	}
 
 	public userTypes getUserTypeEnum() {
@@ -1900,69 +983,42 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public String getUserTypeString() {
 		String text;
-		try {
-			if (userType.equals("")) {
-				final Document doc = getPage("");
-				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-				text = elm.text().split(".+\\(|\\)")[1];
-				userType = text;
-				return text;
-			} else {
-				return userType;
-			}
-		} catch (Exception e) {
-			throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
-		}
-	}
+        try {
+            if (userType.equals("")) {
+                final Document doc = getPage("");
+                final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+                text = elm.text().split(".+\\(|\\)")[1];
+                userType = text;
+                return text;
+            } else {
+                return userType;
+            }
+        } catch (Exception e) {
+            throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
+        }
+    }
 
-	public void clearCache() {
-		allVotesCache = null;
-		allNewslettersCache = null;
-		allAlertsCache = null;
-		allTestsCache = null;
-		allHomeworksCache = null;
-		allLessonsCache = null;
+    public void clearCache() {
+        lm.d("Pulizia cache pages in corso...");
+        absencesPageCache = null;
+        alertsPageCache = null;
+        argumentsActivitiesPageCache = null;
+        authorizationsPageCache = null;
+        documentsPageCache = null;
+		homePageCache = null;
+		interviewsPageCache = null;
+		lessonsPageCache = null;
+		newslettersPageCache = null;
+		disciplinaryNotesPageCache = null;
+		observationsPageCache = null;
+		pinBoardPageCache = null;
 		reportCardCache = null;
-		allDisciplNoticesCache = null;
-		allAbsencesCache = null;
-		allNewsFromHomeCache = null;
+		votesPageCache = null;
 	}
 
 	//endregion
 
 	//region Funzioni di debug
-
-	/**
-	 * Stampa una stringa e va a capo.
-	 */
-	protected static void logln(Object message) {
-		if (GiuaScraper.debugMode)
-			System.out.println(message);
-	}
-
-	/**
-	 * Stampa una stringa.
-	 */
-	protected static void log(Object message) {
-		if (GiuaScraper.debugMode)
-			System.out.print(message);
-	}
-
-	/**
-	 * Stampa una stringa come un errore, quindi rosso.
-	 */
-	public static void logError(Object message) {
-		if (GiuaScraper.debugMode)
-			System.err.print(message);
-	}
-
-	/**
-	 * Stampa una stringa come un errore e va a capo.
-	 */
-	public static void logErrorLn(Object message) {
-		if (GiuaScraper.debugMode)
-			System.err.println(message);
-	}
 
 	public static void setDebugMode(boolean mode) {
 		GiuaScraper.debugMode = mode;

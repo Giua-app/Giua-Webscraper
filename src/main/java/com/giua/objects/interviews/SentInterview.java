@@ -17,37 +17,29 @@
  *     along with this program.  If not, see https://www.gnu.org/licenses/.
  */
 
-package com.giua.objects;
+package com.giua.objects.interviews;
 
-import com.giua.utils.GiuaScraperUtils;
-
-public class Observations {
-
-    public final String date;
-    public final String subject;
+public class SentInterview {
     public final String teacher;
-    public final String observations;
-    public final String quarterly;
+    public final String subject;
+    public final String dateAndHour;
+    public final String state;
+    public final String cancelLink;
 
-    public Observations(String date, String subject, String teacher, String observations, String quarterly) {
-        this.date = date;
-        this.subject = subject;
+    public SentInterview(String teacher, String subject, String dateAndHour, String state, String cancelLink) {
         this.teacher = teacher;
-        this.observations = observations;
-        this.quarterly = quarterly;
+        this.subject = subject;
+        this.dateAndHour = dateAndHour;
+        this.state = state;
+        this.cancelLink = cancelLink;
     }
 
-    public int quarterlyToInt() {
-        return GiuaScraperUtils.quarterlyToInt(quarterly);
+    public boolean isCanceled() {
+        return state.equals("Appuntamento annullato dal genitore");
     }
 
     public String toString() {
-        return "Observations{" +
-                "date='" + date + '\'' +
-                ", subject='" + subject + '\'' +
-                ", teacher='" + teacher + '\'' +
-                ", observations='" + observations + '\'' +
-                ", quarterly='" + quarterly + '\'' +
-                '}';
+        return "Docente: " + teacher + " ; Materia: " + subject + " ; Data e ora: " + dateAndHour + " ; Stato della richiesta: " + state;
     }
+
 }

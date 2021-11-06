@@ -30,16 +30,16 @@ public class Newsletter{
     public final String newslettersObject;
     public final String detailsUrl;
     public final int number;
-    public final List<String> attachments;
+    public final List<String> attachmentsUrl;
     public final int page;
 
-    public Newsletter(String status, int number, String date, String newslettersObject, String detailsUrl, List<String> attachments, int page) {
+    public Newsletter(String status, int number, String date, String newslettersObject, String detailsUrl, List<String> attachmentsUrl, int page) {
         this.status = status;
         this.date = date;
         this.newslettersObject = newslettersObject;
         this.detailsUrl = detailsUrl;
         this.number = number;
-        this.attachments = attachments;
+        this.attachmentsUrl = attachmentsUrl;
         this.page = page;
     }
 
@@ -48,7 +48,7 @@ public class Newsletter{
     }
 
     public String toString() {
-        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachments != null && !this.attachments.isEmpty()) ? this.attachments.get(0) : "null");
+        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachmentsUrl != null && !this.attachmentsUrl.isEmpty()) ? this.attachmentsUrl.get(0) : "null");
     }
 
     /**
@@ -93,7 +93,7 @@ public class Newsletter{
         //true se uguale, false altrimenti
         return this.status.equals(newsletter2.status) && this.number == newsletter2.number
                 && this.date.equals(newsletter2.date) && this.newslettersObject.equals(newsletter2.newslettersObject)
-                && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachments == newsletter2.attachments
+                && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachmentsUrl == newsletter2.attachmentsUrl
                 && this.page == newsletter2.page;
     }
 
@@ -108,13 +108,13 @@ public class Newsletter{
                 .addValue("page", this.page)
                 .addCustomString(",\"attachments\":[");
 
-        if (this.attachments != null) {
+        if (this.attachmentsUrl != null) {
             //aggiungi attachments
 
-            jsonBuilder.addCustomString("\"" + this.attachments.get(0) + "\"");
+            jsonBuilder.addCustomString("\"" + this.attachmentsUrl.get(0) + "\"");
 
-            for (int i = 1; i < this.attachments.size(); i++) {
-                jsonBuilder.addCustomString(",\"" + this.attachments.get(i) + "\"");
+            for (int i = 1; i < this.attachmentsUrl.size(); i++) {
+                jsonBuilder.addCustomString(",\"" + this.attachmentsUrl.get(i) + "\"");
             }
         }
 

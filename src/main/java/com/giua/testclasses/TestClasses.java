@@ -75,14 +75,14 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        //startLogin();
-        //testNewsletters(true);
+        startLogin();
+        testAlerts(true);
     }
 
 
@@ -148,7 +148,7 @@ class TestClasses {
         logln("Get first alert with filter");
         logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
         logln("Get details of first alert");
-        allAvvisi.get(0).getDetails(gS);
+        allAvvisi.get(0).getDetailsToString(gS);
         logln(allAvvisi.get(0).toString());
     }
 

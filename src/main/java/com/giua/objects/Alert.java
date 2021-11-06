@@ -71,11 +71,40 @@ public class Alert {
      * @param gS
      * @return Una Stringa contenente i dettagli dell'avviso
      */
-    public String getDetails(GiuaScraper gS) {
+    public String getDetailsToString(GiuaScraper gS) {
         if (!this.isDetailed) {
             Document detailsHTML = gS.getPage(detailsUrl);
             this.attachmentUrls = new Vector<>();
             this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).text();
+            this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
+
+            Elements els = detailsHTML.getElementsByClass("gs-mt-2");
+            this.type = "";        //Se nessuna delle prossime condizioni viene rispettata allora alertType vale una stringa vuota
+            if (els.size() == 3 && els.get(2).text().split(": ").length > 1)
+                this.type = els.get(2).text().split(": ")[1];
+            else if (els.size() == 2 && els.get(1).text().split(": ").length > 1)
+                this.type = els.get(1).text().split(": ")[1];
+
+            Elements attachmentsHTML = detailsHTML.getElementsByClass("gs-ml-3");
+            for (Element attachmentHTML : attachmentsHTML)
+                this.attachmentUrls.add(attachmentHTML.attr("href"));
+
+            this.isDetailed = true;
+        }
+        return this.details;
+    }
+
+    /**
+     * Ottiene i dettagli, il tipo e il creatore dell'avviso con una richiesta HTTP
+     *
+     * @param gS
+     * @return Una Stringa contenente i dettagli dell'avviso
+     */
+    public String getDetails(GiuaScraper gS) {
+        if (!this.isDetailed) {
+            Document detailsHTML = gS.getPage(detailsUrl);
+            this.attachmentUrls = new Vector<>();
+            this.details = detailsHTML.getElementsByClass("gs-text-normal").get(0).html();
             this.creator = detailsHTML.getElementsByClass("text-right gs-text-normal").get(0).text();
 
             Elements els = detailsHTML.getElementsByClass("gs-mt-2");

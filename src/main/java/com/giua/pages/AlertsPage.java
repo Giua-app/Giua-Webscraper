@@ -34,7 +34,7 @@ import java.util.Vector;
 
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
-    private Document doc;
+    private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
 
     public AlertsPage(GiuaScraper gS) {
         this.gS = gS;
@@ -68,6 +68,7 @@ public class AlertsPage implements IPage {
     /**
      * Ritorna una lista di {@code Alert} senza {@code details} e {@code creator}.
      * Per generare i dettagli {@link Alert#getDetails(GiuaScraper)}
+     * ATTENZIONE: Utilizza una richiesta HTTP
      *
      * @param page La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
      * @return Lista di Alert
@@ -80,6 +81,7 @@ public class AlertsPage implements IPage {
         if (page < 0) {
             throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
+        Document doc = gS.getPage(UrlPaths.ALERTS_PAGE + "/" + page);
         List<Alert> allAlerts = new Vector<>();
         Elements allAlertsHTML = doc.getElementsByTag("tbody");
         if (allAlertsHTML.isEmpty())

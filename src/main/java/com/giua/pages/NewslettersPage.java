@@ -34,7 +34,7 @@ import java.util.Vector;
 
 public class NewslettersPage implements IPage{
     private GiuaScraper gS;
-    private Document doc;
+    private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
 
     public NewslettersPage(GiuaScraper gS) {
         this.gS = gS;
@@ -93,6 +93,7 @@ public class NewslettersPage implements IPage{
 
     /**
      * Serve ad ottenere tutte le {@link Newsletter} della pagina specificata
+     * ATTENZIONE: Utilizza una richiesta HTTP
      *
      * @param page La pagina da cui prendere gli avvisi. Deve essere maggiore di 0.
      * @return Lista di NewsLetter contenente tutte le circolari della pagina specificata
@@ -105,6 +106,7 @@ public class NewslettersPage implements IPage{
         if (page <= 0) {
             throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
+        Document doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE + "/" + page);
         List<Newsletter> allNewsletters = new Vector<>();
         try {
             if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + "circolari/genitori/" + page)) {

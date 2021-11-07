@@ -81,8 +81,27 @@ class TestClasses {
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        startLogin();
-        testAlerts(true);
+        //startLogin();
+        //testAlerts(true);
+
+        com.giua.utils.LoggerManager lm = new com.giua.utils.LoggerManager("Test");
+
+        lm.d("Log1");
+        lm.w("Log2");
+        lm.e("Log3");
+        lm.d("Die##$$$r52aaa#$sfd#ahs#$$");
+
+        String logs = "";
+        for (com.giua.utils.LoggerManager.Log log : lm.getLogs()) {
+            logs += log.toString();
+        }
+
+        lm.parseLogsFrom(logs);
+        System.out.println("---");
+        for (com.giua.utils.LoggerManager.Log log : lm.getLogs()) {
+            System.out.println(log.tag + " | " + log.type + ": " + log.text);
+        }
+
     }
 
 

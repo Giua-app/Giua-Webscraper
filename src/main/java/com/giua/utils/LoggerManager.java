@@ -71,13 +71,29 @@ public class LoggerManager {
 
     //$ - categoria
     //# - fine log
-    // Esempio: tag$tipo$date$text#
+
+    /**
+     * Converte una stringa di Logs in dei {@link Log} e sovrascrive
+     * lo storage interno dell'istanza {@link LoggerManager} corrente con i nuovi {@link Log}.
+     * <br><br>
+     * La stringa deve essere formattata come questo esempio: <br>
+     * {@code TAG$TIPO$DATE$TESTO#} <br>
+     * dove {@code $} indica la fine di una categoria
+     * mentre {@code #} indica la fine del log
+     *
+     * @param logs dei {@link Log} formattati in stringa
+     */
     public void parseLogsFrom(String logs) {
-        String[] logsOb = logs.split("#");
+        String[] logsOb = logs.split("#"); //Separazione dei log
 
-
+        this.logs = new Vector<>();
         for (String s : logsOb) {
-            String[] logsSub = s.split("\\$");
+            String[] logsSub = s.split("\\$"); //Separazione categorie
+
+            logsSub[0] = Log.unescape(logsSub[0]);
+            logsSub[1] = Log.unescape(logsSub[1]);
+            logsSub[2] = Log.unescape(logsSub[2]);
+            logsSub[3] = Log.unescape(logsSub[3]);
 
             try {
                 this.logs.add(new Log(logsSub[0], logsSub[1], logDateFormat.parse(logsSub[2]), logsSub[3]));
@@ -107,7 +123,21 @@ public class LoggerManager {
 
         @Override
         public String toString() {
-            return this.tag + "$" + this.type + "$" + logDateFormat.format(this.date) + "$" + this.text + "#";
+            return escape(this.tag) + "$" + escape(this.type) + "$" + escape(logDateFormat.format(this.date)) + "$" + escape(this.text) + "#";
+        }
+
+        public static String escape(String raw) {
+            String escaped = raw;
+            escaped = escaped.replace("$", "\\u0024");
+            escaped = escaped.replace("#", "\\u0023");
+            return escaped;
+        }
+
+        public static String unescape(String escaped) {
+            String unescaped = escaped;
+            unescaped = unescaped.replace("\\u0024", "$");
+            unescaped = unescaped.replace("\\u0023", "#");
+            return unescaped;
         }
 
     }

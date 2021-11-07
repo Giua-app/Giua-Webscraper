@@ -87,6 +87,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Metodi getter e setter
 
+	public LoggerManager getLoggerManager() {
+		return lm;
+	}
+
 	/**
 	 * Permette di settare l'URL del registro
 	 *

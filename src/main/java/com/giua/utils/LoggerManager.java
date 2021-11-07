@@ -84,6 +84,8 @@ public class LoggerManager {
             } catch (ParseException e) {
                 this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura della data sul prossimo log con tag: " + logsSub[0]));
                 this.logs.add(new Log(logsSub[0], logsSub[1], new Date(0), logsSub[3]));
+            } catch (Exception e) {
+                this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura del log: " + s));
             }
 
         }

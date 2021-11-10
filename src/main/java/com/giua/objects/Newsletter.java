@@ -25,7 +25,7 @@ import java.util.List;
 
 public class Newsletter{
 
-    public final String status;
+    private String status;
     public final String date;
     public final String newslettersObject;
     public final String detailsUrl;
@@ -43,8 +43,19 @@ public class Newsletter{
         this.page = page;
     }
 
+    public String getStatus() {
+        return this.status;
+    }
+
     public boolean isRead() {
         return this.status.equals("LETTA");
+    }
+
+    /**
+     * Modifica lo status assegnandogli il valore "LETTA"
+     */
+    public void markAsRead() {
+        this.status = "LETTA";
     }
 
     public String toString() {

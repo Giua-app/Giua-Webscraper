@@ -31,6 +31,7 @@ public class Lesson {
     public final String activities;
     public final boolean exists;
     public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
+    public final boolean isError;
 
     public Lesson(Date date, String time, String subject, String arguments, String activities, boolean exists) {
         this.date = date;
@@ -39,6 +40,17 @@ public class Lesson {
         this.arguments = arguments;
         this.activities = activities;
         this.exists = exists;
+        isError=false;
+    }
+
+    public Lesson(Date date, String time, String subject, String arguments, String activities, boolean exists, boolean isError) {
+        this.date = date;
+        this.time = time;
+        this.subject = subject;
+        this.arguments = arguments;
+        this.activities = activities;
+        this.exists = exists;
+        this.isError=isError;
     }
 
     public Lesson(String date, String time, String subject, String arguments, String activities, boolean exists) {
@@ -52,10 +64,11 @@ public class Lesson {
         this.arguments = arguments;
         this.activities = activities;
         this.exists = exists;
+        isError=false;
     }
 
     public String toString() {
-        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists;
+        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists + this.isError;
     }
 
     public String getDateToString() {

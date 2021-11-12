@@ -25,7 +25,6 @@ import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
 import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -75,33 +74,16 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        //startLogin();
+        startLogin();
         //testAlerts(true);
-
-        com.giua.utils.LoggerManager lm = new com.giua.utils.LoggerManager("Test");
-
-        lm.d("Log1");
-        lm.w("Log2");
-        lm.e("Log3");
-        lm.d("Die##$$$r52aaa#$sfd#ahs#$$");
-
-        String logs = "";
-        for (com.giua.utils.LoggerManager.Log log : lm.getLogs()) {
-            logs += log.toString();
-        }
-
-        lm.parseLogsFrom(logs);
-        System.out.println("---");
-        for (com.giua.utils.LoggerManager.Log log : lm.getLogs()) {
-            System.out.println(log.tag + " | " + log.type + ": " + log.text);
-        }
-
+        
+        testLessons(true);
     }
 
 
@@ -205,7 +187,7 @@ class TestClasses {
 
     public static void testLessons(boolean forceRefresh) {
         logln("Get lessons");
-        List<Lesson> lessons = gS.getLessonsPage(forceRefresh).getAllLessonsFromDate("2021-05-22");
+        List<Lesson> lessons = gS.getLessonsPage(forceRefresh).getAllLessonsFromDate("2021-01-12");
         for (Lesson a : lessons) {
             logln(a.toString());
         }

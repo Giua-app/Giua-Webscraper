@@ -96,7 +96,12 @@ public class LessonsPage implements IPage{
                 ));
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
-            returnLesson.add(new Lesson(pDate, "", "", "", "", false));
+            if(!doc.getElementsByClass("alert alert-warning").isEmpty())
+                returnLesson.add(new Lesson(pDate, "", "",
+                        doc.getElementsByClass("alert alert-warning").first().text(), "", false, true));
+
+            else
+                returnLesson.add(new Lesson(pDate, "", "", "", "", false));
         }
 
         return returnLesson;

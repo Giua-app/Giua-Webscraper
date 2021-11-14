@@ -84,26 +84,26 @@ public class LoggerManager {
      * @param logs dei {@link Log} formattati in stringa
      */
     public void parseLogsFrom(String logs) {
-        String[] logsOb = logs.split("#"); //Separazione dei log
+        if (!logs.isBlank()) {
+            String[] logsOb = logs.split("#"); //Separazione dei log
 
-        this.logs = new Vector<>();
-        for (String s : logsOb) {
-            String[] logsSub = s.split("\\$"); //Separazione categorie
+            this.logs = new Vector<>();
+            for (String s : logsOb) {
+                String[] logsSub = s.split("\\$"); //Separazione categorie
 
-            logsSub[0] = Log.unescape(logsSub[0]);
-            logsSub[1] = Log.unescape(logsSub[1]);
-            logsSub[2] = Log.unescape(logsSub[2]);
-            logsSub[3] = Log.unescape(logsSub[3]);
-
-            try {
-                this.logs.add(new Log(logsSub[0], logsSub[1], logDateFormat.parse(logsSub[2]), logsSub[3]));
-            } catch (ParseException e) {
-                this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura della data sul prossimo log con tag: " + logsSub[0]));
-                this.logs.add(new Log(logsSub[0], logsSub[1], new Date(0), logsSub[3]));
-            } catch (Exception e) {
-                this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura del log: " + s));
+                try {
+                    logsSub[0] = Log.unescape(logsSub[0]);
+                    logsSub[1] = Log.unescape(logsSub[1]);
+                    logsSub[2] = Log.unescape(logsSub[2]);
+                    logsSub[3] = Log.unescape(logsSub[3]);
+                    this.logs.add(new Log(logsSub[0], logsSub[1], logDateFormat.parse(logsSub[2]), logsSub[3]));
+                } catch (ParseException e) {
+                    this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura della data sul prossimo log con tag: " + logsSub[0]));
+                    this.logs.add(new Log(logsSub[0], logsSub[1], new Date(0), logsSub[3]));
+                } catch (Exception e) {
+                    this.logs.add(new Log("Logger Manager", "ERROR", new Date(), "Errore nella lettura del log: " + s));
+                }
             }
-
         }
     }
 

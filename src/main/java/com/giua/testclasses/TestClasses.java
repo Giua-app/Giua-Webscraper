@@ -80,10 +80,54 @@ class TestClasses {
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        startLogin();
+        //startLogin();
         //testAlerts(true);
-        
-        testLessons(true);
+
+        //testLessons(true);
+
+
+        /* NON TOGLIERE SERVE IN FUTURO PER LO SPEEDTEST
+        long t1;
+        long t2;
+
+        t1 = nanoTime();
+        com.giua.utils.LoggerManager lm = new com.giua.utils.LoggerManager("Create");
+
+        for(int i=0; i < 10; i++){
+            lm.w("Sono @##!|_il lo#g " + i);
+        }
+        t1 = nanoTime() - t1;
+        logln("Ho scritto 10 log in " + (t1 / 1000000) + "ms");
+
+        t1 = nanoTime();
+        List<com.giua.utils.LoggerManager.Log> logs = lm.getLogs();
+        t1 = nanoTime() - t1;
+        logln("Ho ottenuto una lista di " + logs.size() + " log in " + (t1 / 1000000) + "ms");
+
+
+
+        t1 = nanoTime();
+        String logs2 = "";
+
+        for(com.giua.utils.LoggerManager.Log log : logs){
+            logs2 += log.toString();
+        }
+        t1 = nanoTime() - t1;
+        logln("Ho convertito " + logs.size() + " log in stringa in " + (t1 / 1000000) + "ms");
+
+        t1 = nanoTime();
+        lm = new com.giua.utils.LoggerManager("Parse");
+
+        lm.parseLogsFrom(logs2);
+        t1 = nanoTime() - t1;
+        logln("Ho convertito 10 logs da stringa ad oggetto in " + (t1 / 1000000) + "ms");
+
+        logs = lm.getLogs();
+        for(com.giua.utils.LoggerManager.Log log : logs){
+            System.out.println(log.tag + " | " + log.type + ": " + log.text);
+        }*/
+
+
     }
 
 

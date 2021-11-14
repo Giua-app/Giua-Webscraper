@@ -131,7 +131,7 @@ public class Alert {
      * Modifica lo status assegnandogli il valore "LETTA"
      */
     public void markAsRead() {
-        this.status = "LETTA";
+        this.status = "LETTO";
     }
 
     public boolean isRead() {

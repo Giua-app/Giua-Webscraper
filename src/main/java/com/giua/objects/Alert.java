@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class Alert {
-    public final String status;
+    private String status;
     public final String date;
     public final String receivers;
     public final String object;
@@ -121,6 +121,17 @@ public class Alert {
             this.isDetailed = true;
         }
         return this.details;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Modifica lo status assegnandogli il valore "LETTA"
+     */
+    public void markAsRead() {
+        this.status = "LETTA";
     }
 
     public boolean isRead() {

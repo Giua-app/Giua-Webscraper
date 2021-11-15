@@ -688,7 +688,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
                         .method(Method.GET)
                         .execute();
 
-                lm.d("getPage: " + GiuaScraper.SiteURL + "/ caricato");
+                lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
                 Document doc = response.parse();
 
@@ -739,7 +739,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
             Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.get();
 
-			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/ caricato");
+			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 			return doc;
 

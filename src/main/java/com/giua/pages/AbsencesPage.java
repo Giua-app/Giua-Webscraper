@@ -167,6 +167,8 @@ public class AbsencesPage implements IPage {
 
     /**
      * Ottiene il numero di giorni di assenza
+     *
+     * @return Una Stringa con i giorni di assenza
      */
     public String getAbsencesDayCount(){
         return tbodyGlobalSituation.child(0).child(1).text();
@@ -174,6 +176,7 @@ public class AbsencesPage implements IPage {
 
     /**
      * Ottiene il numero di ritardi brevi
+     * @return Una stringa con il numero di ritardi brevi
      */
     public String getShortDelaysCount(){
         return tbodyGlobalSituation.child(1).child(1).text();
@@ -181,6 +184,7 @@ public class AbsencesPage implements IPage {
 
     /**
      * Ottiene il numero di ritardi
+     * @return Una stringa con il numero di ritardi
      */
     public String getDelaysCount(){
         return tbodyGlobalSituation.child(2).child(1).text();
@@ -188,13 +192,15 @@ public class AbsencesPage implements IPage {
 
     /**
      * Ottiene il numero delle uscite anticipate
+     * @return Una stringa con il numero di uscite anticipate
      */
     public String getEarlyExitsCount(){
         return tbodyGlobalSituation.child(3).child(1).text();
     }
 
     /**
-     * Ottiene le ore toatli di assenza
+     * Ottiene le ore totali di assenza
+     * @return Una stringa con il numero di ore totali di assenza
      */
     public String getTotalHourOfAbsences(){
         return tbodyGlobalSituation.child(4).child(1).text();

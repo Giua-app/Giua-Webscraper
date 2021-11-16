@@ -51,7 +51,6 @@ public class PinBoardPage implements IPage{
      * Serve solo a capire in quali giorni ci sono verifiche.
      *
      * @param date         puo essere {@code null}. Formato: anno-mese
-     * @param forceRefresh Ricarica effettivamente tutti le verifiche
      * @return Lista di {@link Test} del mese specificato oppure del mese attuale
      */
     public List<Test> getAllTestsWithoutDetails(String date) {

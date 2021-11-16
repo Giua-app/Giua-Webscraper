@@ -83,7 +83,7 @@ public class ReportCard {
         else if (lastChar == '-')
             return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) - 1 + 0.85f : Integer.parseInt(vote.substring(0, 2)) - 1 + 0.85f;
 
-        else if (lastChar == '½')
+        else if (lastChar == '\u00BD') //1 / 2
             return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.5f : Integer.parseInt(vote.substring(0, 2)) + 0.5f;
 
         else {

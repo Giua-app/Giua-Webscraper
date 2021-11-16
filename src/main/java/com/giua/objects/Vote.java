@@ -65,7 +65,7 @@ public class Vote{
         else if (lastChar == '-')
             return (value.length() == 2) ? Character.getNumericValue(value.charAt(0)) - 1 + 0.85f : Integer.parseInt(value.substring(0, 2)) - 1 + 0.85f;
 
-        else if (lastChar == '½')
+        else if (lastChar == '\u00BD') //1 / 2
             return (value.length() == 2) ? Character.getNumericValue(value.charAt(0)) + 0.5f : Integer.parseInt(value.substring(0, 2)) + 0.5f;
 
         else

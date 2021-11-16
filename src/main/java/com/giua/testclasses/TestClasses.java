@@ -78,7 +78,7 @@ class TestClasses {
         //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         //startLogin();
         //testAlerts(true);

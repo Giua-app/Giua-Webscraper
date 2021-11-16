@@ -68,7 +68,7 @@ public class Alert {
     /**
      * Ottiene i dettagli, il tipo e il creatore dell'avviso con una richiesta HTTP
      *
-     * @param gS
+     * @param gS istanza di {@link GiuaScraper} con il login già effettuato
      * @return Una Stringa contenente i dettagli dell'avviso
      */
     public String getDetailsToString(GiuaScraper gS) {
@@ -97,7 +97,7 @@ public class Alert {
     /**
      * Ottiene i dettagli, il tipo e il creatore dell'avviso con una richiesta HTTP
      *
-     * @param gS
+     * @param gS istanza di {@link GiuaScraper} con il login già effettuato
      * @return Una Stringa contenente i dettagli dell'avviso
      */
     public String getDetails(GiuaScraper gS) {

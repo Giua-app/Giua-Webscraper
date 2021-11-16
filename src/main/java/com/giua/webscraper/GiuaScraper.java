@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-/* -- Giua Webscraper ALPHA -- */
+/* -- Giua Webscraper BETA -- */
 // Tested with version 1.4.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions {
 
@@ -416,18 +416,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	/**
 	 * Ottiene il banner della login page se presente
 	 *
-	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
-	 * @throws LoginPageBannerNotFound se non esiste il banner
+	 * @return Il testo del banner (in html).
+	 * Ritorna vuoto se non c'è banner
 	 */
 	public String getLoginPageBanner() {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
 
-        //TODO: se non trova il banner ritorna vuoto, tanto anche nel registro se è vuoto non mette il banner
         try {
             els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
         } catch (IndexOutOfBoundsException e) {
-            throw new LoginPageBannerNotFound("Cant find banner in login page", e);
+			return "";
         }
 
         return els.child(0).html();

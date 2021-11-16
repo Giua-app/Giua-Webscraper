@@ -188,6 +188,8 @@ public class NewslettersPage implements IPage{
     /**
      * Segna la circolare come già letta senza scaricarne il contenuto
      * ATTENZIONE: Usa una richiesta HTTP
+     *
+     * @param newsletter La {@link Newsletter} da segnare come letta
      */
     public void markNewsletterAsRead(Newsletter newsletter) {
         try {

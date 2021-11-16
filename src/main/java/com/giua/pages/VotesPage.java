@@ -48,6 +48,8 @@ public class VotesPage implements IPage {
     /**
      * Ottiene tutti i voti di tutte le materie. I voti per materia sono già in ordine di pubblicazione,
      * il primo è l' ultimo pubblicato
+     *
+     * @return
      */
     public Map<String, List<Vote>> getAllVotes() {
         Map<String, List<Vote>> returnVotes = new HashMap<>();

@@ -50,7 +50,7 @@ public class InterviewsPage implements IPage{
     /**
      * Ottieni tutti i colloqui prenotabili
      *
-     * @return
+     * @return Una lista di {@link Interview} prenotabili
      */
     public List<Interview> getAllInterviews() {
         if (gS.getUserTypeEnum() != GiuaScraper.userTypes.PARENT)
@@ -72,6 +72,8 @@ public class InterviewsPage implements IPage{
 
     /**
      * Ottieni i colloqui prenotati
+     *
+     * @return Una lista di {@link SentInterview} già prenotati
      */
     public List<SentInterview> getAllSentInterviews() {
         if (gS.getUserTypeEnum() != GiuaScraper.userTypes.PARENT)

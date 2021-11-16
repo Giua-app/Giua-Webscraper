@@ -108,6 +108,8 @@ public class AlertsPage implements IPage {
      * Utilizzare {@link #resetFiltersAndRefreshPage()} per resettare il filtro
      * ATTENZIONE: Utilizza una richiesta HTTP
      *
+     * @param onlyNotRead true per ottenere soltanto gli avvisi non letti, false altrimenti
+     * @param text        Il testo da filtrare
      * @return Lista di Alert
      * @throws IndexOutOfBoundsException Se {@code page} è minore o uguale a 0.
      */
@@ -158,6 +160,7 @@ public class AlertsPage implements IPage {
     /**
      * Segna la circolare come già letta
      * ATTENZIONE: Usa una richiesta HTTP
+     * @param alert L'avviso da segnare come letto
      */
     public void markAlertAsRead(Alert alert) {
         try {

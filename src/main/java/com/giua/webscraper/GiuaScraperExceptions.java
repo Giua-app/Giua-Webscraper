@@ -153,4 +153,10 @@ public class GiuaScraperExceptions implements Serializable {
         }
     }
 
+    public static class OldAlertsIsEmpty extends RuntimeException {
+        public OldAlertsIsEmpty(String errorMessage) {super(errorMessage);}
+
+        public OldAlertsIsEmpty(String errorMessage, Throwable err) {super(errorMessage, err);}
+    }
+
 }

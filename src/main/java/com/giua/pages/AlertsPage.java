@@ -29,13 +29,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
     private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
-
+    public static List<Alert> OldAlerts=new Vector<>();
     public AlertsPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
@@ -149,6 +151,70 @@ public class AlertsPage implements IPage {
             e.printStackTrace();
         }
         return allAlerts;
+    }
+
+    /**
+     * Funzione che filtra il vettore di Avvisi in ingresso e restituisce
+     * solo gli avvisi di compiti o verifiche da notificare
+     *
+     * @param homeworkOrTests stringa che indica se si vogliono ottenere i compiti o le verifiche
+     * ATTENZIONE: assegnare a homeworkOrTests o "Compiti" o "Verifica"
+     */
+    public List<Alert> getNotificationToAlerts(String homeworkOrTests, String date, int page){
+
+        List<Alert> newAlerts= getAllAlertsWithFilters(false, "per la materia");
+
+        SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+        String data= sdf.format(16/11/2021);
+
+        for(int i=0; i<newAlerts.size();i++)
+            if(newAlerts.get(i).object.contains(homeworkOrTests))
+                newAlerts.remove(i);
+
+        for(int i=0; i<newAlerts.size();i++)
+            if(newAlerts.get(i).date.compareTo(data)>=0)
+                newAlerts.remove(i);
+
+        if(!OldAlerts.isEmpty()){
+        List <Alert> returnAlerts= new Vector<>();
+        int index=inedxOfSuperficialAlerts(newAlerts,OldAlerts, 0);
+        int l=0;
+        for(int i=index; i<newAlerts.size();i++)
+            if(newAlerts.get(i).object!=OldAlerts.get(i-l).object){
+                returnAlerts.add(new Alert(newAlerts.get(i).status, newAlerts.get(i).date,
+                        newAlerts.get(i).receivers, newAlerts.get(i).object,
+                        newAlerts.get(i).detailsUrl, page));
+                l++;
+            }
+        OldAlerts=newAlerts;
+        return returnAlerts;
+        }
+        else{
+            OldAlerts=newAlerts;
+            List<Alert> returnE=new Vector<>();
+            returnE.add(new Alert(null, null,
+                    null, "Questo è un tentativo test",
+                    null, page));
+            return returnE;
+        }
+    }
+
+    /**
+     * funzione ricorsiva che restituisce un valore da usare come index per saltare i compiti gia notificati
+     */
+    private int inedxOfSuperficialAlerts(List<Alert> newAlerts, List<Alert> oldAlerts, int i){
+       try {
+           if (newAlerts.get(i).object==oldAlerts.get(i).object)
+               return inedxOfSuperficialAlerts(newAlerts, oldAlerts, i + 1);
+           else
+               return i;
+       }catch (IndexOutOfBoundsException e){
+           oldAlerts=newAlerts;
+           List<Alert> returnE=new Vector<>();
+           returnE.add(new Alert(null, null,
+                   null, "Questo è un tentativo test",
+                   null, 1));
+       }throw new GiuaScraperExceptions.OldAlertsIsEmpty("La lista oldAlerts risulta vuota");
     }
 
     private String getFilterToken() {

@@ -25,6 +25,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Vector;
 
@@ -40,6 +41,7 @@ public class Alert {
     public String type;
     public List<String> attachmentUrls;
     public boolean isDetailed;  //Indica se per questo avviso sono stati caricati i dettagli
+    public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
 
     public Alert(String status, String date, String receivers, String object, String detailsUrl, int page) {
         this.status = status;

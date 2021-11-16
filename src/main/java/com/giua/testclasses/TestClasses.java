@@ -21,6 +21,7 @@ package com.giua.testclasses;
 
 import com.giua.objects.*;
 import com.giua.pages.AbsencesPage;
+import com.giua.pages.AlertsPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
 import com.giua.utils.LoggerManager;
@@ -81,9 +82,10 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         startLogin();
-        //testAlerts(true);
-        
-        testLessons(true);
+        testAlerts(true);
+
+
+
     }
 
 
@@ -151,6 +153,45 @@ class TestClasses {
         logln("Get details of first alert");
         allAvvisi.get(0).getDetailsToString(gS);
         logln(allAvvisi.get(0).toString());
+
+        logln("Test notifiche \r\n");
+
+        AlertsPage.OldAlerts= gS.getAlertsPage(forceRefresh).getAllAlertsWithFilters(false,"per la materia");
+        for(int i=0; i<AlertsPage.OldAlerts.size();i++)
+            if(AlertsPage.OldAlerts.get(i).object.contains("Compiti"))
+                AlertsPage.OldAlerts.remove(i);
+        logln("--------------Stampa di OldAlerts----------------");
+        for(Alert a:AlertsPage.OldAlerts)
+            logln(a.object);
+        logln("-------------------------------------------------");
+
+
+
+        List<Alert> newAlerts= gS.getAlertsPage(forceRefresh).getNotificationToAlerts("Compiti","16/11/2021" , 1);
+        logln("--------------Stampa di oldAlerts----------------");
+        for(Alert a:AlertsPage.OldAlerts)
+            logln(a.object);
+        logln("-------------------------------------------------");
+
+        if(newAlerts.get(0).object!="Questo è un tentativo test"){
+            //logln("Test fallito");
+            logln("----Stampa di OldAlerts senza il primo avviso----");
+            AlertsPage.OldAlerts.remove(0);
+            for(Alert a:AlertsPage.OldAlerts)
+                logln(a.object);
+            logln("-------------------------------------------------");
+
+            newAlerts=gS.getAlertsPage(forceRefresh).getNotificationToAlerts("Compiti","16/11/2021" , 1);
+            logln("--------------Stampa di newAlerts----------------");
+            for(Alert a:newAlerts)
+                logln(a.object);
+            logln("-------------------------------------------------");
+
+        }
+        //else logln("Test riuscito");
+
+
+
     }
 
     private static void testHomeworks(boolean forceRefresh) {

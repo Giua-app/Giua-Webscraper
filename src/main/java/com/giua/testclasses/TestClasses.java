@@ -42,6 +42,7 @@ class TestClasses {
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
 
+
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
         try {
@@ -82,9 +83,8 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         startLogin();
-        testAlerts(true);
-
-
+        gS.getAlertsPage(true).getNotificationToAlerts(true);
+        //testAlerts(true);
 
     }
 
@@ -141,7 +141,8 @@ class TestClasses {
     }
 
     private static void testAlerts(boolean forceRefresh) {
-        logln("Get avvisi");
+        AlertsPage alertsPage = gS.getAlertsPage(forceRefresh);
+        /*logln("Get avvisi");
         List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
         for (Alert a : allAvvisi) {
             logln(a.toString());
@@ -188,7 +189,7 @@ class TestClasses {
             logln("-------------------------------------------------");
 
         }
-        //else logln("Test riuscito");
+        //else logln("Test riuscito");*/
 
 
 

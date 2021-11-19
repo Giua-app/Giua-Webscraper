@@ -20,6 +20,7 @@
 package com.giua.pages;
 
 import com.giua.objects.Alert;
+import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import com.giua.webscraper.GiuaScraperExceptions;
@@ -29,6 +30,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -37,9 +39,13 @@ import java.util.Vector;
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
     private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
-    public static List<Alert> OldAlerts=new Vector<>();
+    private List<Alert> oldAlerts;
+    private final LoggerManager lm;
+
     public AlertsPage(GiuaScraper gS) {
         this.gS = gS;
+        oldAlerts = new Vector<>();
+        lm = new LoggerManager("AlertsPage");
         refreshPage();
     }
 
@@ -155,6 +161,8 @@ public class AlertsPage implements IPage {
         return allAlerts;
     }
 
+
+
     /**
      * Funzione che filtra il vettore di Avvisi in ingresso e restituisce
      * solo gli avvisi di compiti o verifiche da notificare
@@ -162,44 +170,85 @@ public class AlertsPage implements IPage {
      * @param homeworkOrTests stringa che indica se si vogliono ottenere i compiti o le verifiche
      * ATTENZIONE: assegnare a homeworkOrTests o "Compiti" o "Verifica"
      */
-    public List<Alert> getNotificationToAlerts(String homeworkOrTests, String date, int page){
+    public void getNotificationToAlerts(boolean homeworks) {
 
-        List<Alert> newAlerts= getAllAlertsWithFilters(false, "per la materia");
-
-        SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
-        String data= sdf.format(16/11/2021);
-
-        for(int i=0; i<newAlerts.size();i++)
-            if(newAlerts.get(i).object.contains(homeworkOrTests))
-                newAlerts.remove(i);
-
-        for(int i=0; i<newAlerts.size();i++)
-            if(newAlerts.get(i).date.compareTo(data)>=0)
-                newAlerts.remove(i);
-
-        if(!OldAlerts.isEmpty()){
-        List <Alert> returnAlerts= new Vector<>();
-        int index=inedxOfSuperficialAlerts(newAlerts,OldAlerts, 0);
-        int l=0;
-        for(int i=index; i<newAlerts.size();i++)
-            if(newAlerts.get(i).object!=OldAlerts.get(i-l).object){
-                returnAlerts.add(new Alert(newAlerts.get(i).status, newAlerts.get(i).date,
-                        newAlerts.get(i).receivers, newAlerts.get(i).object,
-                        newAlerts.get(i).detailsUrl, page));
-                l++;
+        lm.d("Alerts vecchie:");
+        if (!oldAlerts.isEmpty()) {
+            for (Alert alert : oldAlerts) {
+                lm.d(alert.toString());
             }
-        OldAlerts=newAlerts;
-        return returnAlerts;
+        }
+
+        List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
+        List<Alert> temp = new Vector<>();
+
+        lm.d("Ottenuto " + newAlerts.size() + " alerts nuove con filtro");
+        for (Alert alert : newAlerts) {
+            lm.d(alert.toString());
+        }
+
+        Date date = new Date();
+        for(int i=0; i<newAlerts.size();i++){
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            Date alertDate;
+            try {
+                alertDate = dateFormat.parse(newAlerts.get(i).date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return;
+            }
+            if(date.before(alertDate)){ //TODO: controllare con compareTo
+                lm.d("Aggiungo " + newAlerts.get(i).object+ "del giorno"+ newAlerts.get(i).date);
+                temp.add(newAlerts.get(i));
+            }
+        }
+        newAlerts = temp;
+        temp=new Vector<>();
+
+        for (int i = 0; i < newAlerts.size(); i++) {
+            lm.d("Controllo alert " + newAlerts.get(i).object);
+            if (newAlerts.get(i).object.contains("Compiti")) {
+                lm.d("Aggiungo " + newAlerts.get(i).object);
+                temp.add(newAlerts.get(i));
+            }
+        }
+
+        newAlerts = temp;
+
+        lm.d("new alerts finali:");
+        for (Alert alert : newAlerts) {
+            lm.d(alert.toString());
+        }
+
+    }
+/*
+
+
+
+
+        if(!oldAlerts.isEmpty()){
+            List <Alert> returnAlerts= new Vector<>();
+            int index = inedxOfSuperficialAlerts(newAlerts,oldAlerts, 0);
+            int l=0;
+            for(int i = index; i < newAlerts.size(); i++)
+                if(newAlerts.get(i).object!=oldAlerts.get(i-l).object){
+                    returnAlerts.add(new Alert(newAlerts.get(i).status, newAlerts.get(i).date,
+                            newAlerts.get(i).receivers, newAlerts.get(i).object,
+                            newAlerts.get(i).detailsUrl, page));
+                    l++;
+                }
+            oldAlerts=newAlerts;
+            return returnAlerts;
         }
         else{
-            OldAlerts=newAlerts;
+            oldAlerts=newAlerts;
             List<Alert> returnE=new Vector<>();
             returnE.add(new Alert(null, null,
                     null, "Questo è un tentativo test",
                     null, page));
             return returnE;
         }
-    }
+    }*/
 
     /**
      * funzione ricorsiva che restituisce un valore da usare come index per saltare i compiti gia notificati

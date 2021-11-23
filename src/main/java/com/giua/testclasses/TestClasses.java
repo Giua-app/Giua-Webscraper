@@ -42,7 +42,6 @@ class TestClasses {
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
 
-
     //Main function, only used on the console version for testing
     public static void main(String[] args) {
         try {
@@ -83,8 +82,9 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         startLogin();
-        gS.getAlertsPage(true).getNotificationToAlerts(true);
-        //testAlerts(true);
+        testAlerts(true);
+
+
 
     }
 
@@ -141,8 +141,7 @@ class TestClasses {
     }
 
     private static void testAlerts(boolean forceRefresh) {
-        AlertsPage alertsPage = gS.getAlertsPage(forceRefresh);
-        /*logln("Get avvisi");
+        /**logln("Get avvisi");
         List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
         for (Alert a : allAvvisi) {
             logln(a.toString());
@@ -154,45 +153,16 @@ class TestClasses {
         logln("Get details of first alert");
         allAvvisi.get(0).getDetailsToString(gS);
         logln(allAvvisi.get(0).toString());
-
+        */
         logln("Test notifiche \r\n");
+        AlertsPage aP=new AlertsPage(gS);
 
-        AlertsPage.OldAlerts= gS.getAlertsPage(forceRefresh).getAllAlertsWithFilters(false,"per la materia");
-        for(int i=0; i<AlertsPage.OldAlerts.size();i++)
-            if(AlertsPage.OldAlerts.get(i).object.contains("Compiti"))
-                AlertsPage.OldAlerts.remove(i);
-        logln("--------------Stampa di OldAlerts----------------");
-        for(Alert a:AlertsPage.OldAlerts)
-            logln(a.object);
-        logln("-------------------------------------------------");
-
-
-
-        List<Alert> newAlerts= gS.getAlertsPage(forceRefresh).getNotificationToAlerts("Compiti","16/11/2021" , 1);
-        logln("--------------Stampa di oldAlerts----------------");
-        for(Alert a:AlertsPage.OldAlerts)
-            logln(a.object);
-        logln("-------------------------------------------------");
-
-        if(newAlerts.get(0).object!="Questo è un tentativo test"){
-            //logln("Test fallito");
-            logln("----Stampa di OldAlerts senza il primo avviso----");
-            AlertsPage.OldAlerts.remove(0);
-            for(Alert a:AlertsPage.OldAlerts)
-                logln(a.object);
-            logln("-------------------------------------------------");
-
-            newAlerts=gS.getAlertsPage(forceRefresh).getNotificationToAlerts("Compiti","16/11/2021" , 1);
-            logln("--------------Stampa di newAlerts----------------");
-            for(Alert a:newAlerts)
-                logln(a.object);
-            logln("-------------------------------------------------");
-
-        }
-        //else logln("Test riuscito");*/
-
-
-
+        //la funzione viene eseguita due volte per caricare dei dati in oldAlerts
+        logln("\r\n ----------------Prima esecuzione--------------------- \r\n");
+        aP.getNotificationToAlerts(true);
+        //aP.oldAlerts.remove(0);   //permette di fare un confronto tra oldAlerts e newAlerts
+        logln("\r\n ----------------Seconda esecuzione--------------------- \r\n");
+        aP.getNotificationToAlerts(true);
     }
 
     private static void testHomeworks(boolean forceRefresh) {

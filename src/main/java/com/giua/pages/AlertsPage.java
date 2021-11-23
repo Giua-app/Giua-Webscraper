@@ -39,7 +39,7 @@ import java.util.Vector;
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
     private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
-    private List<Alert> oldAlerts;
+    public List<Alert> oldAlerts;
     private final LoggerManager lm;
 
     public AlertsPage(GiuaScraper gS) {
@@ -167,8 +167,7 @@ public class AlertsPage implements IPage {
      * Funzione che filtra il vettore di Avvisi in ingresso e restituisce
      * solo gli avvisi di compiti o verifiche da notificare
      *
-     * @param homeworkOrTests stringa che indica se si vogliono ottenere i compiti o le verifiche
-     * ATTENZIONE: assegnare a homeworkOrTests o "Compiti" o "Verifica"
+     * @param homeworks variabile booleana che se vera, restituirà le notifiche dei compiti, altrimenti delle verifiche
      */
     public void getNotificationToAlerts(boolean homeworks) {
 
@@ -178,15 +177,17 @@ public class AlertsPage implements IPage {
                 lm.d(alert.toString());
             }
         }
+        lm.d("\r\n \r\n");
 
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
         List<Alert> temp = new Vector<>();
 
-        lm.d("Ottenuto " + newAlerts.size() + " alerts nuove con filtro");
+        lm.d("\r\n Ottenuto " + newAlerts.size() + " alerts nuove con filtro");
         for (Alert alert : newAlerts) {
             lm.d(alert.toString());
         }
 
+        lm.d("");
         Date date = new Date();
         for(int i=0; i<newAlerts.size();i++){
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -197,11 +198,13 @@ public class AlertsPage implements IPage {
                 e.printStackTrace();
                 return;
             }
-            if(date.before(alertDate)){ //TODO: controllare con compareTo
-                lm.d("Aggiungo " + newAlerts.get(i).object+ "del giorno"+ newAlerts.get(i).date);
+
+            if(date.before(alertDate) ||date.equals(alertDate)){ //TODO: controllare se notifica anche i compiti assegnati il giorno odierno
+                lm.d("Aggiungo " + newAlerts.get(i).object+ " del giorno "+ newAlerts.get(i).date);
                 temp.add(newAlerts.get(i));
             }
         }
+        lm.d("");
         newAlerts = temp;
         temp=new Vector<>();
 
@@ -212,60 +215,38 @@ public class AlertsPage implements IPage {
                 temp.add(newAlerts.get(i));
             }
         }
-
+        lm.d("");
         newAlerts = temp;
-
-        lm.d("new alerts finali:");
-        for (Alert alert : newAlerts) {
-            lm.d(alert.toString());
-        }
-
-    }
-/*
-
-
+        temp=new Vector<>();
 
 
         if(!oldAlerts.isEmpty()){
-            List <Alert> returnAlerts= new Vector<>();
-            int index = inedxOfSuperficialAlerts(newAlerts,oldAlerts, 0);
+            int index=0;
+            while (newAlerts.get(index).object==oldAlerts.get(index).object){
+                index++;
+            }
             int l=0;
-            for(int i = index; i < newAlerts.size(); i++)
+            for(int i = index; i < newAlerts.size(); i++){
+                lm.d("Controllo alert "+ newAlerts.get(i).object+" con "+ oldAlerts.get(i-l).object);
                 if(newAlerts.get(i).object!=oldAlerts.get(i-l).object){
-                    returnAlerts.add(new Alert(newAlerts.get(i).status, newAlerts.get(i).date,
-                            newAlerts.get(i).receivers, newAlerts.get(i).object,
-                            newAlerts.get(i).detailsUrl, page));
+                    lm.d("Aggiungo "+ newAlerts.get(i).object);
+                    temp.add(newAlerts.get(i));
                     l++;
                 }
+            }
+            newAlerts = temp;
+            temp=new Vector<>();
             oldAlerts=newAlerts;
-            return returnAlerts;
+            lm.d("new alerts finali:");
+            for (Alert alert : newAlerts) {
+                lm.d(alert.toString());
+            }
         }
         else{
             oldAlerts=newAlerts;
-            List<Alert> returnE=new Vector<>();
-            returnE.add(new Alert(null, null,
-                    null, "Questo è un tentativo test",
-                    null, page));
-            return returnE;
+            lm.d("Questo è un tentativo test");
         }
-    }*/
-
-    /**
-     * funzione ricorsiva che restituisce un valore da usare come index per saltare i compiti gia notificati
-     */
-    private int inedxOfSuperficialAlerts(List<Alert> newAlerts, List<Alert> oldAlerts, int i){
-       try {
-           if (newAlerts.get(i).object==oldAlerts.get(i).object)
-               return inedxOfSuperficialAlerts(newAlerts, oldAlerts, i + 1);
-           else
-               return i;
-       }catch (IndexOutOfBoundsException e){
-           oldAlerts=newAlerts;
-           List<Alert> returnE=new Vector<>();
-           returnE.add(new Alert(null, null,
-                   null, "Questo è un tentativo test",
-                   null, 1));
-       }throw new GiuaScraperExceptions.OldAlertsIsEmpty("La lista oldAlerts risulta vuota");
+        lm.d("");
     }
 
     private String getFilterToken() {

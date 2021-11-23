@@ -93,7 +93,7 @@ public class HomePage implements IPage {
      *
      * @return numero di avvisi da leggere
      */
-    public int checkForAlertsUpdate() {
+    public int getNumberAlerts() {
         List<News> news = getAllNewsFromHome();
         String text;
 
@@ -121,7 +121,7 @@ public class HomePage implements IPage {
      *
      * @return numero di circolari da leggere
      */
-    public int checkForNewsletterUpdate() {
+    public int getNumberNewsletters() {
         List<News> news = getAllNewsFromHome();
         String text;
 
@@ -145,7 +145,7 @@ public class HomePage implements IPage {
      *
      * @return true se ci sono assenze o ritardi da giustificare, altrimenti false
      */
-    public boolean checkForAbsenceUpdate() {
+    public boolean areAllJustificationsJustified() {
         List<News> news = getAllNewsFromHome();
 
         for (News nw : news) {

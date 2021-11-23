@@ -21,6 +21,7 @@ package com.giua.utils;
 
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
+import com.giua.objects.Vote;
 
 import java.util.List;
 import java.util.Vector;
@@ -109,7 +110,7 @@ public class GiuaScraperUtils {
      * @param newHomework Homeworks nuovi
      * @return Una lista di homework diversi/nuovi
      */
-    public List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
+    public static List<Homework> compareHomeworks(List<Homework> oldHomework, List<Homework> newHomework) {
         List<Homework> homeworkDiff = new Vector<>();
 
         if (!oldHomework.get(0).month.equals(newHomework.get(0).month) && !oldHomework.get(1).month.equals(newHomework.get(1).month)) {
@@ -141,7 +142,7 @@ public class GiuaScraperUtils {
      * @param newTest Test nuovi
      * @return Una lista di test diversi/nuovi
      */
-    public List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
+    public static List<Test> compareTests(List<Test> oldTest, List<Test> newTest) {
         List<Test> testDiff = new Vector<>();
 
         if (!oldTest.get(0).month.equals(newTest.get(0).month) && !oldTest.get(1).month.equals(newTest.get(1).month)) {
@@ -160,5 +161,44 @@ public class GiuaScraperUtils {
         }
 
         return testDiff;
+    }
+
+    /**
+     * Ottieni una lista di {@link Vote} contenente le differenze delle due liste
+     *
+     * @param firstList  La prima lista
+     * @param secondList La seconda lista
+     * @return La lista di {@link Vote} con i {@link Vote} diversi
+     */
+    public static List<Vote> compareListVote(List<Vote> firstList, List<Vote> secondList) {
+        List<Vote> difference = new Vector<>();
+
+        for (Vote vote : secondList) {
+            if (!firstList.contains(vote))
+                difference.add(vote);
+        }
+
+        return difference;
+    }
+
+    /**
+     * Ottieni una lista di {@code int} contenente gli indici della seconda lista in cui è stata trovata una differenza
+     * con la prima lista
+     *
+     * @param firstList  La prima lista
+     * @param secondList La seconda lista
+     * @return La lista di {@code int} contenente gli indici
+     */
+    public static List<Integer> getListVoteIndexDifferences(List<Vote> firstList, List<Vote> secondList) {
+        List<Integer> difference = new Vector<>();
+
+        int index = 0;
+        for (Vote vote : secondList) {
+            if (!firstList.contains(vote))
+                difference.add(index);
+            index++;
+        }
+
+        return difference;
     }
 }

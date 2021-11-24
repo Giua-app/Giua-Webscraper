@@ -30,11 +30,14 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
+import java.util.spi.CalendarNameProvider;
 
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
@@ -188,7 +191,19 @@ public class AlertsPage implements IPage {
         }
 
         lm.d("");
-        Date date = new Date();
+        Date date;
+        /**
+         * codice di debug per inserire una data qualsiasi
+         * SimpleDateFormat dF = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            date = dF.parse("20/11/2021");
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        }*/
+        date=new Date();    //per inserire una data manualmente col codice qui sopra, commentare questa riga
+
+        
         for(int i=0; i<newAlerts.size();i++){
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Date alertDate;
@@ -234,8 +249,8 @@ public class AlertsPage implements IPage {
                     l++;
                 }
             }
+            totalNotification(l);
             newAlerts = temp;
-            temp=new Vector<>();
             oldAlerts=newAlerts;
             lm.d("new alerts finali:");
             for (Alert alert : newAlerts) {
@@ -249,6 +264,7 @@ public class AlertsPage implements IPage {
         lm.d("");
     }
 
+    private int totalNotification(int n){lm .d("Numero di notifiche:"+ n);return n;}
     private String getFilterToken() {
         return doc.getElementById("bacheca_avvisi_genitori__token").attr("value");
     }

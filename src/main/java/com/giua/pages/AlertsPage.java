@@ -42,12 +42,10 @@ import java.util.spi.CalendarNameProvider;
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
     private Document doc;   //ATTENZIONE: doc rappresenta solo la prima pagina
-    public List<Alert> oldAlerts;
     private final LoggerManager lm;
 
     public AlertsPage(GiuaScraper gS) {
         this.gS = gS;
-        oldAlerts = new Vector<>();
         lm = new LoggerManager("AlertsPage");
         refreshPage();
     }
@@ -169,13 +167,10 @@ public class AlertsPage implements IPage {
     /**
      * Funzione che filtra il vettore di Avvisi in ingresso e restituisce
      * solo gli avvisi di compiti o verifiche da notificare
-     *
-     * @param homeworks variabile booleana che se vera, restituirà le notifiche dei compiti, altrimenti delle verifiche
      */
-    public void getNotificationToAlerts(boolean homeworks) {
-
-        lm.d("Alerts vecchie:");
+    public List<Alert> getNotificationToAlerts(List<Alert> oldAlerts) {
         if (!oldAlerts.isEmpty()) {
+            lm.d("Alerts vecchie:");
             for (Alert alert : oldAlerts) {
                 lm.d(alert.toString());
             }
@@ -206,12 +201,11 @@ public class AlertsPage implements IPage {
         
         for(int i=0; i<newAlerts.size();i++){
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Date alertDate;
+            Date alertDate=new Date();
             try {
                 alertDate = dateFormat.parse(newAlerts.get(i).date);
             } catch (ParseException e) {
                 e.printStackTrace();
-                return;
             }
 
             if(date.before(alertDate) ||date.equals(alertDate)){ //TODO: controllare se notifica anche i compiti assegnati il giorno odierno
@@ -222,19 +216,6 @@ public class AlertsPage implements IPage {
         lm.d("");
         newAlerts = temp;
         temp=new Vector<>();
-
-        for (int i = 0; i < newAlerts.size(); i++) {
-            lm.d("Controllo alert " + newAlerts.get(i).object);
-            if (newAlerts.get(i).object.contains("Compiti")) {
-                lm.d("Aggiungo " + newAlerts.get(i).object);
-                temp.add(newAlerts.get(i));
-            }
-        }
-        lm.d("");
-        newAlerts = temp;
-        temp=new Vector<>();
-
-
         if(!oldAlerts.isEmpty()){
             int index=0;
             while (newAlerts.get(index).object==oldAlerts.get(index).object){
@@ -249,7 +230,6 @@ public class AlertsPage implements IPage {
                     l++;
                 }
             }
-            totalNotification(l);
             newAlerts = temp;
             oldAlerts=newAlerts;
             lm.d("new alerts finali:");
@@ -257,14 +237,21 @@ public class AlertsPage implements IPage {
                 lm.d(alert.toString());
             }
         }
-        else{
-            oldAlerts=newAlerts;
-            lm.d("Questo è un tentativo test");
-        }
-        lm.d("");
+        return newAlerts;
     }
 
-    private int totalNotification(int n){lm .d("Numero di notifiche:"+ n);return n;}
+    public List<Alert> getNotificationToAlert( List<Alert> oldAlerts) {
+        List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
+        List<Alert> temp = new Vector<>();
+
+        for(Alert a:newAlerts){
+            if(!oldAlerts.contains(a))
+                temp.add(a);
+        }
+
+        return temp;
+    }
+
     private String getFilterToken() {
         return doc.getElementById("bacheca_avvisi_genitori__token").attr("value");
     }

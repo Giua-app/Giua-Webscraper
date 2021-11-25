@@ -24,8 +24,8 @@ import com.giua.pages.AbsencesPage;
 import com.giua.pages.AlertsPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
-import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -147,22 +147,20 @@ class TestClasses {
             logln(a.toString());
         }
         logln("Marking first alert as read");
-        gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
-        logln("Get first alert with filter");
-        logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
-        logln("Get details of first alert");
-        allAvvisi.get(0).getDetailsToString(gS);
-        logln(allAvvisi.get(0).toString());
-        */
+         gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
+         logln("Get first alert with filter");
+         logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
+         logln("Get details of first alert");
+         allAvvisi.get(0).getDetailsToString(gS);
+         logln(allAvvisi.get(0).toString());
+         */
         logln("Test notifiche \r\n");
-        AlertsPage aP=new AlertsPage(gS);
+        AlertsPage aP = new AlertsPage(gS);
 
-        //la funzione viene eseguita due volte per caricare dei dati in oldAlerts
-        logln("\r\n ----------------Prima esecuzione--------------------- \r\n");
-        aP.getNotificationToAlerts(true);
-        //aP.oldAlerts.remove(0);   //permette di fare un confronto tra oldAlerts e newAlerts
-        logln("\r\n ----------------Seconda esecuzione--------------------- \r\n");
-        aP.getNotificationToAlerts(true);
+        List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
+        List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size() - 1);
+        List<Alert> o = aP.getNotificationToAlert(oldAlerts);
+        logln("Servo solo per il breakpoint, ELIMINAMI");
     }
 
     private static void testHomeworks(boolean forceRefresh) {

@@ -30,14 +30,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
-import java.util.spi.CalendarNameProvider;
 
 public class AlertsPage implements IPage {
     private GiuaScraper gS;
@@ -240,16 +237,20 @@ public class AlertsPage implements IPage {
         return newAlerts;
     }
 
-    public List<Alert> getNotificationToAlert( List<Alert> oldAlerts) {
+    public List<Alert> getNotificationToAlert(List<Alert> oldAlerts) {
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
         List<Alert> temp = new Vector<>();
+        if (oldAlerts.size() == 0)
+            return newAlerts;   //Ritorno newAlerts perché è la loro differenza
 
-        for(Alert a:newAlerts){
-            if(!oldAlerts.contains(a))
-                temp.add(a);
+        int i = 0;
+        for (Alert a : newAlerts) {
+            if (a.toString().equals(oldAlerts.get(0).toString()))
+                break;
+            i++;
         }
 
-        return temp;
+        return newAlerts.subList(0, i);
     }
 
     private String getFilterToken() {
@@ -257,9 +258,10 @@ public class AlertsPage implements IPage {
     }
 
     /**
-     * Segna la circolare come già letta
+     * Segna l' avviso come già letto
      * ATTENZIONE: Usa una richiesta HTTP
-     * @param alert L'avviso da segnare come letto
+     *
+     * @param alert L' avviso da segnare come letto
      */
     public void markAlertAsRead(Alert alert) {
         try {

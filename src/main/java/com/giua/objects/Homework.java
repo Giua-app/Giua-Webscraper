@@ -54,8 +54,8 @@ public class Homework {
     }
 
     public String toJson() {
-
-        return new JsonBuilder("[{")
+        return "";
+        /*return new JsonBuilder("[{")
                 .addValue("day", this.day)
                 .addValue("month", this.month)
                 .addValue("year", this.year)
@@ -64,7 +64,7 @@ public class Homework {
                 .addValue("creator", this.creator)
                 .addValue("details", JsonBuilder.escape(this.details))
                 .addValue("exists", this.exists)
-                .build("}]");
+                .build("}]");*/
     }
 
     /*public List<String> compare(Homework homework) {

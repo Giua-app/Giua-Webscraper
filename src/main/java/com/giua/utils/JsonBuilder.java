@@ -19,49 +19,76 @@
 
 package com.giua.utils;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.json.JsonWriteFeature;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.giua.objects.*;
+import com.giua.webscraper.GiuaScraper;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 public class JsonBuilder {
-    private String completeString = "";
-    private boolean firstValue = true;
+    BufferedWriter writer;
+    ObjectMapper objectMapper;
+    JsonGenerator jsonGenerator;
+    int jsonVer = 2;
+    LoggerManager lm;
 
-    public JsonBuilder(String start) {
-        completeString = start;
+    /**
+     * Il JsonBuilder ti permette di creare un json pronto a contenere dati dagli oggetti di GiuaScraper
+     *
+     * @param path Percorso dove scrivere il file (il file viene creato appena istanziata questa classe)
+     * @param gS   Istanza {@link GiuaScraper} per ottenere il {@link LoggerManager}
+     * @throws IOException se ci sono errori nella scrittura
+     */
+    public JsonBuilder(String path, GiuaScraper gS) throws IOException {
+        objectMapper = new ObjectMapper();
+        writer = new BufferedWriter(new FileWriter(path));
+        lm = gS.getLoggerManager();
+        initializeJsonGenerator();
     }
 
     /**
-     * Aggiunge una riga al JSON con una copia nome-valore.
+     * Serve a inizializzare il JsonGenerator e a scrivere la versione e la data di creazione del json
      *
-     * @param name  Il nome a cui verrà associato {@code value}
-     * @param value Un oggetto qualsiasi che verrà associato a {@code name} e che verrà trasformato in una stringa
-     * @return Il {@code JsonBuilder} attuale
+     * @throws IOException
      */
-    public JsonBuilder addValue(String name, Object value) {
-        if (firstValue) {
-            completeString += String.format("\"%s\":\"%s\"", name, value);
-            firstValue = false;
-        } else
-            completeString += String.format(",\"%s\":\"%s\"", name, value);
-        return this;
+    private void initializeJsonGenerator() throws IOException {
+        lm.d("Serializzazione json inizializzata. Versione: " + jsonVer);
+        jsonGenerator = new JsonFactory().createGenerator(writer);
+        jsonGenerator.enable(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature());
+        jsonGenerator.enable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+
+        jsonGenerator.writeStartObject();
+        jsonGenerator.writeNumberField("version", jsonVer);
+        Date calendar = Calendar.getInstance().getTime();
+        jsonGenerator.writeStringField("create_date", calendar.toString());
     }
 
     /**
-     * Aggiungi una stringa qualsiasi al JSON.
+     * Salva il json nel file indicato e chiude JsonGenerator
+     * ATTENZIONE: Una volta salvato, questa classe deve essere ricreata per generare altri json
      *
-     * @param s La stringa da aggiungere
-     * @return Il {@code JsonBuilder} attuale
+     * @throws IOException
      */
-    public JsonBuilder addCustomString(String s) {
-        completeString += s;
-        return this;
-    }
-
-    /**
-     * Costruisci la stringa JSON aggiungendo {@code end} come fine.
-     *
-     * @param end La stringa da aggiungere alla fine
-     * @return La stringa JSON creata
-     */
-    public String build(String end) {
-        return completeString + end;
+    public void saveJson() throws IOException {
+        lm.d("Salvataggio json...");
+        jsonGenerator.writeEndObject();
+        jsonGenerator.flush();
+        jsonGenerator.close();
+        lm.d("Scrittura json su file completato con successo. Libero memoria");
+        jsonGenerator = null;
+        writer = null;
+        objectMapper = null;
     }
 
     public static String escape(String raw) {
@@ -75,5 +102,84 @@ public class JsonBuilder {
         escaped = escaped.replace("\t", "\\t");
         //escaped = escaped.replace("\"", "\\u0022");
         return escaped;
+    }
+
+
+    public void writeNewsletters(List<Newsletter> newsletters) throws IOException {
+        jsonGenerator.writeArrayFieldStart("newsletters");
+        objectMapper.writeValue(jsonGenerator, newsletters);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeAlerts(List<Alert> alerts) throws IOException {
+        jsonGenerator.writeArrayFieldStart("alerts");
+        objectMapper.writeValue(jsonGenerator, alerts);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeVotes(Map<String, List<Vote>> votes) throws IOException {
+        jsonGenerator.writeArrayFieldStart("votes");
+        objectMapper.writeValue(jsonGenerator, votes);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeAbsences(List<Absence> absences) throws IOException {
+        jsonGenerator.writeArrayFieldStart("absences");
+        objectMapper.writeValue(jsonGenerator, absences);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeDisciplinaryNotices(List<DisciplinaryNotices> dn) throws IOException {
+        jsonGenerator.writeArrayFieldStart("disciplinary_notices");
+        objectMapper.writeValue(jsonGenerator, dn);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeDocuments(List<Document> documents) throws IOException {
+        jsonGenerator.writeArrayFieldStart("documents");
+        objectMapper.writeValue(jsonGenerator, documents);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeHomeworks(List<Homework> homeworks) throws IOException {
+        jsonGenerator.writeArrayFieldStart("homeworks");
+        objectMapper.writeValue(jsonGenerator, homeworks);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeLessons(List<Lesson> lessons) throws IOException {
+        jsonGenerator.writeArrayFieldStart("lessons");
+        objectMapper.writeValue(jsonGenerator, lessons);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeMaintenance(Maintenance maintenance) throws IOException {
+        jsonGenerator.writeArrayFieldStart("maintenance");
+        objectMapper.writeValue(jsonGenerator, maintenance);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeNews(List<News> news) throws IOException {
+        jsonGenerator.writeArrayFieldStart("news");
+        objectMapper.writeValue(jsonGenerator, news);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeObservations(List<Observations> observations) throws IOException {
+        jsonGenerator.writeArrayFieldStart("observations");
+        objectMapper.writeValue(jsonGenerator, observations);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeReportCards(List<ReportCard> reportCards) throws IOException {
+        jsonGenerator.writeArrayFieldStart("report_cards");
+        objectMapper.writeValue(jsonGenerator, reportCards);
+        jsonGenerator.writeEndArray();
+    }
+
+    public void writeTests(List<Test> tests) throws IOException {
+        jsonGenerator.writeArrayFieldStart("tests");
+        objectMapper.writeValue(jsonGenerator, tests);
+        jsonGenerator.writeEndArray();
     }
 }

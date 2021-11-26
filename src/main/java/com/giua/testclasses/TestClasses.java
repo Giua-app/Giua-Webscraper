@@ -20,16 +20,12 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.pages.AbsencesPage;
-import com.giua.pages.AlertsPage;
-import com.giua.pages.HomePage;
-import com.giua.pages.VotesPage;
+import com.giua.pages.*;
+import com.giua.utils.JsonBuilder;
 import com.giua.webscraper.GiuaScraper;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Vector;
+import java.io.IOException;
+import java.util.*;
 
 import static java.lang.System.nanoTime;
 
@@ -82,8 +78,23 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         startLogin();
-        testAlerts(true);
+        //testVotes(true);
+        //testAlerts(true);
 
+
+        try {
+            JsonBuilder jsonBuilder = new JsonBuilder("test.json", gS);
+            jsonBuilder.writeNewsletters(gS.getNewslettersPage(true).getAllNewsletters(1));
+            jsonBuilder.writeAlerts(gS.getAlertsPage(true).getAllAlerts(1));
+            jsonBuilder.writeVotes(gS.getVotesPage(true).getAllVotes());
+            jsonBuilder.writeAbsences(gS.getAbsencesPage(true).getAllAbsences());
+            jsonBuilder.writeDisciplinaryNotices(gS.getDisciplinaryNotesPage(true).getAllDisciplinaryNotices());
+            jsonBuilder.writeLessons(gS.getLessonsPage(true).getAllLessonsFromDate(new Date()));
+            //logln(jsonBuilder.getJson());
+            jsonBuilder.saveJson();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
     }
@@ -123,6 +134,7 @@ class TestClasses {
         for (News news : allNews) {
             logln(news.toString());
         }
+
     }
 
     private static void testVotes(boolean forceRefresh) {
@@ -720,6 +732,17 @@ class TestClasses {
         System.out.println("\\--------------------------------------------------------");
     }
 
+    private static class hello {
+        public int integer = 30;
+        public List<String> list;
+
+        public hello(int lol) {
+            integer = lol;
+            list = new Vector<>();
+            list.add("lolaaslda");
+            list.add("aaaaaaaaaa");
+        }
+    }
 
     private static class LoggerManager extends com.giua.utils.LoggerManager {
 

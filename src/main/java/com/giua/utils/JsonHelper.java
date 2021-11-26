@@ -156,12 +156,12 @@ public class JsonHelper {
             //Materia
             json.append("\"").append(str).append("\":[{")
                     .append("\"0\":")
-                    .append(votes.get(str).get(0).toJSON());
+                    .append(votes.get(str).get(0));
 
             for (int i = 1; i < votes.get(str).size(); i++) {
                 //Voto
                 json.append(",\"").append(i).append("\":")
-                        .append(votes.get(str).get(i).toJSON());
+                        .append(votes.get(str).get(i));
             }
             //Fine di una materia
             json.append("}],");

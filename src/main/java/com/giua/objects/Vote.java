@@ -19,8 +19,12 @@
 
 package com.giua.objects;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.JsonBuilder;
+
+import java.io.IOException;
+import java.io.StringWriter;
 
 public class Vote{
     public final String value;
@@ -72,8 +76,19 @@ public class Vote{
             return Integer.parseInt(value);
     }
 
-    public String toJSON() {
-        return new JsonBuilder("[{")
+    /*public StringWriter toJSON() {
+        StringWriter stringEmp = new StringWriter();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            objectMapper.writeValue(stringEmp, this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return stringEmp;
+
+        /*return new JsonBuilder("[{")
                 .addValue("value", this.value)
                 .addValue("isFirstQuarterly", this.quarterly)
                 .addValue("isAsterisk", this.isAsterisk)
@@ -81,8 +96,8 @@ public class Vote{
                 .addValue("judgement", JsonBuilder.escape(this.judgement))
                 .addValue("type", this.testType)
                 .addValue("arguments", JsonBuilder.escape(this.arguments))
-                .build("}]");
-    }
+                .build("}]");*
+    }*/
 
     public int quarterlyToInt() {
         return GiuaScraperUtils.quarterlyToInt(quarterly);

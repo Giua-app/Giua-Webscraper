@@ -148,7 +148,7 @@ public class Alert {
     }
 
     public String toJSON() {
-
+/*
         JsonBuilder jsonBuilder = new JsonBuilder("[{")
                 .addValue("status", this.status)
                 .addValue("date", this.date)
@@ -172,7 +172,8 @@ public class Alert {
             }
         }
 
-        return jsonBuilder.build("]}]");
+        return jsonBuilder.build("]}]");*/
+        return "";
     }
 
 }

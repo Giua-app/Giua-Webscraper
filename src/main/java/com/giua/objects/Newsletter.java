@@ -110,7 +110,7 @@ public class Newsletter{
 
     public String toJson() {
 
-        JsonBuilder jsonBuilder = new JsonBuilder("[{")
+        /*JsonBuilder jsonBuilder = new JsonBuilder("[{")
                 .addValue("status", this.status)
                 .addValue("date", this.date)
                 .addValue("object", JsonBuilder.escape(this.newslettersObject))
@@ -129,6 +129,7 @@ public class Newsletter{
             }
         }
 
-        return jsonBuilder.build("]}]");
+        return jsonBuilder.build("]}]");*/
+        return "";
     }
 }

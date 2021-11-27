@@ -20,12 +20,18 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.pages.*;
-import com.giua.utils.JsonBuilder;
+import com.giua.pages.AbsencesPage;
+import com.giua.pages.AlertsPage;
+import com.giua.pages.HomePage;
+import com.giua.pages.VotesPage;
+import com.giua.utils.JsonHelper;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.IOException;
-import java.util.*;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Vector;
 
 import static java.lang.System.nanoTime;
 
@@ -82,7 +88,7 @@ class TestClasses {
         //testAlerts(true);
 
 
-        try {
+        /*try {
             JsonBuilder jsonBuilder = new JsonBuilder("test.json", gS);
             jsonBuilder.writeNewsletters(gS.getNewslettersPage(true).getAllNewsletters(1));
             jsonBuilder.writeAlerts(gS.getAlertsPage(true).getAllAlerts(1));
@@ -90,12 +96,43 @@ class TestClasses {
             jsonBuilder.writeAbsences(gS.getAbsencesPage(true).getAllAbsences());
             jsonBuilder.writeDisciplinaryNotices(gS.getDisciplinaryNotesPage(true).getAllDisciplinaryNotices());
             jsonBuilder.writeLessons(gS.getLessonsPage(true).getAllLessonsFromDate(new Date()));
+            jsonBuilder.writeDocuments(gS.getDocumentsPage(true).getDocuments());
+            jsonBuilder.writeMaintenance(gS.getMaintenanceInfo());
+            jsonBuilder.writeHomeworks(gS.getPinBoardPage(true).getHomework("2021-11-27"));
+            jsonBuilder.writeTests(gS.getPinBoardPage(false).getAllTestsWithoutDetails(null));
             //logln(jsonBuilder.getJson());
             jsonBuilder.saveJson();
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+
+
+        List<Newsletter> allNewsletters = new JsonHelper().parseJsonForNewsletters(Path.of("test.json"));
+        for (Newsletter a : allNewsletters) {
+            logln(a.toString());
         }
 
+
+        List<Alert> allAvvisi = new JsonHelper().parseJsonForAlerts(Path.of("test.json"));
+        for (Alert a : allAvvisi) {
+            logln(a.toString());
+        }
+
+
+        Map<String, List<Vote>> votes = new JsonHelper().parseJsonForVotes(Path.of("test.json"));
+        for (String m : votes.keySet()) {
+            logln(m + ": " + votes.get(m).toString());
+        }
+
+        List<Absence> allAbsences = new JsonHelper().parseJsonForAbsences(Path.of("test.json"));
+        for (Absence a : allAbsences) {
+            logln(a.toString());
+        }
+
+        List<Lesson> allLessons = new JsonHelper().parseJsonForLessons(Path.of("test.json"));
+        for (Lesson a : allLessons) {
+            logln(a.toString());
+        }
 
     }
 

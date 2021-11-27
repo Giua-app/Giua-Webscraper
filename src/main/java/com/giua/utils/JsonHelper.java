@@ -21,34 +21,32 @@ package com.giua.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.giua.objects.Alert;
-import com.giua.objects.Homework;
-import com.giua.objects.Newsletter;
-import com.giua.objects.Vote;
+import com.giua.objects.*;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 public class JsonHelper {
 
-    boolean debugMode;
-    int jsonVer = 1;
+    static boolean debugMode;
+    static int jsonVer = 2;
+    static LoggerManager lm;
 
+
+    public JsonHelper(GiuaScraper gS) {
+        debugMode = GiuaScraper.getDebugMode();
+        lm = gS.getLoggerManager();
+    }
 
     public JsonHelper() {
         debugMode = GiuaScraper.getDebugMode();
+        lm = new LoggerManager("JsonHelper");
     }
 
-    // FUNZIONI UTILI
-    //region
-
-    private JsonNode getRootNode(String jsonData) {
+    private static JsonNode getRootNode(String jsonData) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode rootNode = null;
@@ -60,214 +58,14 @@ public class JsonHelper {
         }
         int ver = Objects.requireNonNull(rootNode).findPath("version").asInt();
         if (ver != jsonVer) {
-            logln("ERRORE: JSON VECCHIO!");
+            lm.w("Versione json (" + ver + ") non è uguale al attuale versione (" + jsonVer + ")");
         }
 
         return rootNode;
     }
 
-    private StringBuilder writeJsonVerAndDate(){
-        logln("writeJsonVerAndDate: JSON VERSIONE: " + jsonVer + " SCRITTURA IN CORSO");
-        StringBuilder json = new StringBuilder("{\"version\":"+jsonVer+",");
-        Date calendar = Calendar.getInstance().getTime();
-        json.append("\"create_date\":\"").append(calendar).append("\",");
-        return json;
-    }
 
-    private String writeJsonEOF(StringBuilder json){
-        json.append("}");
-        logln("JSON FINALE: " + json);
-        logln("saveDataToJSON: Salvataggio completato");
-        return json.toString();
-    }
-
-    private void saveJsonStringToFile(String path, String string) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-
-        ObjectMapper mapper = new ObjectMapper();
-        Object jsonOb = mapper.readValue(string, Object.class);
-
-        String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonOb);
-
-        writer.write(pretty);
-        writer.close();
-    }
-
-    //endregion
-
-    // FUNZIONI PER SCRITTURA DI OGGETTI
-    //region
-
-    /**
-     * Scrive sul StringBuilder json le newsletters.
-     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
-     * tra questa funzione e la prossima, in modo che il json sia valido
-     *
-     * @param json      StringBuilder del json in uso
-     * @param homeworks Lista di newsletters da salvare
-     * @return StringBuilder json aggiornato con newsletters
-     */
-    public StringBuilder writeHomeworksToJson(StringBuilder json, List<Homework> homeworks) {
-        json.append("\"homeworks\":[{")
-                .append("\"0\":")
-                .append(homeworks.get(0).toJson());
-        for (int i = 1; i < homeworks.size(); i++) {
-            json.append(",\"").append(i).append("\":")
-                    .append(homeworks.get(i).toJson());
-        }
-        json.append("}]");
-        return json;
-    }
-
-
-    /**
-     * Scrive sul StringBuilder json le newsletters.
-     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
-     * tra questa funzione e la prossima, in modo che il json sia valido
-     *
-     * @param json        StringBuilder del json in uso
-     * @param newsletters Lista di newsletters da salvare
-     * @return StringBuilder json aggiornato con newsletters
-     */
-    public StringBuilder writeNewslettersToJson(StringBuilder json, List<Newsletter> newsletters) {
-        json.append("\"newsletters\":[{")
-                .append("\"0\":")
-                .append(newsletters.get(0).toJson());
-        for (int i = 1; i < newsletters.size(); i++) {
-            json.append(",\"").append(i).append("\":")
-                    .append(newsletters.get(i).toJson());
-        }
-        json.append("}]");
-        return json;
-    }
-
-    /**
-     * Scrive sul StringBuilder json i votes.
-     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
-     * tra questa funzione e la prossima, in modo che il json sia valido
-     *
-     * @param json  StringBuilder del json in uso
-     * @param votes Lista di votes da salvare
-     * @return StringBuilder json aggiornato con votes
-     */
-    public StringBuilder writeVotesToJson(StringBuilder json, Map<String, List<Vote>> votes) {
-        json.append("\"votes\":[{");
-        for (String str : votes.keySet()) {
-            //Materia
-            json.append("\"").append(str).append("\":[{")
-                    .append("\"0\":")
-                    .append(votes.get(str).get(0));
-
-            for (int i = 1; i < votes.get(str).size(); i++) {
-                //Voto
-                json.append(",\"").append(i).append("\":")
-                        .append(votes.get(str).get(i));
-            }
-            //Fine di una materia
-            json.append("}],");
-        }
-        json.deleteCharAt(json.length() - 1); //Cancella la virgola dell'ultima materia
-
-        json.append("}]");
-
-        return json;
-    }
-
-    /**
-     * Scrive sul StringBuilder json gli alerts.
-     * Per usare questa funzione insieme ad altre scritture json bisogna inserire una virgola
-     * tra questa funzione e la prossima, in modo che il json sia valido
-     *
-     * @param json   StringBuilder del json in uso
-     * @param alerts Lista di alerts da salvare
-     * @return StringBuilder json aggiornato con alerts
-     */
-    public StringBuilder writeAlertsToJson(StringBuilder json, List<Alert> alerts) {
-        json.append("\"alerts\":[{")
-                .append("\"0\":")
-                .append(alerts.get(0).toJSON());
-        for (int i = 1; i < alerts.size(); i++) {
-            json.append(",\"").append(i).append("\":")
-                    .append(alerts.get(i).toJSON());
-        }
-        json.append("}]");
-        return json;
-    }
-
-    //endregion
-
-    //FUNIONI PER SALAVATAGGIO DI OGGETTI IN STRINGHE
-    //region
-
-    public String saveNewslettersToString(List<Newsletter> newsletters) {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeNewslettersToJson(json, newsletters);
-
-        return writeJsonEOF(json);
-    }
-
-    public String saveVotesToString(Map<String, List<Vote>> votes) {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeVotesToJson(json, votes);
-
-        return writeJsonEOF(json);
-    }
-
-    public String saveAlertsToString(List<Alert> alerts) {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeAlertsToJson(json, alerts);
-
-        return writeJsonEOF(json);
-    }
-
-    //endregion
-
-    // FUNZIONI PER SALVATAGGIO DI OGGETTI IN FILE SINGOLI
-    //region
-
-    public void saveHomeworksToFile(String path, List<Homework> homeworks) throws IOException {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeHomeworksToJson(json, homeworks);
-
-        String finalJson = writeJsonEOF(json);
-        saveJsonStringToFile(path, finalJson);
-    }
-
-    public void saveNewslettersToFile(String path, List<Newsletter> newsletters) throws IOException {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeNewslettersToJson(json, newsletters);
-
-        String finalJson = writeJsonEOF(json);
-        saveJsonStringToFile(path, finalJson);
-    }
-
-    public void saveVotesToFile(String path, Map<String, List<Vote>> votes) throws IOException {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeVotesToJson(json, votes);
-
-        String finalJson = writeJsonEOF(json);
-        saveJsonStringToFile(path, finalJson);
-    }
-
-    public void saveAlertsToFile(String path, List<Alert> alerts) throws IOException {
-        StringBuilder json = writeJsonVerAndDate();
-
-        json = writeAlertsToJson(json, alerts);
-
-        String finalJson = writeJsonEOF(json);
-        saveJsonStringToFile(path, finalJson);
-    }
-
-    //endregion
-
-    // FUNZIONI PER PARSING DI OGGETTI DA FILE O STRINGA JSON
-    //region
+    //region FUNZIONI PER PARSING DI OGGETTI DA FILE O STRINGA JSON
 
     public List<Newsletter> parseJsonForNewsletters(Path path){
 
@@ -292,9 +90,9 @@ public class JsonHelper {
         log("parseJsonForNewsletters: Leggo json circolari");
         while(i < 50){
             JsonNode newsletter;
-            newsletter = newsletters.findPath(""+i);
+            newsletter = newsletters.get(0).get(i);
 
-            if(newsletter.isMissingNode()){
+            if (newsletter == null || newsletter.isMissingNode()) {
                 logln("\nparseJsonForNewsletters: Lettura circolari completata, ho letto " + i + " circolari");
                 break;
             }
@@ -344,17 +142,17 @@ public class JsonHelper {
 
 
         logln("parseJsonForVotes: Leggo json voti...");
-        while(subject.hasNext()){
+        while (subject.hasNext()) {
             String subjectName = subject.next();
 
             List<Vote> votes = new Vector<>();
-            int i=0;
+            int i = 0;
             //non dovrebbe MAI raggiungere 50 (perchè è impossibile mettere 50 voti)
             //ma nel caso succeda qualcosa almeno ferma il loop
-            while(i < 50){
-                JsonNode vote = rootVotes.get(subjectName).findPath(""+i);
+            while (i < 100) {
+                JsonNode vote = rootVotes.get(subjectName).get(i);
 
-                if(vote.isMissingNode()){
+                if (vote == null || vote.isMissingNode()) {
                     //significa che abbiamo finito i voti
                     break;
                 }
@@ -402,9 +200,9 @@ public class JsonHelper {
         log("parseJsonForAlerts: Leggo json avvisi");
         while(i < 50){
             JsonNode alert;
-            alert = alerts.findPath(""+i);
+            alert = alerts.get(0).get(i);
 
-            if(alert.isMissingNode()){
+            if (alert == null || alert.isMissingNode()) {
                 logln("\nparseJsonForAlerts: Lettura avvisi completata, ho letto " + i + " avvisi");
                 break;
             }
@@ -444,13 +242,105 @@ public class JsonHelper {
     }
 
 
+    public List<Absence> parseJsonForAbsences(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForAbsences(json);
+    }
+
+    public List<Absence> parseJsonForAbsences(String json) {
+        List<Absence> returnAbsences = new Vector<>();
+        JsonNode rootNode = getRootNode(json);
+        JsonNode absences = rootNode.findPath("absences");
+
+        int i = 0;
+        //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
+        //ma nel caso succeda qualcosa almeno ferma il loop
+        lm.d("Parsing json assenze in corso");
+        while (i < 50) {
+            JsonNode absence;
+            absence = absences.get(0).get(i);
+
+            if (absence == null || absence.isMissingNode()) {
+                lm.d("Lettura assenze completata, ho letto " + i + " assenze");
+                break;
+            }
+
+            String date = absence.findPath("date").asText();
+            String type = absence.findPath("type").asText();
+            String notes = absence.findPath("notes").asText();
+            boolean isJustified = absence.findPath("isJustified").asBoolean();
+            boolean isModificable = absence.findPath("isModificable").asBoolean();
+            String justifyUrl = absence.findPath("justifyUrl").asText();
+
+
+            returnAbsences.add(new Absence(date, type, notes, isJustified, isModificable, justifyUrl));
+
+            i++;
+        }
+        return returnAbsences;
+    }
+
+
+    public List<Lesson> parseJsonForLessons(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForLessons(json);
+    }
+
+    public List<Lesson> parseJsonForLessons(String json) {
+        List<Lesson> returnLessons = new Vector<>();
+        JsonNode rootNode = getRootNode(json);
+        JsonNode lessons = rootNode.findPath("lessons");
+
+        int i = 0;
+        //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
+        //ma nel caso succeda qualcosa almeno ferma il loop
+        lm.d("Parsing json lezioni in corso");
+        while (i < 50) {
+            JsonNode lesson;
+            lesson = lessons.get(0).get(i);
+
+            if (lesson == null || lesson.isMissingNode()) {
+                lm.d("Lettura lezioni completata, ho letto " + i + " assenze");
+                break;
+            }
+
+            Date date = new Date(lesson.findPath("date").asLong());
+            String time = lesson.findPath("time").asText();
+            String subject = lesson.findPath("subject").asText();
+            String arguments = lesson.findPath("arguments").asText();
+            String activities = lesson.findPath("activities").asText();
+            boolean exist = lesson.findPath("exist").asBoolean();
+            boolean isError = lesson.findPath("isError").asBoolean();
+
+            returnLessons.add(new Lesson(date, time, subject, arguments, activities, exist, isError));
+
+            i++;
+        }
+        return returnLessons;
+    }
+
+
     //endregion
 
 
     /**
      * Stampa una stringa e va a capo.
      */
-    protected void logln(String message) {
+    protected static void logln(String message) {
         if (debugMode)
             System.out.println(message);
     }
@@ -458,7 +348,7 @@ public class JsonHelper {
     /**
      * Stampa una stringa.
      */
-    protected void log(String message) {
+    protected static void log(String message) {
         if (debugMode)
             System.out.print(message);
     }

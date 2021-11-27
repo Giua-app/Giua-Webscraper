@@ -87,6 +87,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Metodi getter e setter
 
+	/**
+	 * Permette di ottenere il {@link LoggerManager} usato da GiuaScraper
+	 * Utile nel caso GiuaScraper abbia un LoggerManager personalizzato impostato
+	 *
+	 * @return {@link LoggerManager} usato da questa istanza
+	 */
 	public LoggerManager getLoggerManager() {
 		return lm;
 	}

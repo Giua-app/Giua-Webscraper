@@ -54,13 +54,6 @@
           <artifactId>jackson-databind</artifactId>
           <version>2.12.5</version>
       </dependency>
-      <!-- JSON in Java -->
-      <dependency>
-          <groupId>org.json</groupId>
-          <artifactId>json</artifactId>
-          <version>20210307</version>
-          <scope>compile</scope>
-      </dependency>
   </dependencies>
 
   <build>

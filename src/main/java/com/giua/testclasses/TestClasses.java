@@ -101,7 +101,7 @@ class TestClasses {
             jsonBuilder.writeDocuments(gS.getDocumentsPage(true).getDocuments());
             jsonBuilder.writeMaintenance(gS.getMaintenanceInfo());*/
             jsonBuilder.writeHomeworks(gS.getPinBoardPage(true).getAllHomeworksWithoutDetails("2021-11"));
-            jsonBuilder.writeTests(gS.getPinBoardPage(false).getAllTestsWithoutDetails(null));
+            jsonBuilder.writeTests(gS.getPinBoardPage(false).getTest("2021-11-05"));
             //logln(jsonBuilder.getJson());
             jsonBuilder.saveJson();
         } catch (IOException e) {
@@ -138,6 +138,11 @@ class TestClasses {
 
         List<Homework> allHomework = new JsonHelper().parseJsonForHomeworks(Path.of("test.json"));
         for (Homework a : allHomework) {
+            logln(a.toString());
+        }
+
+        List<Test> allTest = new JsonHelper().parseJsonForTests(Path.of("test.json"));
+        for (Test a : allTest) {
             logln(a.toString());
         }
 

@@ -332,6 +332,44 @@ public class JsonHelper {
         return returnHomeworks;
     }
 
+    public List<Test> parseJsonForTests(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForTests(json);
+    }
+
+    public List<Test> parseJsonForTests(String json) {
+        List<Test> returnTests = new Vector<>();
+        Iterator<JsonNode> tests = getRootNode(json).findPath("tests").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per Tests in corso...");
+        while (tests.hasNext()) {
+            JsonNode test = tests.next();
+
+            String day = test.findPath("day").asText();
+            String month = test.findPath("month").asText();
+            String year = test.findPath("year").asText();
+            String date = test.findPath("date").asText();
+            String subject = test.findPath("subject").asText();
+            String creator = test.findPath("creator").asText();
+            String details = test.findPath("details").asText();
+            boolean exists = test.findPath("exists").asBoolean();
+
+            returnTests.add(new Test(day, month, year, date, subject, creator, details, exists));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " Tests completata");
+        return returnTests;
+    }
+
 
     //endregion
 

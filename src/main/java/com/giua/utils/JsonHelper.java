@@ -294,6 +294,44 @@ public class JsonHelper {
         return returnLessons;
     }
 
+    public List<Homework> parseJsonForHomeworks(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForHomeworks(json);
+    }
+
+    public List<Homework> parseJsonForHomeworks(String json) {
+        List<Homework> returnHomeworks = new Vector<>();
+        Iterator<JsonNode> homeworks = getRootNode(json).findPath("homeworks").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per Homeworks in corso...");
+        while (homeworks.hasNext()) {
+            JsonNode homework = homeworks.next();
+
+            String day = homework.findPath("day").asText();
+            String month = homework.findPath("month").asText();
+            String year = homework.findPath("year").asText();
+            String date = homework.findPath("date").asText();
+            String subject = homework.findPath("subject").asText();
+            String creator = homework.findPath("creator").asText();
+            String details = homework.findPath("details").asText();
+            boolean exists = homework.findPath("exists").asBoolean();
+
+            returnHomeworks.add(new Homework(day, month, year, date, subject, creator, details, exists));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " Homeworks completata");
+        return returnHomeworks;
+    }
+
 
     //endregion
 

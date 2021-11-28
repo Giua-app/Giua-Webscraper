@@ -24,9 +24,11 @@ import com.giua.pages.AbsencesPage;
 import com.giua.pages.AlertsPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
+import com.giua.utils.JsonBuilder;
 import com.giua.utils.JsonHelper;
 import com.giua.webscraper.GiuaScraper;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -88,26 +90,26 @@ class TestClasses {
         //testAlerts(true);
 
 
-        /*try {
+        try {
             JsonBuilder jsonBuilder = new JsonBuilder("test.json", gS);
-            jsonBuilder.writeNewsletters(gS.getNewslettersPage(true).getAllNewsletters(1));
+            /*jsonBuilder.writeNewsletters(gS.getNewslettersPage(true).getAllNewsletters(1));
             jsonBuilder.writeAlerts(gS.getAlertsPage(true).getAllAlerts(1));
             jsonBuilder.writeVotes(gS.getVotesPage(true).getAllVotes());
             jsonBuilder.writeAbsences(gS.getAbsencesPage(true).getAllAbsences());
             jsonBuilder.writeDisciplinaryNotices(gS.getDisciplinaryNotesPage(true).getAllDisciplinaryNotices());
             jsonBuilder.writeLessons(gS.getLessonsPage(true).getAllLessonsFromDate(new Date()));
             jsonBuilder.writeDocuments(gS.getDocumentsPage(true).getDocuments());
-            jsonBuilder.writeMaintenance(gS.getMaintenanceInfo());
-            jsonBuilder.writeHomeworks(gS.getPinBoardPage(true).getHomework("2021-11-27"));
+            jsonBuilder.writeMaintenance(gS.getMaintenanceInfo());*/
+            jsonBuilder.writeHomeworks(gS.getPinBoardPage(true).getAllHomeworksWithoutDetails("2021-11"));
             jsonBuilder.writeTests(gS.getPinBoardPage(false).getAllTestsWithoutDetails(null));
             //logln(jsonBuilder.getJson());
             jsonBuilder.saveJson();
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
 
 
-        List<Newsletter> allNewsletters = new JsonHelper().parseJsonForNewsletters(Path.of("test.json"));
+        /*List<Newsletter> allNewsletters = new JsonHelper().parseJsonForNewsletters(Path.of("test.json"));
         for (Newsletter a : allNewsletters) {
             logln(a.toString());
         }
@@ -131,6 +133,11 @@ class TestClasses {
 
         List<Lesson> allLessons = new JsonHelper().parseJsonForLessons(Path.of("test.json"));
         for (Lesson a : allLessons) {
+            logln(a.toString());
+        }*/
+
+        List<Homework> allHomework = new JsonHelper().parseJsonForHomeworks(Path.of("test.json"));
+        for (Homework a : allHomework) {
             logln(a.toString());
         }
 

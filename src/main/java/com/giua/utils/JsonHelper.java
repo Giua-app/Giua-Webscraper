@@ -46,14 +46,14 @@ public class JsonHelper {
         lm = new LoggerManager("JsonHelper");
     }
 
-    private static JsonNode getRootNode(String jsonData) {
+    private JsonNode getRootNode(String jsonData) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode rootNode = null;
         try {
             rootNode = objectMapper.readTree(jsonData);
         } catch (IOException e) {
-            logln("loadDataFromJSON: Impossibile leggere json");
+            lm.e("JsonHelper: Impossibile leggere json");
             e.printStackTrace();
         }
         int ver = Objects.requireNonNull(rootNode).findPath("version").asInt();
@@ -79,23 +79,14 @@ public class JsonHelper {
         return parseJsonForNewsletters(json);
     }
 
-    public List<Newsletter> parseJsonForNewsletters(String json){
+    public List<Newsletter> parseJsonForNewsletters(String json) {
         List<Newsletter> returnNewsletters = new Vector<>();
-        JsonNode rootNode = getRootNode(json);
-        JsonNode newsletters = rootNode.findPath("newsletters");
+        Iterator<JsonNode> newsletters = getRootNode(json).findPath("newsletters").get(0).iterator();
 
         int i = 0;
-        //non dovrebbe MAI raggiungere 50 (perchè il massimo di circolari in una pagina sono 20)
-        //ma nel caso succeda qualcosa almeno ferma il loop
-        log("parseJsonForNewsletters: Leggo json circolari");
-        while(i < 50){
-            JsonNode newsletter;
-            newsletter = newsletters.get(0).get(i);
-
-            if (newsletter == null || newsletter.isMissingNode()) {
-                logln("\nparseJsonForNewsletters: Lettura circolari completata, ho letto " + i + " circolari");
-                break;
-            }
+        lm.d("De-serializzazione JSON per Newsletters in corso...");
+        while (newsletters.hasNext()) {
+            JsonNode newsletter = newsletters.next();
 
             String status = newsletter.findPath("status").asText();
             String date = newsletter.findPath("date").asText();
@@ -114,8 +105,8 @@ public class JsonHelper {
 
             returnNewsletters.add(new Newsletter(status, number, date, object, details, attachments, page));
             i++;
-            log(".");
         }
+        lm.d("De-serializzazione di " + i + " Newsletters completata");
         return returnNewsletters;
     }
 
@@ -132,33 +123,24 @@ public class JsonHelper {
         return parseJsonForVotes(json);
     }
 
-    public Map<String, List<Vote>> parseJsonForVotes(String json){
+    public Map<String, List<Vote>> parseJsonForVotes(String json) {
         Map<String, List<Vote>> returnVote = new HashMap<>();
-        JsonNode rootNode = getRootNode(json);
-        JsonNode votesNode = rootNode.findPath("votes");
+        JsonNode votesNode = getRootNode(json).findPath("votes").get(0);
 
-        JsonNode rootVotes = votesNode.get(0);
-        Iterator<String> subject = rootVotes.fieldNames();
+        Iterator<String> subject = votesNode.fieldNames();
 
-
-        logln("parseJsonForVotes: Leggo json voti...");
+        int iSubject = 0;
+        int iVotes = 0;
+        lm.d("De-serializzazione JSON per Votes in corso...");
         while (subject.hasNext()) {
             String subjectName = subject.next();
+            Iterator<JsonNode> subjectVotes = votesNode.get(subjectName).iterator();
 
             List<Vote> votes = new Vector<>();
-            int i = 0;
-            //non dovrebbe MAI raggiungere 50 (perchè è impossibile mettere 50 voti)
-            //ma nel caso succeda qualcosa almeno ferma il loop
-            while (i < 100) {
-                JsonNode vote = rootVotes.get(subjectName).get(i);
-
-                if (vote == null || vote.isMissingNode()) {
-                    //significa che abbiamo finito i voti
-                    break;
-                }
+            while (subjectVotes.hasNext()) {
+                JsonNode vote = subjectVotes.next();
 
                 String value = vote.findPath("value").asText();
-                boolean isFirstQuarterly = vote.findPath("isFirstQuarterly").asBoolean();
                 String quart = vote.findPath("Quarterly").asText();
                 boolean isAsterisk = vote.findPath("isAsterisk").asBoolean();
                 String date = vote.findPath("date").asText();
@@ -168,11 +150,12 @@ public class JsonHelper {
 
                 votes.add(new Vote(value, date, type, arguments, judgement, quart, isAsterisk));
 
-                i++;
+                iVotes++;
             }
+            iSubject++;
             returnVote.put(subjectName, votes);
         }
-        logln("parseJsonForVotes: lettura completata");
+        lm.d("De-serializzazione di " + iSubject + " materie e " + iVotes + " voti completata");
         return returnVote;
     }
 
@@ -189,23 +172,16 @@ public class JsonHelper {
         return parseJsonForAlerts(json);
     }
 
-    public List<Alert> parseJsonForAlerts(String json){
+    public List<Alert> parseJsonForAlerts(String json) {
         List<Alert> returnAlerts = new Vector<>();
-        JsonNode rootNode = getRootNode(json);
-        JsonNode alerts = rootNode.findPath("alerts");
+        Iterator<JsonNode> alerts = getRootNode(json).findPath("alerts").get(0).iterator();
 
         int i = 0;
         //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
         //ma nel caso succeda qualcosa almeno ferma il loop
-        log("parseJsonForAlerts: Leggo json avvisi");
-        while(i < 50){
-            JsonNode alert;
-            alert = alerts.get(0).get(i);
-
-            if (alert == null || alert.isMissingNode()) {
-                logln("\nparseJsonForAlerts: Lettura avvisi completata, ho letto " + i + " avvisi");
-                break;
-            }
+        lm.d("De-serializzazione JSON per Alerts in corso...");
+        while (alerts.hasNext()) {
+            JsonNode alert = alerts.next();
 
             String status = alert.findPath("status").asText();
             String date = alert.findPath("date").asText();
@@ -238,6 +214,7 @@ public class JsonHelper {
 
             i++;
         }
+        lm.d("De-serializzazione di " + i + " Alerts completata");
         return returnAlerts;
     }
 
@@ -256,21 +233,12 @@ public class JsonHelper {
 
     public List<Absence> parseJsonForAbsences(String json) {
         List<Absence> returnAbsences = new Vector<>();
-        JsonNode rootNode = getRootNode(json);
-        JsonNode absences = rootNode.findPath("absences");
+        Iterator<JsonNode> absences = getRootNode(json).findPath("absences").get(0).iterator();
 
         int i = 0;
-        //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
-        //ma nel caso succeda qualcosa almeno ferma il loop
-        lm.d("Parsing json assenze in corso");
-        while (i < 50) {
-            JsonNode absence;
-            absence = absences.get(0).get(i);
-
-            if (absence == null || absence.isMissingNode()) {
-                lm.d("Lettura assenze completata, ho letto " + i + " assenze");
-                break;
-            }
+        lm.d("De-serializzazione JSON per Absences in corso...");
+        while (absences.hasNext()) {
+            JsonNode absence = absences.next();
 
             String date = absence.findPath("date").asText();
             String type = absence.findPath("type").asText();
@@ -284,6 +252,7 @@ public class JsonHelper {
 
             i++;
         }
+        lm.d("De-serializzazione di " + i + " Absences completata");
         return returnAbsences;
     }
 
@@ -302,21 +271,12 @@ public class JsonHelper {
 
     public List<Lesson> parseJsonForLessons(String json) {
         List<Lesson> returnLessons = new Vector<>();
-        JsonNode rootNode = getRootNode(json);
-        JsonNode lessons = rootNode.findPath("lessons");
+        Iterator<JsonNode> lessons = getRootNode(json).findPath("lessons").get(0).iterator();
 
         int i = 0;
-        //non dovrebbe MAI raggiungere 50 (perchè il massimo di avvisi in una pagina sono 19)
-        //ma nel caso succeda qualcosa almeno ferma il loop
-        lm.d("Parsing json lezioni in corso");
-        while (i < 50) {
-            JsonNode lesson;
-            lesson = lessons.get(0).get(i);
-
-            if (lesson == null || lesson.isMissingNode()) {
-                lm.d("Lettura lezioni completata, ho letto " + i + " assenze");
-                break;
-            }
+        lm.d("De-serializzazione JSON per Lessons in corso...");
+        while (lessons.hasNext()) {
+            JsonNode lesson = lessons.next();
 
             Date date = new Date(lesson.findPath("date").asLong());
             String time = lesson.findPath("time").asText();
@@ -330,27 +290,11 @@ public class JsonHelper {
 
             i++;
         }
+        lm.d("De-serializzazione di " + i + " Lessons completata");
         return returnLessons;
     }
 
 
     //endregion
-
-
-    /**
-     * Stampa una stringa e va a capo.
-     */
-    protected static void logln(String message) {
-        if (debugMode)
-            System.out.println(message);
-    }
-
-    /**
-     * Stampa una stringa.
-     */
-    protected static void log(String message) {
-        if (debugMode)
-            System.out.print(message);
-    }
 
 }

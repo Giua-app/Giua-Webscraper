@@ -19,24 +19,22 @@
 
 package com.giua.objects;
 
-import com.giua.utils.JsonBuilder;
-
 import java.util.List;
 
 public class Newsletter{
 
     private String status;
     public final String date;
-    public final String newslettersObject;
+    public final String object;
     public final String detailsUrl;
     public final int number;
     public final List<String> attachmentsUrl;
     public final int page;
 
-    public Newsletter(String status, int number, String date, String newslettersObject, String detailsUrl, List<String> attachmentsUrl, int page) {
+    public Newsletter(String status, int number, String date, String object, String detailsUrl, List<String> attachmentsUrl, int page) {
         this.status = status;
         this.date = date;
-        this.newslettersObject = newslettersObject;
+        this.object = object;
         this.detailsUrl = detailsUrl;
         this.number = number;
         this.attachmentsUrl = attachmentsUrl;
@@ -59,7 +57,7 @@ public class Newsletter{
     }
 
     public String toString() {
-        return this.status + "; " + this.number + "; " + this.date + "; " + this.newslettersObject + "; " + this.detailsUrl + "; " + ((this.attachmentsUrl != null && !this.attachmentsUrl.isEmpty()) ? this.attachmentsUrl.get(0) : "null");
+        return this.status + "; " + this.number + "; " + this.date + "; " + this.object + "; " + this.detailsUrl + "; " + ((this.attachmentsUrl != null && !this.attachmentsUrl.isEmpty()) ? this.attachmentsUrl.get(0) : "null");
     }
 
     /**
@@ -103,7 +101,7 @@ public class Newsletter{
     public boolean equals(Newsletter newsletter2) {
         //true se uguale, false altrimenti
         return this.status.equals(newsletter2.status) && this.number == newsletter2.number
-                && this.date.equals(newsletter2.date) && this.newslettersObject.equals(newsletter2.newslettersObject)
+                && this.date.equals(newsletter2.date) && this.object.equals(newsletter2.object)
                 && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachmentsUrl == newsletter2.attachmentsUrl
                 && this.page == newsletter2.page;
     }

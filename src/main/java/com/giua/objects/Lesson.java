@@ -68,7 +68,7 @@ public class Lesson {
     }
 
     public String toString() {
-        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.exists + this.isError;
+        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; Esiste?" + this.exists + "; Errore?" + this.isError;
     }
 
     public String getDateToString() {

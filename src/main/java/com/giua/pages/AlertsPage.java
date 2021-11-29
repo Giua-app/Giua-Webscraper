@@ -30,9 +30,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -160,24 +157,24 @@ public class AlertsPage implements IPage {
     }
 
 
-
     /**
-     * Funzione che filtra il vettore di Avvisi in ingresso e restituisce
-     * solo gli avvisi di compiti o verifiche da notificare
-     */
-    public List<Alert> getNotificationToAlerts(List<Alert> oldAlerts) {
+     * Ottieni la differenza degli avvisi tra gli {@code oldAlerts} e gli avvisi nuovi. Serve SOLO per notificare
+     * i nuovi compiti e le nuove verifiche
+     * @param oldAlerts Una lista degli avvisi già notificati
+     * @return Una lista di avvisi nuovi da notificare
+     *//*
+    public List<Alert> getNewAlertsFromOldAlerts(List<Alert> oldAlerts) {
         if (!oldAlerts.isEmpty()) {
             lm.d("Alerts vecchie:");
             for (Alert alert : oldAlerts) {
                 lm.d(alert.toString());
             }
         }
-        lm.d("\r\n \r\n");
 
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
         List<Alert> temp = new Vector<>();
 
-        lm.d("\r\n Ottenuto " + newAlerts.size() + " alerts nuove con filtro");
+        lm.d("Ottenuto " + newAlerts.size() + " alerts nuove con filtro");
         for (Alert alert : newAlerts) {
             lm.d(alert.toString());
         }
@@ -192,7 +189,7 @@ public class AlertsPage implements IPage {
         } catch (ParseException e) {
             e.printStackTrace();
             return;
-        }*/
+        }*//*
         date=new Date();    //per inserire una data manualmente col codice qui sopra, commentare questa riga
 
         
@@ -235,11 +232,17 @@ public class AlertsPage implements IPage {
             }
         }
         return newAlerts;
-    }
+    }*/
 
-    public List<Alert> getNotificationToAlert(List<Alert> oldAlerts) {
+    /**
+     * Ottieni la differenza degli avvisi tra gli {@code oldAlerts} e gli avvisi nuovi. Serve SOLO per notificare
+     * i nuovi compiti e le nuove verifiche
+     *
+     * @param oldAlerts Una lista degli avvisi già notificati
+     * @return Una lista di avvisi nuovi da notificare
+     */
+    public List<Alert> getNewAlertsFromOldAlerts(List<Alert> oldAlerts) {
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
-        List<Alert> temp = new Vector<>();
         if (oldAlerts.size() == 0)
             return newAlerts;   //Ritorno newAlerts perché è la loro differenza
 

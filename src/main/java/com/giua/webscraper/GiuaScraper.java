@@ -417,6 +417,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return pinBoardPageCache;
 	}
 
+	public ObservationsPage getObservationsPage(boolean forceRefresh) {
+		if (observationsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				observationsPageCache = new ObservationsPage(this);
+				return observationsPageCache;
+			} else
+				return new ObservationsPage(this);
+		} else
+			return observationsPageCache;
+	}
+
 	//endregion
 
 	/**

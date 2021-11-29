@@ -29,21 +29,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public class JsonHelper {
+public class JsonParser {
 
     static boolean debugMode;
     static int jsonVer = 2;
     static LoggerManager lm;
 
 
-    public JsonHelper(GiuaScraper gS) {
+    public JsonParser(GiuaScraper gS) {
         debugMode = GiuaScraper.getDebugMode();
         lm = gS.getLoggerManager();
     }
 
-    public JsonHelper() {
+    public JsonParser() {
         debugMode = GiuaScraper.getDebugMode();
-        lm = new LoggerManager("JsonHelper");
+        lm = new LoggerManager("JsonParser");
     }
 
     private JsonNode getRootNode(String jsonData) {
@@ -53,7 +53,7 @@ public class JsonHelper {
         try {
             rootNode = objectMapper.readTree(jsonData);
         } catch (IOException e) {
-            lm.e("JsonHelper: Impossibile leggere json");
+            lm.e("JsonParser: Impossibile leggere json");
             e.printStackTrace();
         }
         int ver = Objects.requireNonNull(rootNode).findPath("version").asInt();
@@ -367,6 +367,146 @@ public class JsonHelper {
             i++;
         }
         lm.d("De-serializzazione di " + i + " Tests completata");
+        return returnTests;
+    }
+
+
+    public List<News> parseJsonForNews(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForNews(json);
+    }
+
+    public List<News> parseJsonForNews(String json) {
+        List<News> returnTests = new Vector<>();
+        Iterator<JsonNode> news = getRootNode(json).findPath("news").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per News in corso...");
+        while (news.hasNext()) {
+            JsonNode node = news.next();
+
+            String newsText = node.findPath("newsText").asText();
+            String url = node.findPath("url").asText();
+
+            returnTests.add(new News(newsText, url));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " News completata");
+        return returnTests;
+    }
+
+    public List<DisciplinaryNotices> parseJsonForDNotices(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForDNotices(json);
+    }
+
+    public List<DisciplinaryNotices> parseJsonForDNotices(String json) {
+        List<DisciplinaryNotices> returnTests = new Vector<>();
+        Iterator<JsonNode> notes = getRootNode(json).findPath("disciplinary_notices").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per DisciplinaryNotices in corso...");
+        while (notes.hasNext()) {
+            JsonNode node = notes.next();
+
+            String date = node.findPath("date").asText();
+            String type = node.findPath("type").asText();
+            String details = node.findPath("details").asText();
+            String countermeasures = node.findPath("countermeasures").asText();
+            String authorOfDetails = node.findPath("authorOfDetails").asText();
+            String authorOfCountermeasures = node.findPath("authorOfCountermeasures").asText();
+            String quarterly = node.findPath("quarterly").asText();
+
+            returnTests.add(new DisciplinaryNotices(date, type, details, countermeasures, authorOfDetails, authorOfCountermeasures, quarterly));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " DisciplinaryNotices completata");
+        return returnTests;
+    }
+
+    public List<Observations> parseJsonForObservations(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForObservations(json);
+    }
+
+    public List<Observations> parseJsonForObservations(String json) {
+        List<Observations> returnTests = new Vector<>();
+        Iterator<JsonNode> obs = getRootNode(json).findPath("observations").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per Observations in corso...");
+        while (obs.hasNext()) {
+            JsonNode node = obs.next();
+
+            String date = node.findPath("date").asText();
+            String subject = node.findPath("subject").asText();
+            String teacher = node.findPath("teacher").asText();
+            String observations = node.findPath("observations").asText();
+            String quarterly = node.findPath("quarterly").asText();
+
+            returnTests.add(new Observations(date, subject, teacher, observations, quarterly));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " Observations completata");
+        return returnTests;
+    }
+
+    public List<Document> parseJsonForDocuments(Path path) {
+
+        String json = "";
+        try {
+            json = Files.readString(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return parseJsonForDocuments(json);
+    }
+
+    public List<Document> parseJsonForDocuments(String json) {
+        List<Document> returnTests = new Vector<>();
+        Iterator<JsonNode> docs = getRootNode(json).findPath("documents").get(0).iterator();
+
+        int i = 0;
+        lm.d("De-serializzazione JSON per Documents in corso...");
+        while (docs.hasNext()) {
+            JsonNode node = docs.next();
+
+            String status = node.findPath("status").asText();
+            String classroom = node.findPath("classroom").asText();
+            String subject = node.findPath("subject").asText();
+            String institute = node.findPath("institute").asText();
+            String downloadUrl = node.findPath("downloadUrl").asText();
+
+            returnTests.add(new Document(status, classroom, subject, institute, downloadUrl));
+
+            i++;
+        }
+        lm.d("De-serializzazione di " + i + " Documents completata");
         return returnTests;
     }
 

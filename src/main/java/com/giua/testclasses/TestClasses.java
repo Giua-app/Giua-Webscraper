@@ -220,8 +220,7 @@ class TestClasses {
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
         List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size() - 1);
-        List<Alert> o = aP.getNotificationToAlert(oldAlerts);
-        logln("Servo solo per il breakpoint, ELIMINAMI");
+        List<Alert> o = aP.getAlertsToNotify(oldAlerts);
     }
 
     private static void testHomeworks(boolean forceRefresh) {

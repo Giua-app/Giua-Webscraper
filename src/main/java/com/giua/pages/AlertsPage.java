@@ -241,7 +241,7 @@ public class AlertsPage implements IPage {
      * @param oldAlerts Una lista degli avvisi già notificati
      * @return Una lista di avvisi nuovi da notificare
      */
-    public List<Alert> getNewAlertsFromOldAlerts(List<Alert> oldAlerts) {
+    public List<Alert> getAlertsToNotify(List<Alert> oldAlerts) {
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
         if (oldAlerts.size() == 0)
             return newAlerts;   //Ritorno newAlerts perché è la loro differenza

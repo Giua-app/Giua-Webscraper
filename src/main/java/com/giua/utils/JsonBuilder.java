@@ -57,7 +57,7 @@ public class JsonBuilder {
     }
 
     /**
-     * Serve a inizializzare il JsonGenerator e a scrivere la versione e la data di creazione del json
+     * Serve a inizializzare il JsonGenerator e a scrivere la versione insieme alla data di creazione del json
      *
      * @throws IOException
      */

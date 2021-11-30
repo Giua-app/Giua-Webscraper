@@ -25,15 +25,9 @@ import com.giua.pages.AlertsPage;
 import com.giua.pages.HomePage;
 import com.giua.pages.VotesPage;
 import com.giua.utils.JsonBuilder;
-import com.giua.utils.JsonHelper;
 import com.giua.webscraper.GiuaScraper;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 import static java.lang.System.nanoTime;
 
@@ -79,73 +73,15 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        startLogin();
+        //startLogin();
         //testVotes(true);
         //testAlerts(true);
-
-
-        try {
-            JsonBuilder jsonBuilder = new JsonBuilder("test.json", gS);
-            /*jsonBuilder.writeNewsletters(gS.getNewslettersPage(true).getAllNewsletters(1));
-            jsonBuilder.writeAlerts(gS.getAlertsPage(true).getAllAlerts(1));
-            jsonBuilder.writeVotes(gS.getVotesPage(true).getAllVotes());
-            jsonBuilder.writeAbsences(gS.getAbsencesPage(true).getAllAbsences());
-            jsonBuilder.writeDisciplinaryNotices(gS.getDisciplinaryNotesPage(true).getAllDisciplinaryNotices());
-            jsonBuilder.writeLessons(gS.getLessonsPage(true).getAllLessonsFromDate(new Date()));
-            jsonBuilder.writeDocuments(gS.getDocumentsPage(true).getDocuments());
-            jsonBuilder.writeMaintenance(gS.getMaintenanceInfo());*/
-            jsonBuilder.writeHomeworks(gS.getPinBoardPage(true).getAllHomeworksWithoutDetails("2021-11"));
-            jsonBuilder.writeTests(gS.getPinBoardPage(false).getTest("2021-11-05"));
-            //logln(jsonBuilder.getJson());
-            jsonBuilder.saveJson();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        /*List<Newsletter> allNewsletters = new JsonHelper().parseJsonForNewsletters(Path.of("test.json"));
-        for (Newsletter a : allNewsletters) {
-            logln(a.toString());
-        }
-
-
-        List<Alert> allAvvisi = new JsonHelper().parseJsonForAlerts(Path.of("test.json"));
-        for (Alert a : allAvvisi) {
-            logln(a.toString());
-        }
-
-
-        Map<String, List<Vote>> votes = new JsonHelper().parseJsonForVotes(Path.of("test.json"));
-        for (String m : votes.keySet()) {
-            logln(m + ": " + votes.get(m).toString());
-        }
-
-        List<Absence> allAbsences = new JsonHelper().parseJsonForAbsences(Path.of("test.json"));
-        for (Absence a : allAbsences) {
-            logln(a.toString());
-        }
-
-        List<Lesson> allLessons = new JsonHelper().parseJsonForLessons(Path.of("test.json"));
-        for (Lesson a : allLessons) {
-            logln(a.toString());
-        }*/
-
-        List<Homework> allHomework = new JsonHelper().parseJsonForHomeworks(Path.of("test.json"));
-        for (Homework a : allHomework) {
-            logln(a.toString());
-        }
-
-        List<Test> allTest = new JsonHelper().parseJsonForTests(Path.of("test.json"));
-        for (Test a : allTest) {
-            logln(a.toString());
-        }
-
     }
 
 
@@ -338,10 +274,13 @@ class TestClasses {
         List<Long> tPhase2 = new Vector<>();
         List<Long> tPhase3 = new Vector<>();
         List<Long> tPhasesTot = new Vector<>();
+        List<Long> tJsonBuilder = new Vector<>();
+        List<Long> tJsonParser = new Vector<>();
         int errors = 0;
 
         LoggerManager loggerManager = new LoggerManager("GiuaScraper-silent");
 
+        System.out.println("----  AVVIO SPEEDTEST PER SCRAPER ----");
         System.out.println("Legenda:  |   LOGIN    |  CACHE   | SESSIONE |");
         System.out.println("          [############|##########|##########]");
 
@@ -355,7 +294,6 @@ class TestClasses {
             System.out.print("Progress: [");
 
             try {
-
                 t1 = nanoTime();
                 GiuaScraper.isMyInternetWorking();
                 System.out.print("#");
@@ -481,13 +419,73 @@ class TestClasses {
 
             i++;
         }
+        i = 0;
+
+        System.out.println("----  AVVIO SPEEDTEST PER JSON BUILDER ----");
+        System.out.println("Legenda:  | Scrittura |");
+        System.out.println("          [###########]");
+
+        while (i < speedTestAmount) {
+            long t1;
+            long t2;
+
+
+            System.out.println("Test " + (i + 1) + "/" + speedTestAmount);
+            System.out.print("Progress: [");
+
+            try {
+                JsonBuilder jb = new JsonBuilder("test.json", gS);
+
+                t1 = nanoTime();
+                startLogin(loggerManager);
+
+                jb.writeDocuments(gS.getDocumentsPage(false).getDocuments());
+                System.out.print("#");
+                jb.writeObservations(gS.getObservationsPage(false).getAllObservations());
+                System.out.print("#");
+                jb.writeAlerts(gS.getAlertsPage(false).getAllAlerts(1));
+                System.out.print("#");
+                jb.writeTests(gS.getPinBoardPage(false).getAllTestsWithoutDetails(null));
+                System.out.print("#");
+                jb.writeNews(gS.getHomePage(false).getAllNewsFromHome());
+                System.out.print("#");
+                jb.writeHomeworks(gS.getPinBoardPage(false).getAllHomeworksWithoutDetails(null));
+                System.out.print("#");
+                jb.writeMaintenance(gS.getMaintenanceInfo());
+                System.out.print("#");
+                jb.writeLessons(gS.getLessonsPage(false).getAllLessonsFromDate(new Date()));
+                System.out.print("#");
+                jb.writeAbsences(gS.getAbsencesPage(false).getAllAbsences());
+                System.out.print("#");
+                jb.writeDisciplinaryNotices(gS.getDisciplinaryNotesPage(false).getAllDisciplinaryNotices());
+                System.out.print("#");
+                jb.writeDocuments(gS.getDocumentsPage(false).getDocuments());
+                System.out.print("#");
+
+                t2 = nanoTime();
+                tJsonBuilder.add((t2 / 1000000) - (t1 / 1000000));
+                System.out.println("]");
+            } catch (Exception e) {
+                System.out.println("/!\\]");
+                System.out.println("Error: " + e.getMessage());
+                tInternet.add(-1L);
+                tSite.add(-1L);
+                tPhase1.add(-1L);
+                tPhase2.add(-1L);
+                tPhase3.add(-1L);
+                tPhasesTot.add(-1L);
+                errors += 1;
+            }
+
+            i++;
+        }
 
         System.out.println("\n\n/---------------------LISTS----------------------------");
 
 
         Long tInternetAdd = 0L;
         System.out.print("|    Check Internet:                 ");
-        for( Long value : tInternet){
+        for (Long value : tInternet) {
             tInternetAdd += value;
             System.out.print(value + "ms ; ");
         }
@@ -523,8 +521,16 @@ class TestClasses {
 
         Long tPhase3Add = 0L;
         System.out.print("|    Fase 3 (riutilizzo sessione):   ");
-        for( Long value : tPhase3){
+        for (Long value : tPhase3) {
             tPhase3Add += value;
+            System.out.print(value + "ms ; ");
+        }
+        System.out.print("\n");
+
+        Long tJsonBuilder3Add = 0L;
+        System.out.print("|    Json Builder (scrittura):       ");
+        for (Long value : tJsonBuilder) {
+            tJsonBuilder3Add += value;
             System.out.print(value + "ms ; ");
         }
         System.out.print("\n");
@@ -532,7 +538,7 @@ class TestClasses {
 
         Long tPhasesTotAdd = 0L;
         System.out.print("|    Tempo Totale impiegato:         ");
-        for( Long value : tPhasesTot){
+        for (Long value : tPhasesTot) {
             tPhasesTotAdd += value;
             System.out.print(value + "ms ; ");
         }
@@ -780,17 +786,6 @@ class TestClasses {
         System.out.println("\\--------------------------------------------------------");
     }
 
-    private static class hello {
-        public int integer = 30;
-        public List<String> list;
-
-        public hello(int lol) {
-            integer = lol;
-            list = new Vector<>();
-            list.add("lolaaslda");
-            list.add("aaaaaaaaaa");
-        }
-    }
 
     private static class LoggerManager extends com.giua.utils.LoggerManager {
 

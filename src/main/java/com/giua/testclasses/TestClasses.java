@@ -77,11 +77,12 @@ class TestClasses {
         GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
-        //startLogin();
+        startLogin();
         //testVotes(true);
         //testAlerts(true);
+        testTests(true);
     }
 
 
@@ -170,11 +171,19 @@ class TestClasses {
 
     private static void testTests(boolean forceRefresh) {
         logln("Get tests");
-        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails("2021-03");
+        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails(null);
         for (Test a : allTests) {
             logln(a.toString());
         }
         //logln(gS.getTest("2021-03-07").toString());
+    }
+
+    private static void testActivities(boolean forceRefresh) {
+        logln("Get activities");
+        List<Activity> allActivities = gS.getPinBoardPage(forceRefresh).getAllActivitiesWithoutDetails(null);
+        for (Activity a : allActivities) {
+            logln(a.toString());
+        }
     }
 
     private static void testNewsletters(boolean forceRefresh) {

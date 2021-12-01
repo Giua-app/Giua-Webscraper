@@ -19,6 +19,7 @@
 
 package com.giua.pages;
 
+import com.giua.objects.Activity;
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
 import com.giua.webscraper.GiuaScraper;
@@ -32,6 +33,9 @@ import java.util.Vector;
 
 public class PinBoardPage implements IPage{
     private GiuaScraper gS;
+    /**
+     * Indica SOLO la prima pagina quindi quella del mese attuale
+     */
     private Document doc;
 
     public PinBoardPage(GiuaScraper gS) {
@@ -47,8 +51,8 @@ public class PinBoardPage implements IPage{
 
 
     /**
-     * Ottiene tutti i {@link Test} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
-     * Serve solo a capire in quali giorni ci sono verifiche.
+     * Ottiene tutti i {@link Test} del mese specificato. Se {@code date} è {@code null} ottieni quelli del mese attuale ma SENZA dettagli,
+     * altrimenti quelli della data specificata.
      *
      * @param date         puo essere {@code null}. Formato: anno-mese
      * @return Lista di {@link Test} del mese specificato oppure del mese attuale
@@ -58,14 +62,15 @@ public class PinBoardPage implements IPage{
             return GiuaScraperDemo.getAllTestsWithoutDetails();
 
         List<Test> allTests = new Vector<>();
-        if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() +
-                ((date == null) ? "genitori/eventi" : "genitori/eventi/" + date))) {
-            doc = (date == null) ? gS.getPage("genitori/eventi") : gS.getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+        Document doc = this.doc;
+        if (date != null) {
+            doc = gS.getPage("genitori/eventi/" + date);
         }
 
         Elements testsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
         for (Element testHTML : testsHTML) {
-
+            if (!testHTML.text().equals("Verifiche"))
+                continue;
             assert testHTML.parent() != null;
             assert testHTML.parent().parent() != null;
             String[] hrefSplit = testHTML.attributes().get("data-href").split("/");
@@ -124,9 +129,84 @@ public class PinBoardPage implements IPage{
         }
     }
 
+    /**
+     * Ottiene tutti i {@link com.giua.objects.Activity} del mese specificato. Se {@code date} è {@code null} ottieni quelli del mese attuale ma SENZA dettagli,
+     * altrimenti quelli della data specificata.
+     *
+     * @param date puo essere {@code null}. Formato: anno-mese
+     * @return Lista di {@link Test} del mese specificato oppure del mese attuale
+     */
+    public List<Activity> getAllActivitiesWithoutDetails(String date) {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getAllActivitiesWithoutDetails();
+
+        List<Activity> allActivities = new Vector<>();
+        Document doc = this.doc;
+        if (date != null) {
+            doc = gS.getPage("genitori/eventi/" + date);
+        }
+
+        Elements activitiesHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
+        for (Element activityHTML : activitiesHTML) {
+            if (!activityHTML.text().equals("Attività"))
+                continue;
+            assert activityHTML.parent() != null;
+            assert activityHTML.parent().parent() != null;
+            String[] hrefSplit = activityHTML.attributes().get("data-href").split("/");
+            String dateFromhref = hrefSplit[4];
+            allActivities.add(new Activity(
+                    dateFromhref.split("-")[2],
+                    dateFromhref.split("-")[1],
+                    dateFromhref.split("-")[0],
+                    dateFromhref,
+                    "",
+                    "",
+                    true
+            ));
+        }
+        return allActivities;
+    }
+
 
     /**
-     * Ottiene tutti i {@link Homework} del mese specificato se {@code date} e' {@code null} altrimenti quelli del mese attuale ma SENZA dettagli.
+     * Restituisce una lista di tutti i {@link Activity} di una determinata data con anche i loro dettagli
+     *
+     * @param date Formato: anno-mese-giorno
+     * @return Una lista di tutti i {@link Activity} della data specificata se esiste, altrimenti una lista vuota
+     */
+    public List<Activity> getActivity(String date) {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getActivity(date);
+
+        List<Activity> allActivities = new Vector<>();
+        Document doc = gS.getPage("genitori/eventi/dettagli/" + date + "/A");
+        Elements activityGroupsHTML = doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
+        try {
+            for (Element activityGroupHTML : activityGroupsHTML) {
+                String creator = activityGroupHTML.child(1).text().split(": ")[1];
+                String details = activityGroupHTML.child(0).text();
+
+                allActivities.add(new Activity(
+                        date.split("-")[2],
+                        date.split("-")[1],
+                        date.split("-")[0],
+                        date,
+                        creator,
+                        details,
+                        true
+                ));
+            }
+
+            return allActivities;
+        } catch (IndexOutOfBoundsException e) {        //Non ci sono verifiche in questo giorno
+            return new Vector<>();
+        }
+    }
+
+
+    /**
+     * Ottiene tutti i {@link Homework} del mese specificato. Se {@code date} è {@code null} ottieni quelli del mese attuale ma SENZA dettagli,
+     * altrimenti quelli della data specificata.
      * Serve solo a capire in quali giorni ci sono compiti.
      *
      * @param date puo essere {@code null}. Formato: anno-mese
@@ -137,9 +217,9 @@ public class PinBoardPage implements IPage{
             return GiuaScraperDemo.getAllHomeworksWithoutDetails();
 
         List<Homework> allHomeworks = new Vector<>();
-        if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() +
-                ((date == null) ? "genitori/eventi" : "genitori/eventi/" + date))) {
-            doc = (date == null) ? gS.getPage("genitori/eventi") : gS.getPage("genitori/eventi/" + date); //Se date e' null getPage del mese attuale
+        Document doc = this.doc;
+        if (date != null) {
+            doc = gS.getPage("genitori/eventi/" + date);
         }
 
         Elements homeworksHTML = doc.getElementsByClass("btn btn-xs btn-default gs-button-remote");

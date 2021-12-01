@@ -24,6 +24,7 @@ import org.jsoup.nodes.Document;
 
 import java.util.*;
 
+//FIXME
 public class GiuaScraperDemo {
 
     public static Authorization getAutorizations() {
@@ -217,4 +218,13 @@ public class GiuaScraperDemo {
         return GiuaScraper.userTypes.DEMO;
     }
 
+    public static List<Activity> getAllActivitiesWithoutDetails() {
+        //TODO
+        return new Vector<>();
+    }
+
+    public static List<Activity> getActivity(String date) {
+        //TODO
+        return new Vector<>();
+    }
 }

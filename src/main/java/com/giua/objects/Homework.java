@@ -19,21 +19,14 @@
 
 package com.giua.objects;
 
-public class Homework {
-    public final String day;        //usato per trovare quale compito interessa
-    public final String month;
-    public final String year;
-    public final String date;
+public class Homework extends PinBoardObject {
     public final String subject;
     public final String creator;
     public final String details;
     public final boolean exists;
 
     public Homework(String day, String month, String year, String date, String subject, String creator, String details, boolean exists) {
-        this.day = day;
-        this.month = month;
-        this.year = year;
-        this.date = date;
+        super(day, month, year, date);
         this.subject = subject;
         this.creator = creator;
         this.details = details;

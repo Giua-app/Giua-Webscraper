@@ -19,19 +19,16 @@
 
 package com.giua.objects;
 
-public class Activity extends PinBoardObject {
-    public final String creator;
-    public final String details;
-    public final boolean exists;
+public class PinBoardObject {
+    public String day;        //usato per trovare quale verifica interessa
+    public String month;
+    public String year;
+    public String date;
 
-    public Activity(String day, String month, String year, String date, String creator, String details, boolean exists) {
-        super(day, month, year, date);
-        this.creator = creator;
-        this.details = details;
-        this.exists = exists;
-    }
-
-    public String toString() {
-        return this.date + "; " + this.creator + "; " + this.details + "; " + this.exists;
+    public PinBoardObject(String day, String month, String year, String date) {
+        this.date = date;
+        this.day = day;
+        this.month = month;
+        this.year = year;
     }
 }

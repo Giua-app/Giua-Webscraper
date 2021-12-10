@@ -182,4 +182,10 @@ public class JsonBuilder {
         objectMapper.writeValue(jsonGenerator, tests);
         jsonGenerator.writeEndArray();
     }
+
+    public void writeAgendaObjects(List<AgendaObject> agendaObjects) throws IOException {
+        jsonGenerator.writeArrayFieldStart("agenda_objects");
+        objectMapper.writeValue(jsonGenerator, agendaObjects);
+        jsonGenerator.writeEndArray();
+    }
 }

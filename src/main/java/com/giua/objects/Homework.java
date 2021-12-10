@@ -19,7 +19,7 @@
 
 package com.giua.objects;
 
-public class Homework extends PinBoardObject {
+public class Homework extends AgendaObject {
     public final String subject;
     public final String creator;
     public final String details;

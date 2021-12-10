@@ -77,7 +77,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private NewslettersPage newslettersPageCache = null;
 	private DisciplinaryNoticesPage disciplinaryNotesPageCache = null;
 	private ObservationsPage observationsPageCache = null;
-	private PinBoardPage pinBoardPageCache = null;
+	private AgendaPage agendaPageCache = null;
 	private ReportCard reportCardCache = null;
 	private VotesPage votesPageCache = null;
 	private Document getPageCache = null;
@@ -406,15 +406,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return newslettersPageCache;
 	}
 
-	public PinBoardPage getPinBoardPage(boolean forceRefresh) {
-		if (pinBoardPageCache == null || forceRefresh) {
+	public AgendaPage getAgendaPage(boolean forceRefresh) {
+		if (agendaPageCache == null || forceRefresh) {
 			if (cacheable) {
-				pinBoardPageCache = new PinBoardPage(this);
-				return pinBoardPageCache;
+				agendaPageCache = new AgendaPage(this);
+				return agendaPageCache;
 			} else
-				return new PinBoardPage(this);
+				return new AgendaPage(this);
 		} else
-			return pinBoardPageCache;
+			return agendaPageCache;
 	}
 
 	public ObservationsPage getObservationsPage(boolean forceRefresh) {
@@ -1032,7 +1032,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		newslettersPageCache = null;
 		disciplinaryNotesPageCache = null;
 		observationsPageCache = null;
-		pinBoardPageCache = null;
+		agendaPageCache = null;
 		reportCardCache = null;
 		votesPageCache = null;
 	}

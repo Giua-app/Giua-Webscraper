@@ -73,8 +73,8 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
@@ -82,7 +82,7 @@ class TestClasses {
         startLogin();
         //testVotes(true);
         //testAlerts(true);
-        testTests(true);
+        testAgendaPage(true);
     }
 
 
@@ -160,30 +160,14 @@ class TestClasses {
         List<Alert> o = aP.getAlertsToNotify(oldAlerts);
     }
 
-    private static void testHomeworks(boolean forceRefresh) {
+    private static void testAgendaPage(boolean forceRefresh) {
         logln("Get homeworks");
-        List<Homework> allHomework = gS.getPinBoardPage(forceRefresh).getAllHomeworksWithoutDetails("2021-03");
-        for (Homework a : allHomework) {
+        List<AgendaObject> allAgendaObject = gS.getAgendaPage(forceRefresh).getAllAgendaObjectsWithoutDetails(null);
+        for (AgendaObject a : allAgendaObject) {
             logln(a.toString());
+            logln(a.getRepresentingClass().toString());
         }
         //logln(gS.getHomework("2021-03-07").toString());
-    }
-
-    private static void testTests(boolean forceRefresh) {
-        logln("Get tests");
-        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails(null);
-        for (Test a : allTests) {
-            logln(a.toString());
-        }
-        //logln(gS.getTest("2021-03-07").toString());
-    }
-
-    private static void testActivities(boolean forceRefresh) {
-        logln("Get activities");
-        List<Activity> allActivities = gS.getPinBoardPage(forceRefresh).getAllActivitiesWithoutDetails(null);
-        for (Activity a : allActivities) {
-            logln(a.toString());
-        }
     }
 
     private static void testNewsletters(boolean forceRefresh) {
@@ -331,9 +315,7 @@ class TestClasses {
                 System.out.print("#");
                 testAlerts(true);
                 System.out.print("#");
-                testHomeworks(true);
-                System.out.print("#");
-                testTests(true);
+                testAgendaPage(true);
                 System.out.print("#");
                 testNewsletters(true);
                 System.out.print("#");
@@ -362,9 +344,7 @@ class TestClasses {
                 System.out.print("#");
                 testAlerts(false);
                 System.out.print("#");
-                testHomeworks(false);
-                System.out.print("#");
-                testTests(false);
+                testAgendaPage(false);
                 System.out.print("#");
                 testNewsletters(false);
                 System.out.print("#");
@@ -394,9 +374,7 @@ class TestClasses {
                 System.out.print("#");
                 testAlerts(true);
                 System.out.print("#");
-                testHomeworks(true);
-                System.out.print("#");
-                testTests(true);
+                testAgendaPage(true);
                 System.out.print("#");
                 testNewsletters(true);
                 System.out.print("#");
@@ -454,11 +432,9 @@ class TestClasses {
                 System.out.print("#");
                 jb.writeAlerts(gS.getAlertsPage(false).getAllAlerts(1));
                 System.out.print("#");
-                jb.writeTests(gS.getPinBoardPage(false).getAllTestsWithoutDetails(null));
+                jb.writeAgendaObjects(gS.getAgendaPage(false).getAllAgendaObjectsWithoutDetails(null));
                 System.out.print("#");
                 jb.writeNews(gS.getHomePage(false).getAllNewsFromHome());
-                System.out.print("#");
-                jb.writeHomeworks(gS.getPinBoardPage(false).getAllHomeworksWithoutDetails(null));
                 System.out.print("#");
                 jb.writeMaintenance(gS.getMaintenanceInfo());
                 System.out.print("#");
@@ -623,11 +599,8 @@ class TestClasses {
         System.out.println("--------AVVISI---------");
         testAlerts(true);
 
-        System.out.println("--------COMPITI--------");
-        testHomeworks(true);
-
-        System.out.println("--------VERIFICHE--------");
-        testTests(true);
+        System.out.println("--------AGENDA--------");
+        testAgendaPage(true);
 
         System.out.println("--------CIRCOLARI--------");
         testNewsletters(true);
@@ -685,11 +658,8 @@ class TestClasses {
         System.out.println("--------AVVISI---------");
         testAlerts(false);
 
-        System.out.println("--------COMPITI--------");
-        testHomeworks(false);
-
-        System.out.println("--------VERIFICHE--------");
-        testTests(false);
+        System.out.println("--------AGENDA--------");
+        testAgendaPage(true);
 
         System.out.println("--------CIRCOLARI--------");
         testNewsletters(false);
@@ -749,11 +719,8 @@ class TestClasses {
         System.out.println("--------AVVISI---------");
         testAlerts(true);
 
-        System.out.println("--------COMPITI--------");
-        testHomeworks(true);
-
-        System.out.println("--------VERIFICHE--------");
-        testTests(true);
+        System.out.println("--------AGENDA--------");
+        testAgendaPage(true);
 
         System.out.println("--------CIRCOLARI--------");
         testNewsletters(true);

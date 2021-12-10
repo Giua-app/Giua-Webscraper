@@ -19,16 +19,24 @@
 
 package com.giua.objects;
 
-public class PinBoardObject {
+public class AgendaObject {
     public String day;        //usato per trovare quale verifica interessa
     public String month;
     public String year;
     public String date;
 
-    public PinBoardObject(String day, String month, String year, String date) {
+    public AgendaObject(String day, String month, String year, String date) {
         this.date = date;
         this.day = day;
         this.month = month;
         this.year = year;
+    }
+
+    public String toString() {
+        return "date: " + date + " ; " + "day: " + day + " ; " + "month: " + month + " ; " + "year: " + year;
+    }
+
+    public Class getRepresentingClass() {
+        return this.getClass();
     }
 }

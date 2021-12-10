@@ -227,4 +227,9 @@ public class GiuaScraperDemo {
         //TODO
         return new Vector<>();
     }
+
+    public static List<AgendaObject> getAllAgendaObjects() {
+        //TODO
+        return new Vector<>();
+    }
 }

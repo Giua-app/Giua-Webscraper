@@ -103,7 +103,7 @@ public class AgendaPage implements IPage {
         Elements activityGroupsHTML = _doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
         try {
             for (Element activityGroupHTML : activityGroupsHTML) {
-                String creator = activityGroupHTML.child(1).text().split(": ")[1];
+                String creator = activityGroupHTML.child(1).text();
                 String details = activityGroupHTML.child(0).text();
 
                 allActivities.add(new Activity(

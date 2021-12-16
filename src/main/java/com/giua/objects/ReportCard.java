@@ -25,17 +25,18 @@ import java.util.List;
 import java.util.Map;
 
 public class ReportCard {
-    public final String quarterly;
-    public final String finalResult;
-    public final String credits;
+    public String quarterly;
+    public String finalResult;
+    public String credits;
 
     /**
      * Una map la cui chiave è la materia e come contenuto una lista di stringhe contente all'indice 0 il voto e all'indice 1 le ore di assenza
      **/
-    public final Map<String, List<String>> allVotes;
+    public  Map<String, List<String>> allVotes;
+    public  Map<String, List<String>> allDebts;
 
     public final boolean exists;
-    private float calculatedMean = -1f;
+    public String calculatedMean;
 
     public ReportCard(String quarterly, Map<String, List<String>> allVotes, String finalResult, String credits, boolean exists) {
         this.quarterly = quarterly;
@@ -43,6 +44,15 @@ public class ReportCard {
         this.exists = exists;
         this.finalResult = finalResult;
         this.credits = credits;
+    }
+
+    public ReportCard(){
+        quarterly = "";
+        allVotes = null;
+        exists = true;
+        finalResult = null;
+        credits = null;
+        allDebts=null;
     }
 
     public String toString() {
@@ -55,7 +65,7 @@ public class ReportCard {
      *
      * @return La media dei voti come un {@code float}
      */
-    public float getCalculatedMean() {
+    /*public float getCalculatedMean() {
         if (calculatedMean != -1f) {
             float mean = 0f;
             int i = 0;  //contatore dei voti reali non conta i giudizi
@@ -73,7 +83,7 @@ public class ReportCard {
             calculatedMean = mean / allVotes.keySet().size();
         }
         return calculatedMean;
-    }
+    }*/
 
     private float getFloatFromVote(String vote) {
         char lastChar = vote.charAt(vote.length() - 1);
@@ -83,7 +93,7 @@ public class ReportCard {
         else if (lastChar == '-')
             return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) - 1 + 0.85f : Integer.parseInt(vote.substring(0, 2)) - 1 + 0.85f;
 
-        else if (lastChar == '½')
+        else if (lastChar == '\u00BD') //1 / 2
             return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.5f : Integer.parseInt(vote.substring(0, 2)) + 0.5f;
 
         else {

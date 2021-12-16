@@ -20,12 +20,14 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.pages.AbsencesPage;
-import com.giua.pages.AlertsPage;
-import com.giua.pages.HomePage;
-import com.giua.pages.VotesPage;
+import com.giua.pages.*;
 import com.giua.utils.JsonBuilder;
+import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Vector;
 
 import java.util.*;
 
@@ -73,8 +75,8 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
@@ -82,7 +84,7 @@ class TestClasses {
         startLogin();
         //testVotes(true);
         //testAlerts(true);
-        testAgendaPage(true);
+        testReportCard(true);
     }
 
 
@@ -120,7 +122,6 @@ class TestClasses {
         for (News news : allNews) {
             logln(news.toString());
         }
-
     }
 
     private static void testVotes(boolean forceRefresh) {
@@ -170,6 +171,15 @@ class TestClasses {
         //logln(gS.getHomework("2021-03-07").toString());
     }
 
+    /*private static void testTests(boolean forceRefresh) {
+        logln("Get tests");
+        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails(null);
+        for (Test a : allTests) {
+            logln(a.toString());
+        }
+        //logln(gS.getTest("2021-03-07").toString());
+    }*/
+
     private static void testNewsletters(boolean forceRefresh) {
         logln("Get newsletters");
         List<Newsletter> allNewsletters = gS.getNewslettersPage(forceRefresh).getAllNewsletters(1);
@@ -202,15 +212,6 @@ class TestClasses {
         }
     }
 
-    public static void testReportCard(boolean forceRefresh) {
-        logln("ReportCard disponibile in futuro");
-        /*logln("Get report card");
-        ReportCard reportCard = gS.getReportCard(false, forceRefresh);
-        if (reportCard.exists) {
-            logln(reportCard.toString());
-        }*/
-    } //TODO: completare una volta finito ReportCardPage
-
     public static void testDocuments(boolean forceRefresh) {
         logln("Get documents");
         List<Document> documents = gS.getDocumentsPage(forceRefresh).getDocuments();
@@ -242,6 +243,22 @@ class TestClasses {
         logln(absencesPage.getAllExtraInfo());
     }
 
+    public static void testReportCard(boolean forceRefresh) {
+        logln("-----------Test Pagelle------------");
+
+        ReportcardPage reportcardPage=new ReportcardPage(gS);
+        ReportCard rC=reportcardPage.getReportcard("Scrutinio esami giudizio sospeso");
+        logln("Quadrimestre: "+rC.quarterly);
+        logln("Esito: "+rC.finalResult);
+        logln("Crediti: "+rC.credits);
+        logln("Media: "+rC.calculatedMean);
+        logln("Voti:");
+        for (String m : rC.allVotes.keySet())
+            logln(m + ": " + rC.allVotes.get(m).toString());
+        if(rC.allDebts!=null)
+            for (String m : rC.allDebts.keySet())
+                logln(m + ": " + rC.allDebts.get(m).toString());
+     }
 
     private static void startLogin() {
         startLogin(null);

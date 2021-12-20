@@ -35,15 +35,11 @@ public class ReportcardPage implements IPage{
     private GiuaScraper gS;
     private Document doc;
     private final LoggerManager lm;
-    Map<String, String> quaterlyPath=new HashMap<>();
 
     public ReportcardPage(GiuaScraper gS){
         this.gS = gS;
         lm = new LoggerManager("ReportcardPage");
         refreshPage();
-        quaterlyPath.put("Primo Quadrimestre", UrlPaths.FIRST_QUATERLY);
-        quaterlyPath.put("Scrutinio Finale", UrlPaths.SECOND_QUATERLY);
-        quaterlyPath.put("A.S. Precedente", UrlPaths.LAST_YEAR);
     }
     @Override
     public void refreshPage() {
@@ -68,7 +64,7 @@ public class ReportcardPage implements IPage{
 
         if(quaterlyName=="A.S. Precedente"){
             returnRc=getOldYearReportCard();
-            return returnRc;
+            return returnRc
         }
 
         if (gS.isDemoMode()) {

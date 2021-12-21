@@ -19,7 +19,6 @@
 
 package com.giua.objects;
 
-import com.giua.utils.JsonBuilder;
 import com.giua.webscraper.GiuaScraper;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -145,6 +144,16 @@ public class Alert {
             return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object;
         else
             return this.status + "; " + this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
+    }
+
+    /**
+     * Ritorna l' oggetto come stringa senza specificare lo stato. Serve SOLO per le notifiche.
+     */
+    public String toStringWithoutStatus() {
+        if (!this.isDetailed)
+            return this.date + "; " + this.receivers + "; " + this.object;
+        else
+            return this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
     }
 
     public String toJSON() {

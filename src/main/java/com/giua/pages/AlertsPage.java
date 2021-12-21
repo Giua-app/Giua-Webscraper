@@ -243,17 +243,18 @@ public class AlertsPage implements IPage {
      */
     public List<Alert> getAlertsToNotify(List<Alert> oldAlerts) {
         List<Alert> newAlerts = getAllAlertsWithFilters(false, "per la materia");
+        List<Alert> returnDifference = new Vector<>(newAlerts);
         if (oldAlerts.size() == 0)
             return newAlerts;   //Ritorno newAlerts perché è la loro differenza
 
-        int i = 0;
-        for (Alert a : newAlerts) {
-            if (a.toString().equals(oldAlerts.get(0).toString()))
-                break;
-            i++;
+        for (Alert newAlert : newAlerts) {
+            for (Alert oldAlert : oldAlerts) {
+                if (newAlert.toStringWithoutStatus().equals(oldAlert.toStringWithoutStatus()))
+                    returnDifference.remove(newAlert);
+            }
         }
 
-        return newAlerts.subList(0, i);
+        return returnDifference;
     }
 
     private String getFilterToken() {

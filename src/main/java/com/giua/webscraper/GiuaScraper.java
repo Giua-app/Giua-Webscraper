@@ -705,7 +705,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
                         .method(Method.GET)
                         .execute();
 
-                lm.d("getPage: " + GiuaScraper.SiteURL + "/ caricato");
+                lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
                 Document doc = response.parse();
 

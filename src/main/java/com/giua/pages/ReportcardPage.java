@@ -22,14 +22,14 @@ package com.giua.pages;
 import com.giua.objects.ReportCard;
 import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
-import com.giua.webscraper.GiuaScraperDemo;
-import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 public class ReportcardPage implements IPage{
     private GiuaScraper gS;
@@ -64,11 +64,11 @@ public class ReportcardPage implements IPage{
 
         if(quaterlyName=="A.S. Precedente"){
             returnRc=getOldYearReportCard();
-            return returnRc
+            //return returnRc
         }
 
         if (gS.isDemoMode()) {
-            return GiuaScraperDemo.getAllReportcard();
+            //return GiuaScraperDemo.getAllReportcard();
         }
         try {
             //quadrimestre
@@ -135,7 +135,7 @@ public class ReportcardPage implements IPage{
     private ReportCard getOldYearReportCard(){
         ReportCard returnRc = new ReportCard();
         if (gS.isDemoMode()) {
-            return GiuaScraperDemo.getAllReportcard();
+            //return GiuaScraperDemo.getAllReportcard();
         }
         try {
             //quadrimestre

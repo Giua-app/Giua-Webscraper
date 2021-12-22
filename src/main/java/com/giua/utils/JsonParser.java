@@ -147,8 +147,8 @@ public class JsonParser {
                 String judgement = vote.findPath("judgement").asText();
                 String type = vote.findPath("type").asText();
                 String arguments = vote.findPath("arguments").asText();
-
-                votes.add(new Vote(value, date, type, arguments, judgement, quart, isAsterisk));
+/*TODO per ora sto mettendo che tutti i voti fanno media ma qualcuno aggiunga il parsing anche di quello*/
+                votes.add(new Vote(value, date, type, arguments, judgement, quart, isAsterisk, true));
 
                 iVotes++;
             }

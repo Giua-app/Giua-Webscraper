@@ -33,79 +33,31 @@ public class ReportCard {
      * Una map la cui chiave è la materia e come contenuto una lista di stringhe contente all'indice 0 il voto e all'indice 1 le ore di assenza
      **/
     public  Map<String, List<String>> allVotes;
+    /**
+     * Una map la cui chiave è la materia e come contenuto una lista di stringhe contente all'indice 0 gli argomenti da recuperare e all'indice 1 la modalità di recupero
+     **/
     public  Map<String, List<String>> allDebts;
 
     public final boolean exists;
-    public String calculatedMean;
+    public String mean;
 
-    public ReportCard(String quarterly, Map<String, List<String>> allVotes, String finalResult, String credits, boolean exists) {
+    public ReportCard(String quarterly, Map<String, List<String>> allVotes, String finalResult, String credits, Map<String, List<String>> allDebts, String mean, boolean exists) {
         this.quarterly = quarterly;
         this.allVotes = allVotes;
         this.exists = exists;
         this.finalResult = finalResult;
         this.credits = credits;
-    }
-
-    public ReportCard(){
-        quarterly = "";
-        allVotes = null;
-        exists = true;
-        finalResult = null;
-        credits = null;
-        allDebts=null;
+        this.allDebts=allDebts;
+        this.mean=mean;
     }
 
     public String toString() {
-        return finalResult + "; " + credits + "; " + quarterly + "; " + exists;
-    }
-
-    /**
-     * Ottieni la media dei voti calcolata.
-     * ATTENZIONE: i giudizi (Es. Ottimo) non vengono contati nella media
-     *
-     * @return La media dei voti come un {@code float}
-     */
-    /*public float getCalculatedMean() {
-        if (calculatedMean != -1f) {
-            float mean = 0f;
-            int i = 0;  //contatore dei voti reali non conta i giudizi
-
-            for (String subject : allVotes.keySet()) {
-                List<String> s = allVotes.get(subject);
-                String vote = s.get(0);
-                float voteF = getFloatFromVote(vote);
-                if (voteF != -1f) {
-                    mean += voteF;
-                    i++;
-                }
-            }
-
-            calculatedMean = mean / allVotes.keySet().size();
-        }
-        return calculatedMean;
-    }*/
-
-    private float getFloatFromVote(String vote) {
-        char lastChar = vote.charAt(vote.length() - 1);
-        if (lastChar == '+')
-            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.15f : Integer.parseInt(vote.substring(0, 2)) + 0.15f;
-
-        else if (lastChar == '-')
-            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) - 1 + 0.85f : Integer.parseInt(vote.substring(0, 2)) - 1 + 0.85f;
-
-        else if (lastChar == '\u00BD') //1 / 2
-            return (vote.length() == 2) ? Character.getNumericValue(vote.charAt(0)) + 0.5f : Integer.parseInt(vote.substring(0, 2)) + 0.5f;
-
-        else {
-            try {
-                return Integer.parseInt(vote);
-            } catch (NumberFormatException e) {  //Il voto è un giudizio
-                return -1f;
-            }
-        }
-    }
-
-    public int quarterlyToInt() {
-        return GiuaScraperUtils.quarterlyToInt(quarterly);
+        return "Quadrimestre: "+quarterly+"; \r\n" +
+                "Voti: "+allVotes+"; \r\n" +
+                "Esito: "+finalResult+"; \r\n" +
+                "Crediti: "+credits+"; \r\n" +
+                "Media: "+mean+"; \r\n" +
+                "Debiti: "+allDebts+"; \r\n" +
+                "Esiste: "+exists+"; \r\n";
     }
 }

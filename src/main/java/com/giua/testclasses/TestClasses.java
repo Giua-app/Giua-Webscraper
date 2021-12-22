@@ -84,7 +84,7 @@ class TestClasses {
         startLogin();
         //testVotes(true);
         //testAlerts(true);
-        testReportCard(true);
+        testVotes(true);
     }
 
 
@@ -244,20 +244,25 @@ class TestClasses {
     }
 
     public static void testReportCard(boolean forceRefresh) {
-        logln("-----------Test Pagelle------------");
+        logln("Get report card");
 
-        ReportcardPage reportcardPage=new ReportcardPage(gS);
-        ReportCard rC=reportcardPage.getReportcard("Scrutinio esami giudizio sospeso");
-        logln("Quadrimestre: "+rC.quarterly);
-        logln("Esito: "+rC.finalResult);
-        logln("Crediti: "+rC.credits);
-        logln("Media: "+rC.calculatedMean);
-        logln("Voti:");
+        ReportcardPage reportcardPage= gS.getReportCardPage(forceRefresh);
+        ReportCard rC=reportcardPage.getReportcard(ReportcardPage.lastYear);
+        logln(rC.toString());
+        rC=reportcardPage.getReportcard(ReportcardPage.firstQuaterly);
+        logln(rC.toString());
+        rC=reportcardPage.getReportcard(ReportcardPage.secondQuaterly);
+        logln(rC.toString());
+        rC=reportcardPage.getReportcard(ReportcardPage.finalExams);
+        logln(rC.toString());
+
+        /*
         for (String m : rC.allVotes.keySet())
             logln(m + ": " + rC.allVotes.get(m).toString());
-        if(rC.allDebts!=null)
+        if(!rC.allDebts.equals(null))
             for (String m : rC.allDebts.keySet())
                 logln(m + ": " + rC.allDebts.get(m).toString());
+         */
      }
 
     private static void startLogin() {

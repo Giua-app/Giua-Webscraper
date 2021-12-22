@@ -21,7 +21,7 @@
 package com.giua.webscraper;
 
 import com.giua.objects.Maintenance;
-import com.giua.objects.ReportCard;
+import com.giua.pages.ReportcardPage;
 import com.giua.pages.*;
 import com.giua.utils.LoggerManager;
 import org.jsoup.Connection;
@@ -36,12 +36,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-/* -- Giua Webscraper ALPHA -- */
+/* -- Giua Webscraper BETA -- */
 // Tested with version 1.4.0 of giua@school
 public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
-	private String user;
+	private final String user;
     private String realUsername;
     private final String password;
     private String userType = "";
@@ -78,7 +78,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private DisciplinaryNoticesPage disciplinaryNotesPageCache = null;
 	private ObservationsPage observationsPageCache = null;
 	private AgendaPage agendaPageCache = null;
-	private ReportCard reportCardCache = null;
+	private ReportcardPage reportCardPageCache = null;
 	private VotesPage votesPageCache = null;
 	private Document getPageCache = null;
 	//endregion
@@ -428,23 +428,44 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return observationsPageCache;
 	}
 
+	public ReportcardPage getReportCardPage(boolean forceRefresh) {
+		if (reportCardPageCache == null || forceRefresh) {
+			if (cacheable) {
+				reportCardPageCache = new ReportcardPage(this);
+				return reportCardPageCache;
+			} else
+				return new ReportcardPage(this);
+		} else
+			return reportCardPageCache;
+	}
+
+	public InterviewsPage getInterviewsPage(boolean forceRefresh) {
+		if (interviewsPageCache == null || forceRefresh) {
+			if (cacheable) {
+				interviewsPageCache = new InterviewsPage(this);
+				return interviewsPageCache;
+			} else
+				return new InterviewsPage(this);
+		} else
+			return interviewsPageCache;
+	}
+
 	//endregion
 
 	/**
 	 * Ottiene il banner della login page se presente
 	 *
-	 * @return Il testo del banner (Attenzione potrebbe contenere tag html)
-	 * @throws LoginPageBannerNotFound se non esiste il banner
+	 * @return Il testo del banner (in html).
+	 * Ritorna vuoto se non c'è banner
 	 */
 	public String getLoginPageBanner() {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
 
-        //TODO: se non trova il banner ritorna vuoto, tanto anche nel registro se è vuoto non mette il banner
         try {
             els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
         } catch (IndexOutOfBoundsException e) {
-            throw new LoginPageBannerNotFound("Cant find banner in login page", e);
+			return "";
         }
 
         return els.child(0).html();
@@ -490,60 +511,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region ReportCard
 
-	/**
-	 * Ti da una {@code ReportCard} del quadrimestre indicato
-	 *
-	 * @param firstQuarterly
-	 * @param forceRefresh
-	 * @return La pagella del quadrimestre indicato
-	 *0/
-	public ReportCard getReportCard(boolean firstQuarterly, boolean forceRefresh) {
-		if (demoMode) {
-			return GiuaScraperDemo.getReportCard();
-		}
-		if (reportCardCache == null || forceRefresh) {
-			ReportCard returnReportCard;
-			Map<String, List<String>> returnReportCardValue = new HashMap<>();
-			Document doc;
-			if (firstQuarterly)
-				doc = getPage("genitori/pagelle/P");
-			else
-				doc = getPage("genitori/pagelle/F");
 
-			Elements elements = doc.getElementsByTag("tr");
-
-			if (elements.size() == 0)
-				return new ReportCard(firstQuarterly, null, "", "", false);
-
-			elements.remove(0);
-
-			for (Element e : elements) {
-				String subject = e.child(0).text();
-				String absentTime = "";
-				String vote = e.child(1).text();
-				if (e.children().size() == 3)
-					absentTime = e.child(2).text();
-				List<String> pairValue = new Vector<>();
-				pairValue.add(vote);
-				pairValue.add(absentTime);
-
-				returnReportCardValue.put(subject, pairValue);
-			}
-
-			String finalResult = doc.getElementsByClass("alert alert-success text-center gs-mt-4").text();
-			String[] finalResultSplitted = finalResult.split(" ");
-			finalResult = finalResultSplitted[2];
-			String credits = finalResultSplitted[4];
-			returnReportCard = new ReportCard(firstQuarterly, returnReportCardValue, finalResult, credits, true);
-
-			if (cacheable)
-				reportCardCache = returnReportCard;
-
-			return returnReportCard;
-		} else
-			return reportCardCache;
-
-	}
 
 	//endregion
 
@@ -756,7 +724,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
             Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.get();
 
-			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/ caricato");
+			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 			return doc;
 
@@ -1033,7 +1001,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		disciplinaryNotesPageCache = null;
 		observationsPageCache = null;
 		agendaPageCache = null;
-		reportCardCache = null;
+		reportCardPageCache = null;
 		votesPageCache = null;
 	}
 

@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Vector;
 
 public class VotesPage implements IPage {
-    private GiuaScraper gS;
+    private final GiuaScraper gS;
     private Document doc;
 
     public VotesPage(GiuaScraper gS) {
@@ -66,22 +66,23 @@ public class VotesPage implements IPage {
             final String args = getDetailOfVote(voteHTML, 2);
             final String judg = getDetailOfVote(voteHTML, 3);
             final String quart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text();
+            final boolean isRelevantForMean=voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary");
 
             if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
                 if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
                     List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false));
+                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, voteHTML.className().equals("btn btn-xs gs-btn-secondary")));
                 } else {
-                    returnVotes.put(materiaName, new Vector<Vote>() {{
-                        add(new Vote(voteAsString, voteDate, type, args, judg, quart, false));    //il voto lo aggiungo direttamente
+                    returnVotes.put(materiaName, new Vector<>() {{
+                        add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));    //il voto lo aggiungo direttamente
                     }});
                 }
             } else {        //è un asterisco
                 if (returnVotes.containsKey(materiaName)) {
-                    returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, quart, true));
+                    returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, quart, true, false));
                 } else {
                     returnVotes.put(materiaName, new Vector<>() {{
-                        add(new Vote("", voteDate, type, args, judg, quart, true));
+                        add(new Vote("", voteDate, type, args, judg, quart, true, false));
                     }});
                 }
             }
@@ -119,6 +120,7 @@ public class VotesPage implements IPage {
         for (Element el : els) {
             if (el.text().trim().equalsIgnoreCase(filterSubject.trim())) {
                 votesDoc = gS.getPage(el.child(0).attr("href"));
+                break;
             }
         }
 
@@ -140,7 +142,8 @@ public class VotesPage implements IPage {
                                 el.child(2).text(),
                                 el.child(4).text(),
                                 GiuaScraperUtils.getQuarterName(i + 1),
-                                el.child(3).text().equals("")
+                                el.child(3).text().equals(""),
+                                el.child(3).className().equals("label label-default gs-big")
                         ));
                     }
                 }
@@ -295,6 +298,6 @@ class VariableArray {
         }
 
         array = newArray;
-    }
+    }//dude wtf
 
 }

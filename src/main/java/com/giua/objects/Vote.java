@@ -34,8 +34,9 @@ public class Vote{
     public final String judgement;
     public final String testType;
     public final String arguments;
+    public final boolean isRelevantForMean;
 
-    public Vote(String value, String date, String testType, String arguments, String judgement, String quarterly, boolean isAsterisk) {
+    public Vote(String value, String date, String testType, String arguments, String judgement, String quarterly, boolean isAsterisk, boolean isRelevantForMean) {
         this.value = value;
         this.date = date;
         this.testType = testType;
@@ -43,6 +44,7 @@ public class Vote{
         this.judgement = judgement;
         this.quarterly = quarterly;
         this.isAsterisk = isAsterisk;
+        this.isRelevantForMean=isRelevantForMean;
     }
 
     //Mette anche i dettagli nella stringa

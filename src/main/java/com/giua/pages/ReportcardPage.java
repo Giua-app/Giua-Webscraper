@@ -1,7 +1,7 @@
 /*
  * Giua Webscraper library
  * A webscraper of the online school workbook giua@school
- * Copyright (C) 2021 - 2021 Hiem, Franck1421 and contributors
+ * Copyright (C) 2021 - 2022 Hiem, Franck1421 and contributors
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 public class ReportcardPage implements IPage{
     private final GiuaScraper gS;
@@ -67,7 +70,7 @@ public class ReportcardPage implements IPage{
         }
 
         if (gS.isDemoMode()) {
-            //sciao beli metto checiap in kebab?
+            //TODO demo di report page
         }
         try {
             //quadrimestre
@@ -144,7 +147,7 @@ public class ReportcardPage implements IPage{
         String mean=null;
         String credits=null;
         if (gS.isDemoMode()) {
-            //mangia il nero della banana
+            //TODO demo di report page
         }
         try {
             //quadrimestre

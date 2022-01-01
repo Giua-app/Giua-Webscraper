@@ -1,7 +1,7 @@
 /*
  * Giua Webscraper library
  * A webscraper of the online school workbook giua@school
- * Copyright (C) 2021 - 2021 Hiem, Franck1421 and contributors
+ * Copyright (C) 2021 - 2022 Hiem, Franck1421 and contributors
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by

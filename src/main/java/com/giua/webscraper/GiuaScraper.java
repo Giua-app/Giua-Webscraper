@@ -461,14 +461,23 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		Document doc = getPageNoCookie(""); //pagina di login
 		Element els;
 
-        try {
-            els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
-        } catch (IndexOutOfBoundsException e) {
+		try {
+			els = doc.getElementsByClass("alert alert-warning gs-mb-2 gs-ml-3 gs-mr-3").get(0);
+		} catch (IndexOutOfBoundsException e) {
 			return "";
-        }
+		}
 
-        return els.child(0).html();
-    }
+		return els.child(0).html();
+	}
+
+	public String getSchoolName() {
+		Document doc = getPageNoCookie(""); //pagina di login
+		Element els;
+
+		els = doc.getElementsByClass("hidden-xs gs-big").get(0); //nome scuola abbreviato
+
+		return els.text().split("'")[1];
+	}
 
 /*
 	//region Controllo aggiornamenti oggetti

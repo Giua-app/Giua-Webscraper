@@ -70,8 +70,8 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        //GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
+        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
@@ -79,7 +79,7 @@ class TestClasses {
         startLogin();
         //testVotes(true);
         //testAlerts(true);
-        testVotes(true);
+        //testVotes(true);
     }
 
 

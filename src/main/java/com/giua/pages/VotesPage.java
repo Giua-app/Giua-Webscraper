@@ -207,7 +207,7 @@ public class VotesPage implements IPage {
         int counter = 0;
 
         for (Vote vote : votes) {
-            if(!vote.isAsterisk){
+            if(!vote.isAsterisk && vote.isRelevantForMean){
                 mean += vote.toFloat();
                 counter++;
             }
@@ -229,7 +229,7 @@ public class VotesPage implements IPage {
         int counter = 0;
 
         for (Vote vote : votes) {
-            if (!vote.isAsterisk && vote.quarterlyToInt() == quarterly) {
+            if (!vote.isAsterisk && vote.isRelevantForMean && vote.quarterlyToInt() == quarterly) {
                 mean += vote.toFloat();
                 counter++;
             }

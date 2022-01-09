@@ -470,13 +470,19 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		return els.child(0).html();
 	}
 
-	public String getSchoolName() {
-		Document doc = getPageNoCookie(""); //pagina di login
+	public static String getSchoolName() throws IOException {
+		Document doc = Jsoup.newSession()
+				.url(GiuaScraper.SiteURL + "/")
+				.method(Method.GET)
+				.get(); //pagina di login
 		Element els;
 
 		els = doc.getElementsByClass("hidden-xs gs-big").get(0); //nome scuola abbreviato
 
-		return els.text().split("'")[1];
+		if (els.text().split("'").length > 1)
+			return els.text().split("'")[1];
+
+		return "";
 	}
 
 /*

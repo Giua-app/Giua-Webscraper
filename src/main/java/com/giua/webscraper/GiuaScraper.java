@@ -472,7 +472,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static String getSchoolName() throws IOException {
 		Document doc = Jsoup.newSession()
-				.url(GiuaScraper.SiteURL + "/")
+				.url(GiuaScraper.SiteURL + "/login/form/")
 				.method(Method.GET)
 				.get(); //pagina di login
 		Element els;

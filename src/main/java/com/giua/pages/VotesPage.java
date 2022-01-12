@@ -66,7 +66,7 @@ public class VotesPage implements IPage {
             final String args = getDetailOfVote(voteHTML, 2);
             final String judg = getDetailOfVote(voteHTML, 3);
             final String quart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text();
-            final boolean isRelevantForMean=voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary");
+            final boolean isRelevantForMean=!voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary");
 
             if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
                 if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto

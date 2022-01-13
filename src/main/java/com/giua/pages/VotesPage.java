@@ -66,12 +66,12 @@ public class VotesPage implements IPage {
             final String args = getDetailOfVote(voteHTML, 2);
             final String judg = getDetailOfVote(voteHTML, 3);
             final String quart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text();
-            final boolean isRelevantForMean=!voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary");
+            final boolean isRelevantForMean=!(voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
 
             if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
                 if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
                     List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, voteHTML.className().equals("btn btn-xs gs-btn-secondary")));
+                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));
                 } else {
                     returnVotes.put(materiaName, new Vector<>() {{
                         add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));    //il voto lo aggiungo direttamente

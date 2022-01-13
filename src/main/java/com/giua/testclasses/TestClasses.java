@@ -55,31 +55,28 @@ class TestClasses {
         }
 
         try {
-            logEnabled = Boolean.parseBoolean(args[2]);
+            logEnabled = Boolean.parseBoolean(args[3]);
         } catch (Exception ignored) {
         }
 
         try {
-            speedTest = Boolean.parseBoolean(args[3]);
+            speedTest = Boolean.parseBoolean(args[4]);
         } catch (Exception ignored) {
         }
 
         try {
-            speedTestAmount = Integer.parseInt(args[4]);
+            speedTestAmount = Integer.parseInt(args[5]);
         } catch (Exception ignored) {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL("https://registro.giua.edu.it");
-        //GiuaScraper.setSiteURL("http://hiemvault.ddns.net:9090");
+        GiuaScraper.setSiteURL(args[2]);
 
 
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         startLogin();
-        //testVotes(true);
-        //testAlerts(true);
-        //testVotes(true);
+        testVotes(true);
     }
 
 

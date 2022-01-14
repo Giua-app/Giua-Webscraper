@@ -682,42 +682,100 @@ public class GiuaScraper extends GiuaScraperExceptions {
                 }
 
 
-                Connection.Response response = session.newRequest()
-                        .url(GiuaScraper.SiteURL + "/" + page)
-                        .method(Method.GET)
-                        .execute();
+				Connection.Response response = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/" + page)
+						.method(Method.GET)
+						.execute();
 
-                lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+				lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
-                Document doc = response.parse();
+				Document doc = response.parse();
 
-                if (response.statusCode() == 302) {    //Se è true vuol dire che non siamo loggati
-                    lm.d("getPage: Pagina ha risposto con codice 302, probabilmente non siamo loggati");
-                    try {
-                        lm.d("getPage: Rieseguo login...");
-                        login();    //Prova a riloggarti
-                        lm.d("getPage: Login eseguito correttamente");
-                    } catch (Exception e) {
-                        lm.e("Impossibile eseguire login da getPage");
-                        throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
-                    }
-                }
-
-                getPageCache = doc;
-                lastGetPageTime = System.nanoTime();
-                return doc;
-            }
+				if (doc.getElementsByClass("col-sm-5 col-xs-8 text-right").isEmpty()) {    //Se vero il cookie è scaduto o non siamo loggati
+					try {
+						lm.d("getPage: Il cookie è scaduto o non siamo loggati, provo a riloggarmi");
+						login();    //Prova a riloggarti
+						lm.d("getPage: Re-Login eseguito correttamente");
+						return getPageWithNoReLogin(page);    //Uso getPageWithNoReLogin per evitare una ricorsione infinita
+					} catch (Exception e) {
+						lm.e("Impossibile eseguire login da getPage");
+						throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
+					}
+				}
+				getPageCache = doc;
+				lastGetPageTime = System.nanoTime();
+				return doc;
+			}
 
         } catch (IOException e) {
             if (!isSiteWorking()) {
                 throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
-            }
-            e.printStackTrace();
-        }
-        //Qui ci si arriva solo in rari casi di connessioni molto lente
-        lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
-        if (!isSiteWorking()) {
-            throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+			}
+			e.printStackTrace();
+		}
+		//Qui ci si arriva solo in rari casi di connessioni molto lente
+		lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
+		if (!isSiteWorking()) {
+			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
+		}
+		return new Document(GiuaScraper.SiteURL + "/" + page);
+	}
+
+	/**
+	 * Ottiene la pagina HTML specificata dalla variabile {@code SiteURL} senza rieseguire
+	 * il login in caso di cookie non valido
+	 * Non c'e' bisogno di inserire {@code /} prima di un URL
+	 *
+	 * @param page il percorso della pagina nel registro. Es: bacheca/circolari/
+	 * @return Una pagina HTML come {@link Document}
+	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non si può richiedere la pagina indicata
+	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
+	 */
+	public Document getPageWithNoReLogin(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
+		if (demoMode)
+			return GiuaScraperDemo.getPage(page);
+		try {
+			if (page.startsWith("/"))
+				page = page.substring(1);
+
+			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+				lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
+				return getPageCache;
+			}
+
+			if (page.equals("login/form/")) {
+				return getPageNoCookie("login/form/");
+			} else {
+				if (isMaintenanceActive()) {
+					throw new MaintenanceIsActiveException("The website is in maintenance");
+				}
+
+
+				Connection.Response response = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/" + page)
+						.method(Method.GET)
+						.execute();
+
+				lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+
+				Document doc = response.parse();
+
+				getPageCache = doc;
+				lastGetPageTime = System.nanoTime();
+				return doc;
+			}
+
+		} catch (IOException e) {
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+			}
+			e.printStackTrace();
+		}
+		//Qui ci si arriva solo in rari casi di connessioni molto lente
+		lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
+		if (!isSiteWorking()) {
+			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
 		}
 		return new Document(GiuaScraper.SiteURL + "/" + page);
 	}
@@ -729,8 +787,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
-        if (page.startsWith("/"))
-            page = page.substring(1);
+		if (page.startsWith("/"))
+			page = page.substring(1);
         if (demoMode)
             return GiuaScraperDemo.getPage(page);
         try {

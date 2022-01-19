@@ -51,39 +51,42 @@ public class VotesPage implements IPage {
      */
     public Map<String, List<Vote>> getAllVotes() {
         Map<String, List<Vote>> returnVotes = new HashMap<>();
-        Elements votesHTML = doc.getElementsByAttributeValue("title", "Informazioni sulla valutazione");
+        Elements alltbody = doc.getElementsByTag("tbody");
 
-        for (final Element voteHTML : votesHTML) {
-            assert voteHTML.parent() != null;
-            assert voteHTML.parent().parent() != null;
-            assert voteHTML.parent().parent().parent() != null;
-            assert voteHTML.parent().parent().parent().parent() != null;
+        for (final Element tbody : alltbody) {
+            final String quart = tbody.parent().child(0).text();
 
-            final String voteAsString = voteHTML.text(); //prende il voto
-            final String materiaName = voteHTML.parent().parent().child(0).text(); //prende il nome della materia
-            final String voteDate = getDetailOfVote(voteHTML, 0);
-            final String type = getDetailOfVote(voteHTML, 1);
-            final String args = getDetailOfVote(voteHTML, 2);
-            final String judg = getDetailOfVote(voteHTML, 3);
-            final String quart = voteHTML.parent().parent().parent().parent().getElementsByTag("caption").get(0).text();
-            final boolean isRelevantForMean=!(voteHTML.attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
+            for (final Element subjectVotesHTML : tbody.children()) {
+                final String subject = subjectVotesHTML.child(0).text();
+                final Elements allVotesHTML = subjectVotesHTML.child(1).children();
+                int length = allVotesHTML.size();
 
-            if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
-                if (returnVotes.containsKey(materiaName)) {            //Se la materia esiste gia aggiungo solamente il voto
-                    List<Vote> tempList = returnVotes.get(materiaName); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-                    tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));
-                } else {
-                    returnVotes.put(materiaName, new Vector<>() {{
-                        add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));    //il voto lo aggiungo direttamente
-                    }});
-                }
-            } else {        //è un asterisco
-                if (returnVotes.containsKey(materiaName)) {
-                    returnVotes.get(materiaName).add(new Vote("", voteDate, type, args, judg, quart, true, false));
-                } else {
-                    returnVotes.put(materiaName, new Vector<>() {{
-                        add(new Vote("", voteDate, type, args, judg, quart, true, false));
-                    }});
+                for (int i = 0; i < length; i += 2) {
+                    final String voteAsString = allVotesHTML.get(i).text(); //prende il voto
+                    final String voteDate = getDetailOfVote(allVotesHTML.get(i + 1), 0);
+                    final String type = getDetailOfVote(allVotesHTML.get(i + 1), 1);
+                    final String args = getDetailOfVote(allVotesHTML.get(i + 1), 2);
+                    final String judg = getDetailOfVote(allVotesHTML.get(i + 1), 3);
+                    final boolean isRelevantForMean = !(allVotesHTML.get(i).attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
+
+                    if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
+                        if (returnVotes.containsKey(subject)) {            //Se la materia esiste gia aggiungo solamente il voto
+                            List<Vote> tempList = returnVotes.get(subject); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
+                            tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));
+                        } else {
+                            returnVotes.put(subject, new Vector<>() {{
+                                add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));    //il voto lo aggiungo direttamente
+                            }});
+                        }
+                    } else {        //è un asterisco
+                        if (returnVotes.containsKey(subject)) {
+                            returnVotes.get(subject).add(new Vote("", voteDate, type, args, judg, quart, true, false));
+                        } else {
+                            returnVotes.put(subject, new Vector<>() {{
+                                add(new Vote("", voteDate, type, args, judg, quart, true, false));
+                            }});
+                        }
+                    }
                 }
             }
         }
@@ -99,11 +102,10 @@ public class VotesPage implements IPage {
      * @return Stringa contenente i dettagli di quel voto
      */
     private String getDetailOfVote(Element e, int index) {
-        try {
-            return e.siblingElements().get(e.elementSiblingIndex()).child(0).child(0).child(index).text().split(": ")[1];
-        } catch (Exception err) {
-            return "";
-        }
+        Elements allDetailsHTML = e.child(0).child(0).children();
+        if (index < allDetailsHTML.size())
+            return e.child(0).child(0).child(index).text().split(": ", 2)[1];
+        return "";
     }
 
     /**

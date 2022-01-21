@@ -20,6 +20,7 @@
 package com.giua.pages;
 
 import com.giua.objects.Newsletter;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import com.giua.webscraper.GiuaScraperExceptions;
@@ -78,7 +79,7 @@ public class NewslettersPage implements IPage{
         if (els.size() > 2) {     //Ci sono allegati
             Elements allAttachments = els.get(1).child(0).children();
             for (Element attachment : allAttachments) {
-                r.add(attachment.child(1).attr("href"));
+                r.add(GiuaScraperUtils.convertGlobalPathToLocal(attachment.child(1).attr("href")));
             }
         } else {        //Non ha allegati
             return null;
@@ -106,22 +107,28 @@ public class NewslettersPage implements IPage{
         if (page <= 0) {
             throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
+        resetFiltersAndRefreshPage();
         Document doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE + "/" + page);
+        //FIXME: Se si usa l'url personalizzato + cache il getPage ritorna una pagina di errore "nessuna circolare presente"
+        // Il resetFilters sembra risolve il problema
+        //TODO: Fare in modo che la cache venga usata veramente
         List<Newsletter> allNewsletters = new Vector<>();
         try {
-            if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + "circolari/genitori/" + page)) {
-                doc = gS.getPage("circolari/genitori/" + page);
+            if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + UrlPaths.NEWSLETTERS_PAGE + "/" + page)) {
+                doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE + "/" + page);
             }
 
             Elements allNewslettersStatusHTML = doc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
 
             for (Element el : allNewslettersStatusHTML) {
+                String detailsUrl = el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href");
+
                 allNewsletters.add(new Newsletter(
                         el.child(0).text(),
                         Integer.parseInt(el.child(1).text()),
                         el.child(2).text(),
                         el.child(3).text(),
-                        el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+                        GiuaScraperUtils.convertGlobalPathToLocal(detailsUrl),
                         attachmentsUrls(el.child(4)),
                         page));
             }
@@ -192,7 +199,7 @@ public class NewslettersPage implements IPage{
     public void markNewsletterAsRead(Newsletter newsletter) {
         try {
             gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + newsletter.detailsUrl)
+                    .url(GiuaScraper.getSiteURL() + "/" + newsletter.detailsUrl)
                     .method(Connection.Method.GET)
                     .ignoreContentType(true)
                     .maxBodySize(1)

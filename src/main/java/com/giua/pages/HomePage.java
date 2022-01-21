@@ -20,6 +20,7 @@
 package com.giua.pages;
 
 import com.giua.objects.News;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
@@ -64,7 +65,7 @@ public class HomePage implements IPage {
             String url = "";
             if (news.child(0).childNodeSize() > 1)
                 url = news.child(0).child(0).attr("href");
-            returnAllNews.add(new News(news.text(), url));
+            returnAllNews.add(new News(news.text(), GiuaScraperUtils.convertGlobalPathToLocal(url)));
         }
 
         return returnAllNews;

@@ -23,6 +23,7 @@ import com.giua.objects.Activity;
 import com.giua.objects.AgendaObject;
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
@@ -212,8 +213,9 @@ public class AgendaPage implements IPage {
     }
 
     private Activity getActivityFromHTML(Element activityHTML) {
-        String[] hrefSplit = activityHTML.attributes().get("data-href").split("/");
-        String dateFromhref = hrefSplit[4];
+        String url = activityHTML.attributes().get("data-href");
+        String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
+        String dateFromhref = hrefSplit[3];
         return new Activity(
                 dateFromhref.split("-")[2],
                 dateFromhref.split("-")[1],
@@ -226,8 +228,9 @@ public class AgendaPage implements IPage {
     }
 
     private Test getTestFromHTML(Element testHTML) {
-        String[] hrefSplit = testHTML.attributes().get("data-href").split("/");
-        String dateFromhref = hrefSplit[4];
+        String url = testHTML.attributes().get("data-href");
+        String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
+        String dateFromhref = hrefSplit[3];
         return new Test(
                 dateFromhref.split("-")[2],
                 dateFromhref.split("-")[1],
@@ -241,8 +244,9 @@ public class AgendaPage implements IPage {
     }
 
     private Homework getHomeworkFromHTML(Element homeworkHTML) {
-        String[] hrefSplit = homeworkHTML.attributes().get("data-href").split("/");
-        String dateFromhref = hrefSplit[4];
+        String url = homeworkHTML.attributes().get("data-href");
+        String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
+        String dateFromhref = hrefSplit[3];
         return new Homework(
                 dateFromhref.split("-")[2],
                 dateFromhref.split("-")[1],

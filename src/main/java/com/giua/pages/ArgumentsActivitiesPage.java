@@ -20,6 +20,7 @@
 package com.giua.pages;
 
 import com.giua.objects.Lesson;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
@@ -76,7 +77,7 @@ public class ArgumentsActivitiesPage implements IPage{
             for (Element element : allLessonsHTML) {
                 Elements lessonsHTML = element.children();
                 for (Element lessonHTML : lessonsHTML) {
-                    String rawHref = lessonHTML.child(0).child(0).attr("href");
+                    String rawHref = GiuaScraperUtils.convertGlobalPathToLocal(lessonHTML.child(0).child(0).attr("href"));
                     Date date;
                     if (!rawHref.equals("")) {   //Lezione normale
                         date = Lesson.dateFormat.parse(rawHref.substring(18, 28));

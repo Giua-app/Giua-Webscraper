@@ -49,6 +49,7 @@ public class DisciplinaryNoticesPage implements IPage {
      *
      * @return Una lista di DisciplNotice
      */
+    //FIXME: Non funziona, rivedere tutto
     public List<DisciplinaryNotices> getAllDisciplinaryNotices() {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllDisciplNotices();

@@ -38,7 +38,7 @@ class TestClasses {
     public static int speedTestAmount = 5;
 
     //Main function, only used on the console version for testing
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         try {
             user = args[0];
             password = args[1];
@@ -52,6 +52,11 @@ class TestClasses {
                 logln("Password: ");
                 password = sc.nextLine();
             }
+        }
+
+        try {
+            GiuaScraper.setSiteURL(args[2]);
+        } catch (Exception ignored) {
         }
 
         try {
@@ -70,15 +75,9 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        GiuaScraper.setSiteURL(args[2]);
 
-
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-
-        startLogin();
-        testVotes(true);
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
-
 
     private static void logln(String msg) {
         if (logEnabled) {
@@ -179,11 +178,11 @@ class TestClasses {
             logln(a.toString());
         }
         logln("Marking first newsletter as read");
-        gS.getNewslettersPage(false).markNewsletterAsRead(allNewsletters.get(0));
+        gS.getNewslettersPage(forceRefresh).markNewsletterAsRead(allNewsletters.get(0));
         logln("First newsletter has attachments?");
         logln(String.valueOf(allNewsletters.get(0).attachmentsUrl != null));
         logln("Get newsletters with a filter");
-        logln(gS.getNewslettersPage(false).getAllNewslettersWithFilter(false, "", "f").toString());
+        logln(gS.getNewslettersPage(forceRefresh).getAllNewslettersWithFilter(false, "", "f").toString());
     }
 
     public static void testLessons(boolean forceRefresh) {
@@ -219,10 +218,11 @@ class TestClasses {
 
     public static void testNotes(boolean forceRefresh) {
         logln("Get disciplinary notes");
-        List<DisciplinaryNotices> allDN = gS.getDisciplinaryNotesPage(forceRefresh).getAllDisciplinaryNotices();
+        logln("Non funzionante");
+        /*List<DisciplinaryNotices> allDN = gS.getDisciplinaryNotesPage(forceRefresh).getAllDisciplinaryNotices();
         for (DisciplinaryNotices a : allDN) {
             logln(a.toString());
-        }
+        }*/
     }
 
     public static void testAbsences(boolean forceRefresh) {

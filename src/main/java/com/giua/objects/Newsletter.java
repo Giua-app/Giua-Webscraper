@@ -60,74 +60,11 @@ public class Newsletter{
         return this.status + "; " + this.number + "; " + this.date + "; " + this.object + "; " + this.detailsUrl + "; " + ((this.attachmentsUrl != null && !this.attachmentsUrl.isEmpty()) ? this.attachmentsUrl.get(0) : "null");
     }
 
-    /**
-     * Le differenze possibili delle {@code Newsletter} sono:
-     * status, date, object, detailsUrl, number, attachments, page
-     *
-     * @param newsletter2 Newsletter da confrontare
-     * @return Una lista delle differenze
-     */
-    /*public List<String> compareWith(Newsletter newsletter2) {
-        List<String> differences = new Vector<>();
-
-        if(this.equals(newsletter2)){
-            return differences;
-        }
-
-        if(!this.status.equals(newsletter2.status)){
-            differences.add("status");
-        }
-        if(!this.date.equals(newsletter2.date)){
-            differences.add("date");
-        }
-        if(!this.newslettersObject.equals(newsletter2.newslettersObject)){
-            differences.add("object");
-        }
-        if(!this.detailsUrl.equals(newsletter2.detailsUrl)){
-            differences.add("detailsUrl");
-        }
-        if(!this.number.equals(newsletter2.number)){
-            differences.add("number");
-        }
-        if(this.attachments != newsletter2.attachments){
-            differences.add("attachments");
-        }
-        if(this.page != newsletter2.page){
-            differences.add("page");
-        }
-        return differences;
-    }*/
-
     public boolean equals(Newsletter newsletter2) {
         //true se uguale, false altrimenti
         return this.status.equals(newsletter2.status) && this.number == newsletter2.number
                 && this.date.equals(newsletter2.date) && this.object.equals(newsletter2.object)
                 && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachmentsUrl == newsletter2.attachmentsUrl
                 && this.page == newsletter2.page;
-    }
-
-    public String toJson() {
-
-        /*JsonBuilder jsonBuilder = new JsonBuilder("[{")
-                .addValue("status", this.status)
-                .addValue("date", this.date)
-                .addValue("object", JsonBuilder.escape(this.newslettersObject))
-                .addValue("detailsUrl", this.detailsUrl)
-                .addValue("number", this.number)
-                .addValue("page", this.page)
-                .addCustomString(",\"attachments\":[");
-
-        if (this.attachmentsUrl != null) {
-            //aggiungi attachments
-
-            jsonBuilder.addCustomString("\"" + this.attachmentsUrl.get(0) + "\"");
-
-            for (int i = 1; i < this.attachmentsUrl.size(); i++) {
-                jsonBuilder.addCustomString(",\"" + this.attachmentsUrl.get(i) + "\"");
-            }
-        }
-
-        return jsonBuilder.build("]}]");*/
-        return "";
     }
 }

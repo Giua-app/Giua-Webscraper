@@ -22,6 +22,7 @@ package com.giua.webscraper;
 
 import com.giua.objects.Maintenance;
 import com.giua.pages.*;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.LoggerManager;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
@@ -662,24 +663,26 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
 	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
-        if (demoMode)
-            return GiuaScraperDemo.getPage(page);
-        try {
-            if (page.startsWith("/"))
-                page = page.substring(1);
+		page = GiuaScraperUtils.convertGlobalPathToLocal(page);
+		if (demoMode)
+			return GiuaScraperDemo.getPage(page);
+		try {
+			if (page.startsWith("/"))
+				page = page.substring(1);
 
-            //Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-            if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
-                lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
-                return getPageCache;
-            }
 
-            if (page.equals("login/form/")) {
-                return getPageNoCookie("login/form/");
-            } else {
-                if (isMaintenanceActive()) {
-                    throw new MaintenanceIsActiveException("The website is in maintenance");
-                }
+			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
+			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+				lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
+				return getPageCache;
+			}
+
+			if (page.equals("login/form/")) {
+				return getPageNoCookie("login/form/");
+			} else {
+				if (isMaintenanceActive()) {
+					throw new MaintenanceIsActiveException("The website is in maintenance");
+				}
 
 
 				Connection.Response response = session.newRequest()

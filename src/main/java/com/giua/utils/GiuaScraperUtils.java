@@ -22,7 +22,10 @@ package com.giua.utils;
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
 import com.giua.objects.Vote;
+import com.giua.webscraper.GiuaScraper;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Vector;
 
@@ -200,5 +203,107 @@ public class GiuaScraperUtils {
         }
 
         return difference;
+    }
+
+    /**
+     * Converte i caratteri considerati illegali in JSON o altro
+     *
+     * @param raw String da convertire
+     * @return String con caratteri convertiti
+     */
+    public static String escapeString(String raw) {
+        String escaped = raw;
+        escaped = escaped.replace("\\", "\\\\");
+        escaped = escaped.replace("\"", "\\\"");
+        escaped = escaped.replace("\b", "\\b");
+        escaped = escaped.replace("\f", "\\f");
+        escaped = escaped.replace("\n", "\\n");
+        escaped = escaped.replace("\r", "\\r");
+        escaped = escaped.replace("\t", "\\t");
+        //escaped = escaped.replace("\"", "\\u0022");
+        return escaped;
+    }
+
+    /**
+     * Converte i path di un url da path globale a locale<br>
+     * <br>
+     * Con path globale si intende il path usato per raggiungere il
+     * registro elettronico.<br>Esempio: https://registro.com/public/circolari/genitori in questo caso
+     * "/public/circolari/genitori" è il path globale
+     * <br>
+     * Con path locale si intende il path usato per raggiungere le varie pagine del registro<br>
+     * Esempio: https://registro.com/public/circolari/genitori in questo caso "/circolari/genitori" è il path locale
+     * <br><br>
+     * <p>
+     * Esempi d'uso di questa funzione:<br>
+     * In ogni esempio, il path globale è "/public"<br>
+     * 1)
+     * <blockquote><pre>
+     *     String url = "https://registro.com/public/circolari/genitori"
+     *     String path = convertGlobalPathToLocal(url)
+     * </pre>
+     * </blockquote>
+     * path equivale "circolari/genitori"<br><br>
+     * 2)
+     * <blockquote><pre>
+     *     String url = "/public/circolari/genitori"
+     *     String path = convertGlobalPathToLocal(url)
+     * </pre>
+     * </blockquote>
+     * path equivale "circolari/genitori"<br><br>
+     * 3)
+     * <blockquote><pre>
+     *     String url = "/public/circolari/genitori"
+     *     String path = convertGlobalPathToLocal(url)
+     * </pre>
+     * </blockquote>
+     * path equivale "circolari/genitori"<br><br>
+     * 4)
+     * <blockquote><pre>
+     *     String url = "/public/circolari/genitori"
+     *     String path = convertGlobalPathToLocal(url, false)
+     * </pre>
+     * </blockquote>
+     * path equivale "/circolari/genitori"<br><br>
+     *
+     * @param url               url da convertire, può essere parziale (es. /public/voti) oppure completo (es. https://registro.com/public/voti)
+     * @param shouldRemoveSlash indica se la funzione deve rimuovere gli slash ("/") all'inizio del path una volta convertito.
+     *                          Se non indicato verrà eseguita la funzione {@link #convertGlobalPathToLocal(String)}
+     * @return {@code String} con path locale
+     */
+    public static String convertGlobalPathToLocal(String url, boolean shouldRemoveSlash) {
+        if (url.startsWith("/"))
+            url = url.substring(1);
+
+        String globalPath = null;
+        try {
+            globalPath = new URL(GiuaScraper.getSiteURL()).getPath();
+        } catch (MalformedURLException e) {
+            //NON DOVREBBE MAI SUCCEDERE
+            //Se succede vuol dire che SiteURL non è un URL valido!
+        }
+
+        if (!globalPath.equals("") && url.startsWith(globalPath.substring(1)))
+            url = url.split(globalPath.substring(1))[1];
+
+
+        if (shouldRemoveSlash && url.startsWith("/"))
+            url = url.substring(1);
+
+        return url;
+    }
+
+    /**
+     * Converte i path di un url da path globale a locale.
+     * Questa funzione di default rimuove gli slash ("/") all'inizio del path una volta convertito
+     *
+     * <p>Per maggiori info e istruzioni vedere {@link #convertGlobalPathToLocal(String, boolean)}</p>
+     *
+     * @param url url da convertire, può essere parziale (es. /public/voti) oppure completo (es. https://registro.com/public/voti)
+     * @return {@code String} con path locale
+     * @see #convertGlobalPathToLocal(String, boolean)
+     */
+    public static String convertGlobalPathToLocal(String url) {
+        return convertGlobalPathToLocal(url, true);
     }
 }

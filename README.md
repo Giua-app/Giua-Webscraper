@@ -42,5 +42,5 @@ dependencies {
 Sostituisci "VERSION" con il numero scritto qui (senza la v iniziale) ![](https://img.shields.io/github/v/release/Giua-app/Giua-Webscraper?color=success&include_prereleases&label=%E2%80%8B&logo=github)
 
 
-## Come posso contribuire?
-Contatta HiemSword o Franck1421
+## Contatti
+Puoi contattarci creando una [Issue](https://github.com/Giua-app/Giua-Webscraper/issues) qui su GitHub oppure via email all'indirizzo [contact@appgiua.slmail.me](mailto:contact@appgiua.slmail.me)

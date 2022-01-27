@@ -682,10 +682,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if (page.equals("login/form/")) {
 				return getPageNoCookie("login/form/");
 			} else {
-				if (isMaintenanceActive()) {
+				if (isMaintenanceActive())
 					throw new MaintenanceIsActiveException("The website is in maintenance");
-				}
-
 
 				Connection.Response response = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/" + page)
@@ -737,6 +735,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
 	public Document getPageWithNoReLogin(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
+		page = GiuaScraperUtils.convertGlobalPathToLocal(page);
 		if (demoMode)
 			return GiuaScraperDemo.getPage(page);
 		try {
@@ -745,17 +744,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
 			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
-				lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
+				lm.d("getPageWithNoReLogin: Rilevata richiesta uguale in meno di 500ms. Uso cache");
 				return getPageCache;
 			}
 
 			if (page.equals("login/form/")) {
 				return getPageNoCookie("login/form/");
 			} else {
-				if (isMaintenanceActive()) {
+				if (isMaintenanceActive())
 					throw new MaintenanceIsActiveException("The website is in maintenance");
-				}
-
 
 				Connection.Response response = session.newRequest()
 						.url(GiuaScraper.SiteURL + "/" + page)
@@ -765,6 +762,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 				Document doc = response.parse();
+
+				lm.d("getPageWithNoReLogin: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 				getPageCache = doc;
 				lastGetPageTime = System.nanoTime();
@@ -910,57 +909,57 @@ public class GiuaScraper extends GiuaScraperExceptions {
         if (demoMode)
             return;
         try {
-            if (isMaintenanceActive())
-                throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
+			if (isMaintenanceActive())
+				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
-            lm.d("login: Controllo validità sessione");
-            if (isSessionValid(PHPSESSID)) {
-                //Il cookie esistente è ancora valido, niente login.
-                lm.d("login: Sessione ancora valida, ignoro...");
-            } else {
-                lm.d("login: Sessione non valida, ne creo una nuova");
-                initiateSession();
+			lm.d("login: Controllo validità sessione");
+			if (isSessionValid(PHPSESSID)) {
+				//Il cookie esistente è ancora valido, niente login.
+				lm.d("login: Sessione ancora valida, ignoro...");
+				return;
+			}
+			lm.d("login: Sessione non valida, ne creo una nuova");
+			initiateSession();
 
-                //logln("login: First connection (login form)");
+			//logln("login: First connection (login form)");
 
-                Document firstRequestDoc = session.newRequest()
-                        .url(GiuaScraper.SiteURL + "/login/form/")
-                        .get();
+			Document firstRequestDoc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/login/form/")
+					.get();
 
-                //logln("login: Second connection (authenticate)");
+			//logln("login: Second connection (authenticate)");
 
-                Document doc = session.newRequest()
-                        .url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
-                        .ignoreContentType(true)
-                        .get();
+			Document doc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
+					.ignoreContentType(true)
+					.get();
 
-                //logln("\n\nCSRF HTML: \n" + doc + "\n\n");
+			//logln("\n\nCSRF HTML: \n" + doc + "\n\n");
 
-                String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
+			String CSRFToken = doc.body().toString().split(".+\":\"|\".")[1];        //prende solo il valore del csrf
 
-                lm.d("login: Token CSRF: " + CSRFToken);
+			lm.d("login: Token CSRF: " + CSRFToken);
 
-                //logln("login: Third connection (login form)");
+			//logln("login: Third connection (login form)");
 
-                doc = session.newRequest()
-                        .url(GiuaScraper.SiteURL + "/login/form/")
-                        .data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
-                        .post();
+			doc = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/login/form/")
+					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
+					.post();
 
-                Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
-                if (!err.isEmpty()) {
-                    throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
-                } else {
-                    PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
-                    if (isSessionValid(PHPSESSID)) {
-                        lm.d("login: Cookie: " + PHPSESSID);
-                        lm.d("Login riuscito con account " + this.user);
-                    } else {
-                        throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
-                    }
-                }
-            }
-        } catch (IOException e) {
+			Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
+			if (!err.isEmpty()) {
+				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
+			} else {
+				PHPSESSID = session.cookieStore().getCookies().get(0).getValue();
+				if (isSessionValid(PHPSESSID)) {
+					lm.d("login: Cookie: " + PHPSESSID);
+					lm.d("Login riuscito con account " + this.user);
+				} else {
+					throw new UnableToLogin("Login unsuccessful, and the site didn't give an error message. Please check the site from your web browser");
+				}
+			}
+		} catch (IOException e) {
             if (!isSiteWorking()) {
                 throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
             } else {
@@ -1047,22 +1046,28 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		throw new UnableToGetUserType("Unable to parse userType to userTypes enum because it's unknown");
 	}
 
+	/**
+	 * Ottieni tipo di utente
+	 * ATTENZIONE: Se il tipo utente non è già stato caricato cerca di ottenerlo con una richiesta HTTP
+	 *
+	 * @return il tipo di utente come stringa
+	 */
 	public String getUserTypeString() {
 		String text;
-        try {
-            if (userType.equals("")) {
-                final Document doc = getPage("");
-                final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-                text = elm.text().split(".+\\(|\\)")[1];
-                userType = text;
-                return text;
-            } else {
-                return userType;
-            }
-        } catch (Exception e) {
-            throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
-        }
-    }
+		try {
+			if (userType.equals("")) {
+				final Document doc = getPage("");
+				final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+				text = elm.text().split(".+\\(|\\)")[1];
+				userType = text;
+				return text;
+			} else {
+				return userType;
+			}
+		} catch (Exception e) {
+			throw new UnableToGetUserType("Unable to get user type, are we not logged in?", e);
+		}
+	}
 
     public void clearCache() {
         lm.d("Pulizia cache pages in corso...");

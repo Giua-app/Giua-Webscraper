@@ -79,7 +79,7 @@ public class NewslettersPage implements IPage{
         if (els.size() > 2) {     //Ci sono allegati
             Elements allAttachments = els.get(1).child(0).children();
             for (Element attachment : allAttachments) {
-                r.add(GiuaScraperUtils.convertGlobalPathToLocal(attachment.child(1).attr("href")));
+                r.add(GiuaScraperUtils.convertGlobalPathToLocal(attachment.child(1).attr("href"), false));
             }
         } else {        //Non ha allegati
             return null;

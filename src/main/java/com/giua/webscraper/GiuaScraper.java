@@ -636,8 +636,6 @@ public class GiuaScraper extends GiuaScraperExceptions {
      * @return Un oggetto {@code DownloadedFile}
      */
     public DownloadedFile download(String url) {
-        if (url.startsWith("/"))
-            url = url.substring(1);
         lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
         try {
             Connection.Response r = session.newRequest()

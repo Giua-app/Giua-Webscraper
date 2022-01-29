@@ -76,7 +76,9 @@ class TestClasses {
 
         GiuaScraper.setDebugMode(logEnabled);
 
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        startLogin();
+        testNewsletters(false);
     }
 
     private static void logln(String msg) {
@@ -181,6 +183,10 @@ class TestClasses {
         gS.getNewslettersPage(forceRefresh).markNewsletterAsRead(allNewsletters.get(0));
         logln("First newsletter has attachments?");
         logln(String.valueOf(allNewsletters.get(0).attachmentsUrl != null));
+        if (allNewsletters.get(0).attachmentsUrl != null) {
+            logln("Get first attachment url");
+            logln(String.valueOf(allNewsletters.get(0).attachmentsUrl));
+        }
         logln("Get newsletters with a filter");
         logln(gS.getNewslettersPage(forceRefresh).getAllNewslettersWithFilter(false, "", "f").toString());
     }

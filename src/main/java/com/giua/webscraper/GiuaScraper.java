@@ -759,11 +759,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						.method(Method.GET)
 						.execute();
 
-				lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+				lm.d("getPageWithNoReLogin: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 				Document doc = response.parse();
-
-				lm.d("getPageWithNoReLogin: " + GiuaScraper.SiteURL + "/" + page + " caricato");
 
 				getPageCache = doc;
 				lastGetPageTime = System.nanoTime();
@@ -791,13 +789,14 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @return La pagina che cercata
 	 */
 	public Document getPageNoCookie(String page) {
-		if (page.startsWith("/"))
-			page = page.substring(1);
-        if (demoMode)
-            return GiuaScraperDemo.getPage(page);
-        try {
+		page = GiuaScraperUtils.convertGlobalPathToLocal(page);
+		if (demoMode)
+			return GiuaScraperDemo.getPage(page);
+		try {
+			if (page.startsWith("/"))
+				page = page.substring(1);
 
-            Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
 					.get();
 
 			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/" + page + " caricato");

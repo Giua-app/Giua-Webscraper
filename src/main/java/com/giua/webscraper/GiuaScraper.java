@@ -631,19 +631,24 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Effettua il download di una risorsa di qualunque tipo dal registro
+	 * Non c'è bisogno di mettere gli "/" all'inizio dell'url
 	 *
-	 * @param url percorso della risorsa nel sito. IMPORTANTE: mettere lo "/" prima. Es: /bacheca/circolari/0/0/
-     * @return Un oggetto {@code DownloadedFile}
-     */
+	 * @param url percorso della risorsa nel sito.
+	 * @return Un oggetto {@code DownloadedFile}
+	 */
     public DownloadedFile download(String url) {
-        lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
-        try {
-            Connection.Response r = session.newRequest()
-                    .url(GiuaScraper.SiteURL + url)
-                    .ignoreContentType(true)
-                    .execute();
+		url = GiuaScraperUtils.convertGlobalPathToLocal(url);
+		lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
+		try {
+			if (url.startsWith("/"))
+				url = url.substring(1);
 
-            return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
+			Connection.Response r = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/" + url)
+					.ignoreContentType(true)
+					.execute();
+
+			return new DownloadedFile(Objects.requireNonNull(r.header("Content-Disposition")).split("[.]")[1], r.bodyAsBytes());
 		} catch (Exception e) {
 			if (!isSiteWorking()) {
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later");

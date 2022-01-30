@@ -79,7 +79,7 @@ public class NewslettersPage implements IPage{
         if (els.size() > 2) {     //Ci sono allegati
             Elements allAttachments = els.get(1).child(0).children();
             for (Element attachment : allAttachments) {
-                r.add(GiuaScraperUtils.convertGlobalPathToLocal(attachment.child(1).attr("href"), false));
+                r.add(GiuaScraperUtils.convertGlobalPathToLocal(attachment.child(1).attr("href")));
             }
         } else {        //Non ha allegati
             return null;
@@ -169,12 +169,14 @@ public class NewslettersPage implements IPage{
             Elements allNewslettersStatusHTML = newDoc.getElementsByClass("table table-bordered table-hover table-striped gs-mb-4").get(0).children().get(1).children();
 
             for (Element el : allNewslettersStatusHTML) {
+                String detailsUrl = el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href");
+
                 allNewsletters.add(new Newsletter(
                         el.child(0).text(),
                         Integer.parseInt(el.child(1).text()),
                         el.child(2).text(),
                         el.child(3).text(),
-                        el.child(4).child(1).child(0).child(0).child(0).getElementsByClass("btn btn-xs btn-primary gs-ml-3").get(0).attr("href"),
+                        GiuaScraperUtils.convertGlobalPathToLocal(detailsUrl),
                         attachmentsUrls(el.child(4)),
                         1));
             }

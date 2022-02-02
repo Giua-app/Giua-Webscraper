@@ -103,8 +103,11 @@ public class VotesPage implements IPage {
      */
     private String getDetailOfVote(Element e, int index) {
         Elements allDetailsHTML = e.child(0).child(0).children();
-        if (index < allDetailsHTML.size())
-            return e.child(0).child(0).child(index).text().split(": ", 2)[1];
+        if (index < allDetailsHTML.size()) {
+            String[] splitted = e.child(0).child(0).child(index).text().split(": ", 2);
+            if (splitted.length > 1)
+                return splitted[1];
+        }
         return "";
     }
 

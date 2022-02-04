@@ -53,15 +53,14 @@ public class VotesPage implements IPage {
         Map<String, List<Vote>> returnVotes = new HashMap<>();
         Elements alltbody = doc.getElementsByTag("tbody");
 
-        for (final Element tbody : alltbody) {
+        for (Element tbody : alltbody) { //divisione per quadrimestri
             final String quart = tbody.parent().child(0).text();
 
             for (final Element subjectVotesHTML : tbody.children()) {
                 final String subject = subjectVotesHTML.child(0).text();
                 final Elements allVotesHTML = subjectVotesHTML.child(1).children();
-                int length = allVotesHTML.size();
 
-                for (int i = 0; i < length; i += 2) {
+                for (int i = 0; i < allVotesHTML.size(); i += 2) {
                     final String voteAsString = allVotesHTML.get(i).text(); //prende il voto
                     final String voteDate = getDetailOfVote(allVotesHTML.get(i + 1), 0);
                     final String type = getDetailOfVote(allVotesHTML.get(i + 1), 1);

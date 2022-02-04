@@ -75,10 +75,9 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
         startLogin();
-        testNewsletters(false);
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testVotes(true);
     }
 
     private static void logln(String msg) {
@@ -150,7 +149,7 @@ class TestClasses {
         AlertsPage aP = new AlertsPage(gS);
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
-        List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size() - 1);
+        List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size());
         List<Alert> o = aP.getAlertsToNotify(oldAlerts);
     }
 

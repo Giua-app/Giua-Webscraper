@@ -81,8 +81,8 @@ public class AlertsPage implements IPage {
         if (gS.isDemoMode()) {
             return GiuaScraperDemo.getAllAlerts();
         }
-        if (page < 0) {
-            throw new IndexOutOfBoundsException("Un indice di pagina non puo essere negativo");
+        if (page <= 0) {
+            throw new IndexOutOfBoundsException("Un indice di pagina non puo essere 0 o negativo");
         }
         Document doc = gS.getPage(UrlPaths.ALERTS_PAGE + "/" + page);
         List<Alert> allAlerts = new Vector<>();

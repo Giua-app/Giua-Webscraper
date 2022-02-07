@@ -60,7 +60,8 @@ public class VotesPage implements IPage {
                 final String subject = subjectVotesHTML.child(0).text();
                 final Elements allVotesHTML = subjectVotesHTML.child(1).children();
 
-                for (int i = 0; i < allVotesHTML.size(); i += 2) {
+                int length = allVotesHTML.size();
+                for (int i = 0; i < length; i += 2) {
                     final String voteAsString = allVotesHTML.get(i).text(); //prende il voto
                     final String voteDate = getDetailOfVote(allVotesHTML.get(i + 1), 0);
                     final String type = getDetailOfVote(allVotesHTML.get(i + 1), 1);

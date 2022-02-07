@@ -81,7 +81,7 @@ public class ArgumentsActivitiesPage implements IPage{
                     Date date;
                     String support;
                     try {
-                        support=lessonHTML.child(2).text();
+                        support = lessonHTML.child(3).text();
                     }catch (IndexOutOfBoundsException | NullPointerException e){
                         support="";
                     }

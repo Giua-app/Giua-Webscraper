@@ -88,7 +88,7 @@ public class LessonsPage implements IPage{
             for (Element lessonHTML : allLessonsHTML) {
                 String support;
                 try {
-                    support=lessonHTML.child(2).text();
+                    support = lessonHTML.child(4).text();
                 }catch (IndexOutOfBoundsException | NullPointerException e){
                     support="";
                 }

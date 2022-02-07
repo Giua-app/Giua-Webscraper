@@ -167,18 +167,18 @@ public class GiuaScraperDemo {
 
     public static List<Lesson> getAllLessonsOfSubject() {
         List<Lesson> lessons = new Vector<>();
-        lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
+        /*lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
         lessons.add(new Lesson("2021-11-03", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
-        lessons.add(new Lesson("2021-10-02", "10:30-11:30", "Informatica", "", "Guardato un film", true));
+        lessons.add(new Lesson("2021-10-02", "10:30-11:30", "Informatica", "", "Guardato un film", true));*/
         return lessons;
     }
 
     public static List<Lesson> getAllLessons() {
         List<Lesson> lessons = new Vector<>();
-        lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
+        /*lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
         lessons.add(new Lesson("2021-11-01", "09:30-10:30", "Informatica", "Programmazione c#", "Laboratorio", true));
         lessons.add(new Lesson("2021-11-01", "10:30-11:30", "Storia", "", "Guardato un film", true));
-        lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));
+        lessons.add(new Lesson("2021-11-01", "11:30-12:30", "Scienze", "La Terra", "", true));*/
         return lessons;
     }
 

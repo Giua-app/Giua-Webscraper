@@ -133,27 +133,25 @@ class TestClasses {
     }
 
     private static void testAlerts(boolean forceRefresh) {
-        logln("Get avvisi");
-        List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(0);
+        /**logln("Get avvisi");
+        List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
         for (Alert a : allAvvisi) {
             logln(a.toString());
         }
-         logln("Marking first alert as read");
+        logln("Marking first alert as read");
          gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
          logln("Get first alert with filter");
          logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
          logln("Get details of first alert");
          allAvvisi.get(0).getDetailsToString(gS);
          logln(allAvvisi.get(0).toString());
-
-        /*
+         */
         logln("Test notifiche \r\n");
         AlertsPage aP = new AlertsPage(gS);
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
         List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size());
         List<Alert> o = aP.getAlertsToNotify(oldAlerts);
-         */
     }
 
     private static void testAgendaPage(boolean forceRefresh) {

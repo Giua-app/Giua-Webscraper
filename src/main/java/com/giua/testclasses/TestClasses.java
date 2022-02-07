@@ -163,8 +163,8 @@ class TestClasses {
 
     private static void testMeet(boolean forceRefresh){
         logln("Get meets");
-        List<Meet> allMeets = gS.getAgendaPage(forceRefresh).getMeets("2022-02-08");
-        for (Meet a : allMeets)
+        List<InterviewAgenda> allInterviewAgenda = gS.getAgendaPage(forceRefresh).getMeets("2022-02-08");
+        for (InterviewAgenda a : allInterviewAgenda)
             logln(a.toString());
     }
 

@@ -19,13 +19,13 @@
 
 package com.giua.objects;
 
-public class Meet extends AgendaObject {
+public class InterviewAgenda extends AgendaObject {
     public final String period;
     public final String creator;
     public final String details;
     public final boolean exists;
 
-    public Meet(String day, String month, String year, String date, String period, String creator, String details, boolean exists) {
+    public InterviewAgenda(String day, String month, String year, String date, String period, String creator, String details, boolean exists) {
         super(day, month, year, date);
         this.period = period;
         this.creator = creator;

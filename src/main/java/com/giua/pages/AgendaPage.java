@@ -23,7 +23,7 @@ import com.giua.objects.Activity;
 import com.giua.objects.AgendaObject;
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
-import com.giua.objects.Meet;
+import com.giua.objects.InterviewAgenda;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
@@ -126,16 +126,16 @@ public class AgendaPage implements IPage {
     }
 
     /**
-     * Restituisce una lista di tutti i {@link Meet} di una determinata data con anche i loro dettagli
+     * Restituisce una lista di tutti i {@link InterviewAgenda} di una determinata data con anche i loro dettagli
      *
      * @param date Formato: anno-mese-giorno
-     * @return Una lista di tutti i {@link Meet} della data specificata se esiste, altrimenti una lista vuota
+     * @return Una lista di tutti i {@link InterviewAgenda} della data specificata se esiste, altrimenti una lista vuota
      */
-    public List<Meet> getMeets(String date) {
+    public List<InterviewAgenda> getMeets(String date) {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getMeets();
 
-        List<Meet> allMeets = new Vector<>();
+        List<InterviewAgenda> allInterviewAgenda = new Vector<>();
         Document _doc = gS.getPage("genitori/eventi/dettagli/" + date + "/C");
         Elements meetGroupsHTML = _doc.getElementsByClass("modal-body");
         try {
@@ -143,7 +143,7 @@ public class AgendaPage implements IPage {
                 String creator = meetGroupHTML.child(0).getElementsByClass("gs-text-normal gs-big").text();
                 String details = meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(2).text();
                 String period=meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(1).text();
-                allMeets.add(new Meet(
+                allInterviewAgenda.add(new InterviewAgenda(
                         date.split("-")[2],
                         date.split("-")[1],
                         date.split("-")[0],
@@ -155,7 +155,7 @@ public class AgendaPage implements IPage {
                 ));
             }
 
-            return allMeets;
+            return allInterviewAgenda;
         } catch (IndexOutOfBoundsException e) {        //Non ci sono colloqui in questo giorno
             return new Vector<>();
         }
@@ -251,11 +251,11 @@ public class AgendaPage implements IPage {
         return allAgendaObjects;
     }
 
-    private Meet getMeetFromHTML(Element meetHTML) {
+    private InterviewAgenda getMeetFromHTML(Element meetHTML) {
         String url = meetHTML.attributes().get("data-href");
         String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
         String dateFromhref = hrefSplit[3];
-        return new Meet(
+        return new InterviewAgenda(
                 dateFromhref.split("-")[2],
                 dateFromhref.split("-")[1],
                 dateFromhref.split("-")[0],

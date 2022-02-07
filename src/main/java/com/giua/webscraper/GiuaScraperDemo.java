@@ -27,6 +27,12 @@ import java.util.*;
 //FIXME
 public class GiuaScraperDemo {
 
+    public static List<Meet> getMeets(){
+        List<Meet> list=new Vector<>();
+        //list.add(new Meet("", "", "", "", "", "", "", true));
+        return list;
+    }
+
     public static Authorization getAutorizations() {
         return new Authorization("08:40", "12:20");
     }

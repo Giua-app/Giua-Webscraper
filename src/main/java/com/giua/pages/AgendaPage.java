@@ -23,6 +23,7 @@ import com.giua.objects.Activity;
 import com.giua.objects.AgendaObject;
 import com.giua.objects.Homework;
 import com.giua.objects.Test;
+import com.giua.objects.Meet;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
@@ -63,7 +64,7 @@ public class AgendaPage implements IPage {
             return GiuaScraperDemo.getTest(date);
 
         List<Test> allTests = new Vector<>();
-        Document _doc = gS.getPage("genitori/eventi/dettagli/" + date + "/V");
+        Document _doc = gS.getPage("genitori/eventi/dettagli/" + date+"/V");
         Elements testGroupsHTML = _doc.getElementsByClass("alert alert-info gs-mt-0 gs-mb-2 gs-pt-2 gs-pb-2 gs-pr-2 gs-pl-2");
         try {
             for (Element testGroupHTML : testGroupsHTML) {
@@ -125,6 +126,42 @@ public class AgendaPage implements IPage {
     }
 
     /**
+     * Restituisce una lista di tutti i {@link Meet} di una determinata data con anche i loro dettagli
+     *
+     * @param date Formato: anno-mese-giorno
+     * @return Una lista di tutti i {@link Meet} della data specificata se esiste, altrimenti una lista vuota
+     */
+    public List<Meet> getMeets(String date) {
+        if (gS.isDemoMode())
+            return GiuaScraperDemo.getMeets();
+
+        List<Meet> allMeets = new Vector<>();
+        Document _doc = gS.getPage("genitori/eventi/dettagli/" + date + "/C");
+        Elements meetGroupsHTML = _doc.getElementsByClass("modal-body");
+        try {
+            for (Element meetGroupHTML : meetGroupsHTML) {
+                String creator = meetGroupHTML.child(0).getElementsByClass("gs-text-normal gs-big").text();
+                String details = meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(2).text();
+                String period=meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(1).text();
+                allMeets.add(new Meet(
+                        date.split("-")[2],
+                        date.split("-")[1],
+                        date.split("-")[0],
+                        date,
+                        period,
+                        creator,
+                        details,
+                        true
+                ));
+            }
+
+            return allMeets;
+        } catch (IndexOutOfBoundsException e) {        //Non ci sono colloqui in questo giorno
+            return new Vector<>();
+        }
+    }
+
+    /**
      * Restituisce una lista di tutti gli {@link Homework} di una determinata data con anche i loro dettagli
      *
      * @param date Formato: anno-mese-giorno
@@ -181,7 +218,7 @@ public class AgendaPage implements IPage {
             doc = gS.getPage("genitori/eventi/" + date);
         }
 
-        //Include le attività e le verifiche
+        //Include le attività, le verifiche e i colloqui
         Elements agendaObjectsHTML = doc.getElementsByClass("btn btn-xs btn-primary gs-button-remote");
         //Aggiungo i compiti
         agendaObjectsHTML.addAll(doc.getElementsByClass("btn btn-xs btn-default gs-button-remote"));
@@ -196,6 +233,8 @@ public class AgendaPage implements IPage {
                 agendaObject = getTestFromHTML(agendaObjectHTML);
             else if (objectType.equals("Compiti"))
                 agendaObject = getHomeworkFromHTML(agendaObjectHTML);
+            else if (objectType.equals("Colloqui"))
+                agendaObject = getMeetFromHTML(agendaObjectHTML);
             else {
                 String[] hrefSplit = agendaObjectHTML.attributes().get("data-href").split("/");
                 String dateFromhref = hrefSplit[4];
@@ -210,6 +249,22 @@ public class AgendaPage implements IPage {
 
         }
         return allAgendaObjects;
+    }
+
+    private Meet getMeetFromHTML(Element meetHTML) {
+        String url = meetHTML.attributes().get("data-href");
+        String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
+        String dateFromhref = hrefSplit[3];
+        return new Meet(
+                dateFromhref.split("-")[2],
+                dateFromhref.split("-")[1],
+                dateFromhref.split("-")[0],
+                dateFromhref,
+                "",
+                "",
+                "",
+                true
+        );
     }
 
     private Activity getActivityFromHTML(Element activityHTML) {

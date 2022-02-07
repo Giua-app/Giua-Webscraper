@@ -77,7 +77,8 @@ class TestClasses {
         GiuaScraper.setDebugMode(logEnabled);
         startLogin();
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-        testVotes(true);
+
+        testTest(true);
     }
 
     private static void logln(String msg) {
@@ -132,45 +133,67 @@ class TestClasses {
     }
 
     private static void testAlerts(boolean forceRefresh) {
-        /**logln("Get avvisi");
-        List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
+        logln("Get avvisi");
+        List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(0);
         for (Alert a : allAvvisi) {
             logln(a.toString());
         }
-        logln("Marking first alert as read");
+         logln("Marking first alert as read");
          gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
          logln("Get first alert with filter");
          logln(gS.getAlertsPage(false).getAllAlertsWithFilters(false, "g").get(0).toString());
          logln("Get details of first alert");
          allAvvisi.get(0).getDetailsToString(gS);
          logln(allAvvisi.get(0).toString());
-         */
+
+        /*
         logln("Test notifiche \r\n");
         AlertsPage aP = new AlertsPage(gS);
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
         List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size());
         List<Alert> o = aP.getAlertsToNotify(oldAlerts);
+         */
     }
 
     private static void testAgendaPage(boolean forceRefresh) {
-        logln("Get homeworks");
-        List<AgendaObject> allAgendaObject = gS.getAgendaPage(forceRefresh).getAllAgendaObjectsWithoutDetails(null);
-        for (AgendaObject a : allAgendaObject) {
+        logln("Get Agenda Page");
+        List<AgendaObject> allAgendaObjects = gS.getAgendaPage(forceRefresh).getAllAgendaObjectsWithoutDetails("2022-01");
+        for (AgendaObject a : allAgendaObjects)
             logln(a.toString());
-            logln(a.getRepresentingClass().toString());
-        }
-        //logln(gS.getHomework("2021-03-07").toString());
     }
 
-    /*private static void testTests(boolean forceRefresh) {
+    private static void testMeet(boolean forceRefresh){
+        logln("Get meets");
+        List<Meet> allMeets = gS.getAgendaPage(forceRefresh).getMeets("2022-02-08");
+        for (Meet a : allMeets)
+            logln(a.toString());
+    }
+
+    private static void testTest(boolean forceRefresh) {
         logln("Get tests");
-        List<Test> allTests = gS.getPinBoardPage(forceRefresh).getAllTestsWithoutDetails(null);
+        List<Test> allTests = gS.getAgendaPage(forceRefresh).getTests("2022-01-27");
         for (Test a : allTests) {
             logln(a.toString());
         }
         //logln(gS.getTest("2021-03-07").toString());
-    }*/
+    }
+
+    private static void testHomework(boolean forceRefresh) {
+        logln("Get homeworks");
+        List<Homework> allHomeworks = gS.getAgendaPage(forceRefresh).getHomeworks("2022-01-07");
+        for (Homework a : allHomeworks) {
+            logln(a.toString());
+            logln(a.getRepresentingClass().toString());
+        }
+    }
+
+    private static void testActivity(boolean forceRefresh){
+        logln("Get meets");
+        List<Activity> allActivities = gS.getAgendaPage(forceRefresh).getActivities("2022-02-07");
+        for (Activity a : allActivities)
+            logln(a.toString());
+    }
 
     private static void testNewsletters(boolean forceRefresh) {
         logln("Get newsletters");
@@ -192,7 +215,7 @@ class TestClasses {
 
     public static void testLessons(boolean forceRefresh) {
         logln("Get lessons");
-        List<Lesson> lessons = gS.getLessonsPage(forceRefresh).getAllLessonsFromDate("2021-01-12");
+        List<Lesson> lessons = gS.getLessonsPage(forceRefresh).getAllLessonsFromDate("2022-02-05");
         for (Lesson a : lessons) {
             logln(a.toString());
         }
@@ -202,7 +225,7 @@ class TestClasses {
 
     public static void testArgumentsActivities(boolean forceRefresh) {
         logln("Get arguments and activities");
-        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Informatica");
+        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Italiano");
         for (Lesson a : lessons) {
             logln(a.toString());
         }

@@ -283,10 +283,11 @@ public class JsonParser {
             String subject = lesson.findPath("subject").asText();
             String arguments = lesson.findPath("arguments").asText();
             String activities = lesson.findPath("activities").asText();
+            String support = lesson.findPath("support").asText();
             boolean exist = lesson.findPath("exist").asBoolean();
             boolean isError = lesson.findPath("isError").asBoolean();
 
-            returnLessons.add(new Lesson(date, time, subject, arguments, activities, exist, isError));
+            returnLessons.add(new Lesson(date, time, subject, arguments, activities,support, exist, isError));
 
             i++;
         }

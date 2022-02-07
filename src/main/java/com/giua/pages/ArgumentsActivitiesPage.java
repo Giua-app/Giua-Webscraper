@@ -79,31 +79,31 @@ public class ArgumentsActivitiesPage implements IPage{
                 for (Element lessonHTML : lessonsHTML) {
                     String rawHref = GiuaScraperUtils.convertGlobalPathToLocal(lessonHTML.child(0).child(0).attr("href"));
                     Date date;
-                    if (!rawHref.equals("")) {   //Lezione normale
-                        date = Lesson.dateFormat.parse(rawHref.substring(18, 28));
-                        returnLesson.add(new Lesson(
-                                date,
-                                "",
-                                subjectName,
-                                lessonHTML.child(1).text(),
-                                lessonHTML.child(2).text(),
-                                true
-                        ));
+                    String support;
+                    try {
+                        support=lessonHTML.child(2).text();
+                    }catch (IndexOutOfBoundsException | NullPointerException e){
+                        support="";
+                    }
+                    if(!rawHref.equals("")) {   //Lezione normale
+                        date = Lesson.dateFormat.parse(rawHref.substring(17, 27));
+
                     } else {    //Lezione presente nello stesso giorno della precedente
                         date = returnLesson.get(returnLesson.size() - 1).date;
-                        returnLesson.add(new Lesson(
-                                date,
-                                "",
-                                subjectName,
-                                lessonHTML.child(0).text(),
-                                lessonHTML.child(1).text(),
-                                true
-                        ));
                     }
+                    returnLesson.add(new Lesson(
+                            date,
+                            "",
+                            subjectName,
+                            lessonHTML.child(0).text(),
+                            lessonHTML.child(1).text(),
+                            support,
+                            true
+                    ));
                 }
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
-            returnLesson.add(new Lesson(new Date(), "", subjectName, "", "", false));
+            returnLesson.add(new Lesson(new Date(), "", subjectName, "", "","", false));
         } catch (ParseException e) {
             throw new IllegalArgumentException("Impossibile fare parsing della stringa per una data", e);
         }

@@ -86,22 +86,29 @@ public class LessonsPage implements IPage{
             Elements allLessonsHTML = doc.getElementsByTag("tbody").get(0).children();
 
             for (Element lessonHTML : allLessonsHTML) {
+                String support;
+                try {
+                    support=lessonHTML.child(2).text();
+                }catch (IndexOutOfBoundsException | NullPointerException e){
+                    support="";
+                }
                 returnLesson.add(new Lesson(
                         pDate,
                         lessonHTML.child(0).text(),
                         lessonHTML.child(1).text(),
                         lessonHTML.child(2).text(),
                         lessonHTML.child(3).text(),
+                        support,
                         true
                 ));
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             if(!doc.getElementsByClass("alert alert-warning").isEmpty())
                 returnLesson.add(new Lesson(pDate, "", "",
-                        doc.getElementsByClass("alert alert-warning").first().text(), "", false, true));
+                        doc.getElementsByClass("alert alert-warning").first().text(), "","", false, true));
 
             else
-                returnLesson.add(new Lesson(pDate, "", "", "", "", false));
+                returnLesson.add(new Lesson(pDate, "", "", "", "","", false));
         }
 
         return returnLesson;

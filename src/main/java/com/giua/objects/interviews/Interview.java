@@ -23,17 +23,17 @@ public class Interview {
 
     public final String teacher;
     public final String subject;
-    public final String meet;
+    public final String interview;
     public final String bookingLink;
 
-    public Interview(String teacher, String subject, String meet, String bookingLink) {
+    public Interview(String teacher, String subject, String interview, String bookingLink) {
         this.teacher = teacher;
         this.subject = subject;
-        this.meet = meet;
+        this.interview = interview;
         this.bookingLink = bookingLink;
     }
 
     public String toString() {
-        return "Docente: " + teacher + " ; Materia: " + subject + " ; Ricevimento: " + meet + " ; Link prenotazione: " + bookingLink;
+        return "Docente: " + teacher + " ; Materia: " + subject + " ; Ricevimento: " + interview + " ; Link prenotazione: " + bookingLink;
     }
 }

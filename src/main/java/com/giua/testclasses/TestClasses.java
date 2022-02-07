@@ -161,9 +161,9 @@ class TestClasses {
             logln(a.toString());
     }
 
-    private static void testMeet(boolean forceRefresh){
-        logln("Get meets");
-        List<InterviewAgenda> allInterviewAgenda = gS.getAgendaPage(forceRefresh).getMeets("2022-02-08");
+    private static void testInterviewsAgenda(boolean forceRefresh) {
+        logln("Get interviews");
+        List<InterviewAgenda> allInterviewAgenda = gS.getAgendaPage(forceRefresh).getInterviews("2022-02-08");
         for (InterviewAgenda a : allInterviewAgenda)
             logln(a.toString());
     }
@@ -187,7 +187,7 @@ class TestClasses {
     }
 
     private static void testActivity(boolean forceRefresh){
-        logln("Get meets");
+        logln("Get interviews");
         List<Activity> allActivities = gS.getAgendaPage(forceRefresh).getActivities("2022-02-07");
         for (Activity a : allActivities)
             logln(a.toString());

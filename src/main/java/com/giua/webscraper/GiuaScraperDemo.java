@@ -27,9 +27,9 @@ import java.util.*;
 //FIXME
 public class GiuaScraperDemo {
 
-    public static List<InterviewAgenda> getMeets(){
-        List<InterviewAgenda> list=new Vector<>();
-        //list.add(new Meet("", "", "", "", "", "", "", true));
+    public static List<InterviewAgenda> getInterviews() {
+        List<InterviewAgenda> list = new Vector<>();
+        //list.add(new interview("", "", "", "", "", "", "", true));
         return list;
     }
 

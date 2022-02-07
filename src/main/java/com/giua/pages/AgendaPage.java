@@ -19,11 +19,7 @@
 
 package com.giua.pages;
 
-import com.giua.objects.Activity;
-import com.giua.objects.AgendaObject;
-import com.giua.objects.Homework;
-import com.giua.objects.Test;
-import com.giua.objects.InterviewAgenda;
+import com.giua.objects.*;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
@@ -131,18 +127,18 @@ public class AgendaPage implements IPage {
      * @param date Formato: anno-mese-giorno
      * @return Una lista di tutti i {@link InterviewAgenda} della data specificata se esiste, altrimenti una lista vuota
      */
-    public List<InterviewAgenda> getMeets(String date) {
+    public List<InterviewAgenda> getInterviews(String date) {
         if (gS.isDemoMode())
-            return GiuaScraperDemo.getMeets();
+            return GiuaScraperDemo.getInterviews();
 
         List<InterviewAgenda> allInterviewAgenda = new Vector<>();
         Document _doc = gS.getPage("genitori/eventi/dettagli/" + date + "/C");
-        Elements meetGroupsHTML = _doc.getElementsByClass("modal-body");
+        Elements interviewGroupsHTML = _doc.getElementsByClass("modal-body");
         try {
-            for (Element meetGroupHTML : meetGroupsHTML) {
-                String creator = meetGroupHTML.child(0).getElementsByClass("gs-text-normal gs-big").text();
-                String details = meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(2).text();
-                String period=meetGroupHTML.child(0).getElementsByClass("gs-text-normal").get(1).text();
+            for (Element interviewGroupHTML : interviewGroupsHTML) {
+                String creator = interviewGroupHTML.child(0).getElementsByClass("gs-text-normal gs-big").text();
+                String details = interviewGroupHTML.child(0).getElementsByClass("gs-text-normal").get(2).text();
+                String period = interviewGroupHTML.child(0).getElementsByClass("gs-text-normal").get(1).text();
                 allInterviewAgenda.add(new InterviewAgenda(
                         date.split("-")[2],
                         date.split("-")[1],
@@ -234,7 +230,7 @@ public class AgendaPage implements IPage {
             else if (objectType.equals("Compiti"))
                 agendaObject = getHomeworkFromHTML(agendaObjectHTML);
             else if (objectType.equals("Colloqui"))
-                agendaObject = getMeetFromHTML(agendaObjectHTML);
+                agendaObject = getinterviewFromHTML(agendaObjectHTML);
             else {
                 String[] hrefSplit = agendaObjectHTML.attributes().get("data-href").split("/");
                 String dateFromhref = hrefSplit[4];
@@ -251,8 +247,8 @@ public class AgendaPage implements IPage {
         return allAgendaObjects;
     }
 
-    private InterviewAgenda getMeetFromHTML(Element meetHTML) {
-        String url = meetHTML.attributes().get("data-href");
+    private InterviewAgenda getinterviewFromHTML(Element interviewHTML) {
+        String url = interviewHTML.attributes().get("data-href");
         String[] hrefSplit = GiuaScraperUtils.convertGlobalPathToLocal(url).split("/");
         String dateFromhref = hrefSplit[3];
         return new InterviewAgenda(

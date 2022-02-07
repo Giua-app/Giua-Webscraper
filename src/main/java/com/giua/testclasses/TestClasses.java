@@ -76,8 +76,8 @@ class TestClasses {
 
         GiuaScraper.setDebugMode(logEnabled);
         startLogin();
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-        testVotes(true);
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testVotes(true);
     }
 
     private static void logln(String msg) {
@@ -202,7 +202,7 @@ class TestClasses {
 
     public static void testArgumentsActivities(boolean forceRefresh) {
         logln("Get arguments and activities");
-        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Informatica");
+        List<Lesson> lessons = gS.getArgumentsActivitiesPage(forceRefresh).getAllLessonsOfSubject("Italiano");
         for (Lesson a : lessons) {
             logln(a.toString());
         }

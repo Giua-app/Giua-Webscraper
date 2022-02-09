@@ -535,6 +535,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
     //region Funzioni fondamentali
 
+	public boolean isGoogleLoginAvailable(){
+		Document doc=getPageNoCookie("");
+		return !doc.getElementsByAttributeValue("href", "/login/gsuite").isEmpty();
+	}
+
+
     private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
         session = Jsoup.newSession();
@@ -948,8 +954,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.url(GiuaScraper.SiteURL + "/login/form/")
 					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 					.post();
+			Elements err;
+			if(isGoogleLoginAvailable())		//prendi errore dal sito
+				err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big");
+			else
+				err = doc.getElementsByClass("alert alert-danger");
 
-			Elements err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big"); //prendi errore dal sito
 			if (!err.isEmpty()) {
 				throw new SessionCookieEmpty("Session cookie empty, login unsuccessful. Site says: " + err.text(), err.text());
 			} else {

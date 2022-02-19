@@ -673,7 +673,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non si può richiedere la pagina indicata
 	 * @throws SiteConnectionProblems       Il sito ha dei problemi di connessione
 	 */
-	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems {
+	public Document getPage(String page) throws MaintenanceIsActiveException, SiteConnectionProblems, YourConnectionProblems {
 		page = GiuaScraperUtils.convertGlobalPathToLocal(page);
 		if (demoMode)
 			return GiuaScraperDemo.getPage(page);
@@ -727,10 +727,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 		//Qui ci si arriva solo in rari casi di connessioni molto lente
 		lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
-		if (!isSiteWorking()) {
-			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
-		}
-		return new Document(GiuaScraper.SiteURL + "/" + page);
+		throw new YourConnectionProblems("Can't get page because the connection is too slow");
 	}
 
 	/**
@@ -785,10 +782,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		}
 		//Qui ci si arriva solo in rari casi di connessioni molto lente
 		lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
-		if (!isSiteWorking()) {
-			throw new SiteConnectionProblems("Can't get page because the website is down, retry later");
-		}
-		return new Document(GiuaScraper.SiteURL + "/" + page);
+		throw new YourConnectionProblems("Can't get page because the connection is too slow");
 	}
 
 	/**
@@ -818,7 +812,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			}
 			e.printStackTrace();
 		}
-		return new Document(GiuaScraper.SiteURL + "/" + page);    //Non si dovrebbe mai verificare
+
+		lm.w("getPage: Nessuna pagina o errore ottenuto, qualcosa non va! Connessione lenta forse?");
+		throw new YourConnectionProblems("Can't get page because the connection is too slow");
 	}
 
 	/**
@@ -844,13 +840,16 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new YourConnectionProblems("Your internet may not work properly", e);
 			}
 		}
+
 		return new Document(url);    //Non si dovrebbe mai verificare
 	}
 
 	/**
 	 * Controlla se si è loggati dentro il registro
-     * @return true se e' loggato altrimenti false
+	 * @return true se e' loggato altrimenti false
+	 * @deprecated usa {@code #isSessionValid} invece
      */
+	@Deprecated
     public Boolean checkLogin() {
         if (demoMode)
             return GiuaScraperDemo.checkLogin();
@@ -870,37 +869,44 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				throw new SiteConnectionProblems("Can't check login because the site is down, retry later", e);
 			}
 			e.printStackTrace();
-            return false;
-        }
-    }
+			return false;
+		}
+	}
 
-    public boolean isSessionValid(String phpsessid) {
-        if (demoMode)
-            return GiuaScraperDemo.isSessionValid();
-        try {
-            Document doc = Jsoup.connect(GiuaScraper.SiteURL)
-                    .cookie("PHPSESSID", phpsessid)
-                    .get();
+	/**
+	 * Serve a controllare se la sessione è valida.
+	 * Prende la pagina home e cerca il tipo dell' account se cè siamo loggati altrimenti no
+	 *
+	 * @param phpsessid il cookie da controllare
+	 * @return true se la sessione è valida e quindi siamo loggati, false altrimenti
+	 */
+	public boolean isSessionValid(String phpsessid) {
+		if (demoMode)
+			return GiuaScraperDemo.isSessionValid();
+		try {
+			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
+					.cookie("PHPSESSID", phpsessid)
+					.get();
 
-            //lm.d("isSessionValid: Cerco di ottenere il tipo di account");
+			//lm.d("isSessionValid: Cerco di ottenere il tipo di account");
 
-            if (realUsername != null && realUsername.equals(""))
-                loadUserFromDocument(doc);
-            // --- Ottieni tipo account
-            final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
-            userType = elm.text().split(".+\\(|\\)")[1];
+			if (realUsername != null && realUsername.equals(""))
+				loadUserFromDocument(doc);
+			// --- Ottieni tipo account
+			final Elements elm = doc.getElementsByClass("col-sm-5 col-xs-8 text-right");
+			userType = elm.text().split(".+\\(|\\)")[1];
 
-        } catch (Exception e) {
-            if (!isSiteWorking()) {
-                throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
-            }
+		} catch (Exception e) {
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't connect to website while checking the cookie. Please retry later", e);
+			}
 
-            //Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
-            // e quindi, la sessione non è valida
-            lm.w("isSessionValid: Sessione non valida. Causa: " + e.getMessage());
-            return false;
-        }
-        // Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
+			//Se c'è stato un errore di qualunque tipo, allora non siamo riusciti ad ottenere il tipo
+			// e quindi, la sessione non è valida
+			lm.w("isSessionValid: Sessione non valida. Causa: " + e.getMessage());
+			return false;
+		}
+		// Al contrario, se non ci sono errori (quindi siamo dentro la home) allora la sessione è valida
 		//lm.d("isSessionValid: Sessione valida. Tipo account ottenuto: " + userType);
 		return true;
 	}

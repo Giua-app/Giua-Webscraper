@@ -828,10 +828,8 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 *
 	 * @param url l' url da cui prendere la pagina
 	 * @return Una pagina HTML come {@link Document}
-     */
-    public Document getExtPage(String url) {
-        if (demoMode)
-            return GiuaScraperDemo.getExtPage(url);
+	 */
+	public static Document getExtPage(String url) {
 		try {
 
 			Document doc = Jsoup.connect(url)

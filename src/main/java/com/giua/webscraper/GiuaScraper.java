@@ -533,19 +533,25 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 
 
-    //region Funzioni fondamentali
+	//region Funzioni fondamentali
 
-	public boolean isGoogleLoginAvailable(){
-		Document doc=getPageNoCookie("");
+	public static boolean isGoogleLoginAvailable() {
+		Document doc = null;
+		try {
+			doc = Jsoup.connect(GiuaScraper.SiteURL + "/").get();
+		} catch (IOException e) {
+			if (isSiteWorking())
+				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
+		}
 		return !doc.getElementsByAttributeValue("href", "/login/gsuite").isEmpty();
 	}
 
 
-    private void initiateSession() {
+	private void initiateSession() {
 		session = null; //Per sicurezza azzeriamo la variabile
-        session = Jsoup.newSession();
-        lm.d("Nuova sessione creata");
-    }
+		session = Jsoup.newSession();
+		lm.d("Nuova sessione creata");
+	}
 
     private void initiateSession(String cookie) {
         session = null; //Per sicurezza azzeriamo la variabile
@@ -846,9 +852,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	/**
 	 * Controlla se si è loggati dentro il registro
+	 *
 	 * @return true se e' loggato altrimenti false
-	 * @deprecated usa {@code #isSessionValid} invece
-     */
+	 * @deprecated usa {@link #isSessionValid} invece
+	 */
 	@Deprecated
     public Boolean checkLogin() {
         if (demoMode)

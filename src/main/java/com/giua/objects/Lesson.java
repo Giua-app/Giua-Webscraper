@@ -29,34 +29,34 @@ public class Lesson {
     public final String subject;
     public final String arguments;
     public final String activities;
-    public final boolean exist;
+    public final boolean _exists;
     public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
     public final boolean isError;
     public final String support;
 
-    public Lesson(Date date, String time, String subject, String arguments, String activities,String support, boolean exist) {
+    public Lesson(Date date, String time, String subject, String arguments, String activities,String support, boolean exists) {
         this.date = date;
         this.time = time;
         this.subject = subject;
         this.arguments = arguments;
         this.activities = activities;
-        this.exist = exist;
+        this._exists = exists;
         isError=false;
         this.support=support;
     }
 
-    public Lesson(Date date, String time, String subject, String arguments, String activities, String support, boolean exist, boolean isError) {
+    public Lesson(Date date, String time, String subject, String arguments, String activities, String support, boolean existS, boolean isError) {
         this.date = date;
         this.time = time;
         this.subject = subject;
         this.arguments = arguments;
         this.activities = activities;
-        this.exist = exist;
+        this._exists = existS;
         this.isError=isError;
         this.support=support;
     }
 
-    public Lesson(String date, String time, String subject, String arguments, String activities,String support, boolean exist) {
+    public Lesson(String date, String time, String subject, String arguments, String activities,String support, boolean existS) {
         try {
             this.date = dateFormat.parse(date);
         } catch (ParseException e) {
@@ -66,13 +66,13 @@ public class Lesson {
         this.subject = subject;
         this.arguments = arguments;
         this.activities = activities;
-        this.exist = exist;
+        this._exists = existS;
         isError=false;
         this.support=support;
     }
 
     public String toString() {
-        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.support + "; Esiste?" + this.exist + "; Errore?" + this.isError;
+        return dateFormat.format(date) + "; " + this.time + "; " + this.subject + "; " + this.arguments + "; " + this.activities + "; " + this.support + "; Esiste?" + this._exists + "; Errore?" + this.isError;
     }
 
     public String getDateToString() {

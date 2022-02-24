@@ -36,13 +36,13 @@ public class ReportCard {
      **/
     public  Map<String, List<String>> allDebts;
 
-    public final boolean exists;
+    public final boolean _exists;
     public String mean;
 
     public ReportCard(String quarterly, Map<String, List<String>> allVotes, String finalResult, String credits, Map<String, List<String>> allDebts, String mean, boolean exists) {
         this.quarterly = quarterly;
         this.allVotes = allVotes;
-        this.exists = exists;
+        this._exists = exists;
         this.finalResult = finalResult;
         this.credits = credits;
         this.allDebts=allDebts;
@@ -56,6 +56,6 @@ public class ReportCard {
                 "Crediti: "+credits+"; \r\n" +
                 "Media: "+mean+"; \r\n" +
                 "Debiti: "+allDebts+"; \r\n" +
-                "Esiste: "+exists+"; \r\n";
+                "Esiste: "+ _exists +"; \r\n";
     }
 }

@@ -23,17 +23,17 @@ public class InterviewAgenda extends AgendaObject {
     public final String period;
     public final String creator;
     public final String details;
-    public final boolean exist;
+    public final boolean _exists;
 
-    public InterviewAgenda(String day, String month, String year, String date, String period, String creator, String details, boolean exist) {
+    public InterviewAgenda(String day, String month, String year, String date, String period, String creator, String details, boolean exists) {
         super(day, month, year, date);
         this.period = period;
         this.creator = creator;
         this.details = details;
-        this.exist = exist;
+        this._exists = exists;
     }
 
     public String toString() {
-        return this.date + "; " + this.creator + "; " + this.period + "; " + this.details + "; " + this.exist;
+        return this.date + "; " + this.creator + "; " + this.period + "; " + this.details + "; " + this._exists;
     }
 }

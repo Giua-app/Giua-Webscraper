@@ -26,23 +26,23 @@ public class Maintenance{
     public Date end;
     public Boolean isActive;
     public Boolean shouldBeActive;
-    public Boolean exist;
+    public Boolean exists;
 
-    public Maintenance(Date start, Date end, Boolean isActive, Boolean shouldBeActive, Boolean exist) {
+    public Maintenance(Date start, Date end, Boolean isActive, Boolean shouldBeActive, Boolean exists) {
         this.start = start;
         this.end = end;
         this.isActive = isActive;
         this.shouldBeActive = shouldBeActive;
-        this.exist = exist;
+        this.exists = exists;
     }
 
     public String toString() {
-        if(this.exist == false){
-            return "Esiste? " + this.exist + " Inizio: " + "null" + " Fine: " + "null " +
+        if(this.exists == false){
+            return "Esiste? " + this.exists + " Inizio: " + "null" + " Fine: " + "null " +
                     " In corso? " + this.isActive + " Dovrebbe essere in corso? " + this.shouldBeActive;
         }
 
-        return "Esiste? " + this.exist + " Inizio: " + this.start.toString() + " Fine: " + this.end.toString() +
+        return "Esiste? " + this.exists + " Inizio: " + this.start.toString() + " Fine: " + this.end.toString() +
                 " In corso? " + this.isActive + " Dovrebbe essere in corso? " + this.shouldBeActive;
     }
 }

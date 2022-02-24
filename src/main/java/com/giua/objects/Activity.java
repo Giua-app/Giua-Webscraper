@@ -22,16 +22,17 @@ package com.giua.objects;
 public class Activity extends AgendaObject {
     public final String creator;
     public final String details;
-    public final boolean exists;
+    public final boolean exist;
 
     public Activity(String day, String month, String year, String date, String creator, String details, boolean exists) {
         super(day, month, year, date);
         this.creator = creator;
         this.details = details;
-        this.exists = exists;
+        this.exist = exists;
     }
 
     public String toString() {
-        return this.date + "; " + this.creator + "; " + this.details + "; " + this.exists;
+        return this.date + "; " + this.creator + "; " + this.details + "; " + this.exist;
     }
 }
+

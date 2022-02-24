@@ -23,25 +23,25 @@ public class Homework extends AgendaObject {
     public final String subject;
     public final String creator;
     public final String details;
-    public final boolean exists;
+    public final boolean exist;
 
-    public Homework(String day, String month, String year, String date, String subject, String creator, String details, boolean exists) {
+    public Homework(String day, String month, String year, String date, String subject, String creator, String details, boolean exist) {
         super(day, month, year, date);
         this.subject = subject;
         this.creator = creator;
         this.details = details;
-        this.exists = exists;
+        this.exist = exist;
     }
 
     public String toString() {
-        return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details + "; " + this.exists;
+        return this.date + "; " + this.creator + "; " + this.subject + "; " + this.details + "; " + this.exist;
     }
 
     public boolean equals(Homework homework) {
         return this.day.equals(homework.day) && this.month.equals(homework.month)
                 && this.year.equals(homework.year) && this.date.equals(homework.date)
                 && this.subject.equals(homework.subject) && this.creator.equals(homework.creator)
-                && this.details.equals(homework.details) && this.exists == homework.exists;
+                && this.details.equals(homework.details) && this.exist == homework.exist;
     }
 
 }

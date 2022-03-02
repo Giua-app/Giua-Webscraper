@@ -229,7 +229,7 @@ public class VotesPage implements IPage {
      * @return La media dei voti di quel quadrimestre. Ritorna -1f se non sono stati trovati
      * voti di quel quadrimestre
      */
-    public float getMeanOf(List<Vote> votes, int quarterly) {
+    public static float getMeanOf(List<Vote> votes, int quarterly) {
         float mean = 0f;
         int counter = 0;
 

@@ -709,6 +709,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				Document doc = response.parse();
 
+				if (page.equals(""))
+					doc = handleAccountWithMultipleStudents(doc);
+
 				if (doc.getElementsByClass("col-sm-5 col-xs-8 text-right").isEmpty()) {    //Se vero il cookie è scaduto o non siamo loggati
 					try {
 						lm.d("getPage: Il cookie è scaduto o non siamo loggati, provo a riloggarmi");
@@ -917,17 +920,64 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
+	 * @param doc pagina home del registro
+	 * @return
+	 * @throws IOException
+	 */
+	private Document handleAccountWithMultipleStudents(Document doc) throws IOException {
+		if (getUserTypeEnum() == userTypes.PARENT) {
+			lm.w("Questo account ha più studenti collegati, scelgo automaticamente l'username corrente");
+			Element accounts = doc.getElementById("login_profilo_profilo");
+			if (accounts == null) {
+				lm.e("Errore: l'account non presenta più studenti collegati anche se viene mostrato il dialogo!");
+				return doc;
+			}
+
+			Elements labels = accounts.getElementsByTag("label");
+
+			if (labels.isEmpty()) {
+				lm.e("Errore critico: nessuna label trovata nel dialogo per la scelta dell'account");
+				return doc;
+			}
+
+			String profileId = "-1";
+			String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
+
+			for (Element accountLabel : labels) {
+				if (accountLabel.text().contains(user)) {
+					profileId = accountLabel.child(0).attr("value");
+				}
+			}
+
+			if (profileId.equals("-1") || profileId.equals("")) {
+				lm.e("Errore: non sono riuscito a trovare l'id dell'account");
+				return doc;
+			}
+
+			Document doc2 = session.newRequest()
+					.url(GiuaScraper.SiteURL + "/login/profilo")
+					.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
+					.post();
+
+			lm.d("Login tramite scelta account completato con successo");
+
+			return doc2;
+		}
+		return doc;
+	}
+
+	/**
 	 * La funzione per loggarsi effettivamente. Genera un phpsessid e un csrftoken per potersi loggare.
 	 *
 	 * @throws UnableToLogin                Il login è andato male e il sito non ha detto cosa è andato storto
 	 * @throws MaintenanceIsActiveException La manutenzione è attiva e non ci si può loggare
 	 * @throws SessionCookieEmpty           Il login è andato storto e il sito ha detto cosa è andato storto
-     */
-    public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
-        lm.d("login: richiesta procedura di login");
-        if (demoMode)
-            return;
-        try {
+	 */
+	public void login() throws UnableToLogin, MaintenanceIsActiveException, SessionCookieEmpty {
+		lm.d("login: richiesta procedura di login");
+		if (demoMode)
+			return;
+		try {
 			if (isMaintenanceActive())
 				throw new MaintenanceIsActiveException("You can't login while the maintenace is active");
 
@@ -966,7 +1016,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 					.post();
 			Elements err;
-			if(isGoogleLoginAvailable())		//prendi errore dal sito
+			if (isGoogleLoginAvailable())        //prendi errore dal sito
 				err = doc.getElementsByClass("alert alert-danger gs-mt-4 gs-mb-4 gs-big");
 			else
 				err = doc.getElementsByClass("alert alert-danger");
@@ -983,12 +1033,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 			}
 		} catch (IOException e) {
-            if (!isSiteWorking()) {
-                throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
-            } else {
-                throw new UnableToLogin("Something unexpected happened", e);
-            }
-        }
+			if (!isSiteWorking()) {
+				throw new SiteConnectionProblems("Can't log in because the site is down, retry later", e);
+			} else {
+				throw new UnableToLogin("Something unexpected happened", e);
+			}
+		}
 	}
 
 	public static boolean isMyInternetWorking(){

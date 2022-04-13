@@ -80,6 +80,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	private AgendaPage agendaPageCache = null;
 	private ReportcardPage reportCardPageCache = null;
 	private VotesPage votesPageCache = null;
+	private ProfilePage profilePageCache = null;
 	private Document getPageCache = null;
 	//endregion
 
@@ -448,6 +449,17 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				return new InterviewsPage(this);
 		} else
 			return interviewsPageCache;
+	}
+
+	public ProfilePage getProfilePage(boolean forceRefresh) {
+		if (profilePageCache == null || forceRefresh) {
+			if (cacheable) {
+				profilePageCache = new ProfilePage(this);
+				return profilePageCache;
+			} else
+				return new ProfilePage(this);
+		} else
+			return profilePageCache;
 	}
 
 	//endregion

@@ -35,5 +35,6 @@ public class UrlPaths {
     public static String ALERTS_PAGE = "genitori/avvisi";
     public static String DOCUMENTS_PAGE = "documenti/bacheca";
     public static String PINBOARD_PAGE = "genitori/eventi";
+    public static String PROFILE_PAGE = "utenti/profilo";
 
 }

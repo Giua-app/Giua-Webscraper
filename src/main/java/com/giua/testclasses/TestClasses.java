@@ -79,6 +79,7 @@ class TestClasses {
         //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
 
         testTest(true);
+        testProfileInfo(true);
     }
 
     private static void logln(String msg) {
@@ -240,6 +241,11 @@ class TestClasses {
         logln("Get authorization");
         Authorization authorization = gS.getAuthorizationsPage(forceRefresh).getAuthorizations();
         logln(authorization.toString());
+    }
+
+    public static void testProfileInfo(boolean forceRefresh) {
+        logln("Get profile info");
+        logln(Arrays.toString(gS.getProfilePage(forceRefresh).getProfileInformation()));
     }
 
     public static void testNotes(boolean forceRefresh) {

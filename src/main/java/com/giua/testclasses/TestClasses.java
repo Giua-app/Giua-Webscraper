@@ -80,6 +80,7 @@ class TestClasses {
 
         testTest(true);
         testProfileInfo(true);
+        logln(gS.getAllUsernamesFromAccountDialog().toString());
     }
 
     private static void logln(String msg) {

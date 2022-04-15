@@ -34,7 +34,9 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.Vector;
 
 /* -- Giua Webscraper BETA -- */
 // Tested with version 1.4.0 of giua@school
@@ -698,6 +700,12 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		try {
 			if (page.startsWith("/"))
 				page = page.substring(1);
+			/*boolean shouldHandleAccounts = true;
+
+			if (page.equals("GIUASCRAPER_INTERNAL_REQUEST_HOME_WITHOUT_HANDLE_ACCOUNTS")) {
+				page = "";
+				shouldHandleAccounts = false;
+			}*/
 
 
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
@@ -721,7 +729,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 				Document doc = response.parse();
 
-				if (page.equals(""))
+				if (page.equals("")) //if (page.equals("") && shouldHandleAccounts)
 					doc = handleAccountWithMultipleStudents(doc);
 
 				if (doc.getElementsByClass("col-sm-5 col-xs-8 text-right").isEmpty()) {    //Se vero il cookie è scaduto o non siamo loggati
@@ -731,7 +739,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 						lm.d("getPage: Re-Login eseguito correttamente");
 						return getPageWithNoReLogin(page);    //Uso getPageWithNoReLogin per evitare una ricorsione infinita
 					} catch (Exception e) {
-						lm.e("Impossibile eseguire login da getPage");
+						lm.e("Impossibile eseguire login da getPage: " + e.getMessage());
 						throw new NotLoggedIn("Hai richiesto una pagina del registro senza essere loggato!");    //Qualsiasi errore accada vuol dire che non siamo riusciti a riloggarci
 					}
 				}
@@ -839,7 +847,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * Ottiene la pagina HTML specificata da un URL esterna al sito del Giua
+	 * Ottiene la pagina HTML specificata da un URL esterna al sito
 	 *
 	 * @param url l' url da cui prendere la pagina
 	 * @return Una pagina HTML come {@link Document}
@@ -976,6 +984,45 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			return doc2;
 		}
 		return doc;
+	}
+
+	public List<String> getAllUsernamesFromAccountDialog() throws IOException {
+		if (getUserTypeEnum() == userTypes.PARENT) {
+			lm.w("Questo account ha più studenti collegati, ottengo tutti gli account collegati");
+			List<String> allUsernames = new Vector<>();
+
+			//Document doc = getPage("GIUASCRAPER_INTERNAL_REQUEST_HOME_WITHOUT_HANDLE_ACCOUNTS");
+			Document doc = session.newRequest() //in teoria se è scaduta la sessione questo darà errore
+					.url(GiuaScraper.SiteURL)
+					.get();
+
+			Element accounts = doc.getElementById("login_profilo_profilo");
+
+			if (accounts == null) {
+				lm.e("Errore: l'account non presenta più studenti collegati!");
+				return new Vector<>();
+			}
+
+			Elements labels = accounts.getElementsByTag("label");
+
+			if (labels.isEmpty()) {
+				lm.e("Errore: nessuna label trovata nel dialogo per la scelta dell'account");
+				return new Vector<>();
+			}
+
+			//String profileId;
+			//String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
+
+			for (Element accountLabel : labels) {
+				String username = accountLabel.text().split("\\(")[1].replace(")", "");
+				//profileId = accountLabel.child(0).attr("value");
+
+				allUsernames.add(username);
+			}
+
+			return allUsernames;
+		}
+		return null;
 	}
 
 	/**

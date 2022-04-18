@@ -1102,7 +1102,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static boolean isMyInternetWorking(){
 		try {
-			Jsoup.connect("https://www.google.it").method(Method.GET).execute();
+			Jsoup.connect("https://www.google.it").method(Method.POST).execute();
 			return true;
 		} catch (IOException io){
 			return false;

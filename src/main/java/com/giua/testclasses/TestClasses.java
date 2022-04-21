@@ -33,6 +33,7 @@ class TestClasses {
     private static GiuaScraper gS;
     private static String user = "";
     private static String password = "";
+    private static boolean demoMode;
     public static boolean logEnabled = true;
     public static boolean speedTest = false;
     public static int speedTestAmount = 5;
@@ -75,12 +76,9 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
+        demoMode=true;
         startLogin();
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-
-        testTest(true);
-        testProfileInfo(true);
-        logln(gS.getAllUsernamesFromAccountDialog().toString());
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
     }
 
     private static void logln(String msg) {
@@ -149,11 +147,15 @@ class TestClasses {
          logln(allAvvisi.get(0).toString());
          */
         logln("Test notifiche \r\n");
-        AlertsPage aP = new AlertsPage(gS);
+        AlertsPage aP = gS.getAlertsPage(forceRefresh);
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
-        List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size());
-        List<Alert> o = aP.getAlertsToNotify(oldAlerts);
+        if(!gS.isDemoMode()){
+            List<Alert> oldAlerts = newAlerts.subList(3, newAlerts.size());
+            List<Alert> o = aP.getAlertsToNotify(oldAlerts);
+        }
+        for(int i=0; i< newAlerts.size(); i++)
+            logln(newAlerts.get(i).toString());
     }
 
     private static void testAgendaPage(boolean forceRefresh) {
@@ -295,7 +297,7 @@ class TestClasses {
     }
 
     private static void startLogin(com.giua.utils.LoggerManager lm) {
-        gS = new GiuaScraper(user, password, true, lm);
+        gS = new GiuaScraper(user, password, demoMode,true, lm);
         gS.login();
 
         //Document doc = gS.getPage("");
@@ -637,29 +639,29 @@ class TestClasses {
 
         System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
 
-        System.out.println("--------NEWS--------");
+        System.out.println("--------NEWS--------");     //Fatto
         testNews(true);
 
-        System.out.println("--------VOTI--------");
+        System.out.println("--------VOTI--------");     //Fatto
         testVotes(true);
 
-        System.out.println("--------AVVISI---------");
+        System.out.println("--------AVVISI---------");     //Fatto
         testAlerts(true);
 
-        System.out.println("--------AGENDA--------");
+        System.out.println("--------AGENDA--------");     //are you sure about that?
         testAgendaPage(true);
 
-        System.out.println("--------CIRCOLARI--------");
+        System.out.println("--------CIRCOLARI--------");     //Fatto
         testNewsletters(true);
 
-        System.out.println("--------LEZIONI--------");
+        System.out.println("--------LEZIONI--------");     //Fatto
         testLessons(true);
 
-        System.out.println("--------PAGELLA--------");
+        System.out.println("--------PAGELLA--------");     //Fatto
         System.out.println("Non disponibile");
-        //testReportCard(true);
+        testReportCard(true);
 
-        System.out.println("--------NOTE--------");
+        System.out.println("--------NOTE--------");     //Fatto
         testNotes(true);
 
         System.out.println("--------ASSENZE--------");

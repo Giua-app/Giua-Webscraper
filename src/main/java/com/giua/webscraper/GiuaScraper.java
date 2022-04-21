@@ -24,6 +24,7 @@ import com.giua.objects.Maintenance;
 import com.giua.pages.*;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.LoggerManager;
+
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;

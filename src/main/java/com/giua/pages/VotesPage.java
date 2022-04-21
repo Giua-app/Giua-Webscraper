@@ -22,6 +22,7 @@ package com.giua.pages;
 import com.giua.objects.Vote;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -50,6 +51,8 @@ public class VotesPage implements IPage {
      * il primo è l' ultimo pubblicato
      */
     public Map<String, List<Vote>> getAllVotes() {
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getAllVotes();
         Map<String, List<Vote>> returnVotes = new HashMap<>();
         Elements alltbody = doc.getElementsByTag("tbody");
 
@@ -119,6 +122,8 @@ public class VotesPage implements IPage {
      * Per esempio per ottenere la {@code List} dei voti del secondo quadrimestre (se esiste): lista.get(1)
      */
     public List<List<Vote>> getAllVotes(String filterSubject) {
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getAllVotes(filterSubject);
         Elements els = doc.getElementsByClass("dropdown-menu").get(3).children();
         Document votesDoc = null;
 

@@ -46,7 +46,8 @@ public class NewslettersPage implements IPage{
     @Override
     public void refreshPage() {
         doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE);
-        resetFiltersAndRefreshPage();
+        if(!gS.isDemoMode())
+            resetFiltersAndRefreshPage();
     }
 
     public void resetFiltersAndRefreshPage() {

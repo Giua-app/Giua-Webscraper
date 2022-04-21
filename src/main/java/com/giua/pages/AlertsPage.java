@@ -48,7 +48,8 @@ public class AlertsPage implements IPage {
     @Override
     public void refreshPage() {
         doc = gS.getPage(UrlPaths.ALERTS_PAGE);
-        resetFiltersAndRefreshPage();
+        if(!gS.isDemoMode())
+            resetFiltersAndRefreshPage();
     }
 
     public void resetFiltersAndRefreshPage() {

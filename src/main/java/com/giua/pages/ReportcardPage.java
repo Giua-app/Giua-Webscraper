@@ -22,6 +22,7 @@ package com.giua.pages;
 import com.giua.objects.ReportCard;
 import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
+import com.giua.webscraper.GiuaScraperDemo;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -56,6 +57,9 @@ public class ReportcardPage implements IPage{
      * @return un oggetto {@link ReportCard}
      */
     public ReportCard getReportcard(String quaterlyName){
+        if (gS.isDemoMode()) {
+            return GiuaScraperDemo.getReportCard();
+        }
         ReportCard returnRc;
         String quarterly=null;
         Map<String, List<String>> page=new HashMap<>();
@@ -67,10 +71,6 @@ public class ReportcardPage implements IPage{
 
         if(quaterlyName.equals("A.S. Precedente")){
             return getOldYearReportCard();
-        }
-
-        if (gS.isDemoMode()) {
-            //TODO demo di report page
         }
         try {
             //quadrimestre
@@ -139,6 +139,9 @@ public class ReportcardPage implements IPage{
      * @return un oggetto {@link ReportCard}
      */
     private ReportCard getOldYearReportCard(){
+        if (gS.isDemoMode()) {
+            return GiuaScraperDemo.getReportCard();
+        }
         ReportCard returnRc;
         String quarterly=null;
         Map<String, List<String>> page;
@@ -146,9 +149,7 @@ public class ReportcardPage implements IPage{
         String finalResult= null;
         String mean=null;
         String credits=null;
-        if (gS.isDemoMode()) {
-            //TODO demo di report page
-        }
+
         try {
             //quadrimestre
             Elements els = doc.getElementsByClass("dropdown-menu").get(3).children();

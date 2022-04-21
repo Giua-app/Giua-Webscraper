@@ -165,10 +165,8 @@ public class Alert {
         Alert otherAlert = (Alert) obj;
 
         return this.date.equals(otherAlert.date) &&
-                this.creator.equals(otherAlert.creator) &&
                 this.object.equals(otherAlert.object) &&
-                this.details.equals(otherAlert.details) &&
                 this.receivers.equals(otherAlert.receivers) &&
-                this.type.equals(otherAlert.type);
+                this.detailsUrl.equals(otherAlert.detailsUrl);
     }
 }

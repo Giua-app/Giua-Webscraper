@@ -73,30 +73,25 @@ public class Vote{
             return Integer.parseInt(value);
     }
 
-    /*public StringWriter toJSON() {
-        StringWriter stringEmp = new StringWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            objectMapper.writeValue(stringEmp, this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return stringEmp;
-
-        /*return new JsonBuilder("[{")
-                .addValue("value", this.value)
-                .addValue("isFirstQuarterly", this.quarterly)
-                .addValue("isAsterisk", this.isAsterisk)
-                .addValue("date", this.date)
-                .addValue("judgement", JsonBuilder.escape(this.judgement))
-                .addValue("type", this.testType)
-                .addValue("arguments", JsonBuilder.escape(this.arguments))
-                .build("}]");*
-    }*/
-
     public int quarterlyToInt() {
         return GiuaScraperUtils.quarterlyToInt(quarterly);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean isInstanceOfVote = obj instanceof Vote;
+
+        if (!isInstanceOfVote) return false;
+
+        Vote otherVote = (Vote) obj;
+
+        return value.equals(otherVote.value) &&
+                date.equals(otherVote.date) &&
+                quarterly.equals(otherVote.quarterly) &&
+                testType.equals(otherVote.testType) &&
+                arguments.equals(otherVote.arguments) &&
+                judgement.equals(otherVote.judgement) &&
+                isAsterisk == otherVote.isAsterisk &&
+                isRelevantForMean == otherVote.isRelevantForMean;
     }
 }

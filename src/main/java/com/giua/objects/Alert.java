@@ -156,33 +156,17 @@ public class Alert {
             return this.date + "; " + this.receivers + "; " + this.object + "; " + this.creator + "; " + this.details + "; " + this.type;
     }
 
-    public String toJSON() {
-/*
-        JsonBuilder jsonBuilder = new JsonBuilder("[{")
-                .addValue("status", this.status)
-                .addValue("date", this.date)
-                .addValue("receivers", this.receivers)
-                .addValue("object", (!this.object.isEmpty() ? JsonBuilder.escape(this.object) : ""))
-                .addValue("page", this.page)
-                .addValue("detailsUrl", this.detailsUrl)
-                .addValue("details", (this.details != null ? JsonBuilder.escape(this.details) : ""))
-                .addValue("creator", this.creator)
-                .addValue("type", this.type)
-                .addValue("isDetailed", this.isDetailed)
-                .addCustomString(",\"attachmentUrls\":[");
+    @Override
+    public boolean equals(Object obj) {
+        boolean isInstanceOfNewsletter = obj instanceof Alert;
 
-        if (this.attachmentUrls != null && !this.attachmentUrls.isEmpty()) {
-            //aggiungi attachments
+        if (!isInstanceOfNewsletter) return false;
 
-            jsonBuilder.addCustomString("\"" + this.attachmentUrls.get(0) + "\"");
+        Alert otherAlert = (Alert) obj;
 
-            for (int i = 1; i < this.attachmentUrls.size(); i++) {
-                jsonBuilder.addCustomString(",\"" + this.attachmentUrls.get(i) + "\"");
-            }
-        }
-
-        return jsonBuilder.build("]}]");*/
-        return "";
+        return this.date.equals(otherAlert.date) &&
+                this.object.equals(otherAlert.object) &&
+                this.receivers.equals(otherAlert.receivers) &&
+                this.detailsUrl.equals(otherAlert.detailsUrl);
     }
-
 }

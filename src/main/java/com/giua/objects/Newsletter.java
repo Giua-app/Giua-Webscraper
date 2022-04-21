@@ -60,11 +60,14 @@ public class Newsletter{
         return this.status + "; " + this.number + "; " + this.date + "; " + this.object + "; " + this.detailsUrl + "; " + ((this.attachmentsUrl != null && !this.attachmentsUrl.isEmpty()) ? this.attachmentsUrl.get(0) : "null");
     }
 
-    public boolean equals(Newsletter newsletter2) {
-        //true se uguale, false altrimenti
-        return this.status.equals(newsletter2.status) && this.number == newsletter2.number
-                && this.date.equals(newsletter2.date) && this.object.equals(newsletter2.object)
-                && this.detailsUrl.equals(newsletter2.detailsUrl) && this.attachmentsUrl == newsletter2.attachmentsUrl
-                && this.page == newsletter2.page;
+    @Override
+    public boolean equals(Object obj) {
+        boolean isInstanceOfNewsletter = obj instanceof Newsletter;
+
+        if (!isInstanceOfNewsletter) return false;
+
+        Newsletter otherNewsletter = (Newsletter) obj;
+
+        return this.number == otherNewsletter.number;
     }
 }

@@ -24,7 +24,6 @@ import com.giua.objects.Maintenance;
 import com.giua.pages.*;
 import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.LoggerManager;
-
 import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
@@ -947,50 +946,54 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 */
 	private Document handleAccountWithMultipleStudents(Document doc) throws IOException {
 		if (getUserTypeEnum() == userTypes.PARENT) {
-			lm.w("Questo account ha più studenti collegati, scelgo automaticamente l'username corrente");
 			Element accounts = doc.getElementById("login_profilo_profilo");
-			if (accounts == null) {
-				lm.e("Errore: l'account non presenta più studenti collegati anche se viene mostrato il dialogo!");
-				return doc;
-			}
+			if (accounts != null) {
+				lm.w("Questo account ha più studenti collegati, scelgo automaticamente l'username corrente");
 
-			Elements labels = accounts.getElementsByTag("label");
+				Elements labels = accounts.getElementsByTag("label");
 
-			if (labels.isEmpty()) {
-				lm.e("Errore critico: nessuna label trovata nel dialogo per la scelta dell'account");
-				return doc;
-			}
-
-			String profileId = "-1";
-			String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
-
-			for (Element accountLabel : labels) {
-				if (accountLabel.text().contains(user)) {
-					profileId = accountLabel.child(0).attr("value");
+				if (labels.isEmpty()) {
+					lm.e("Errore critico: nessuna label trovata nel dialogo per la scelta dell'account");
+					return doc;
 				}
+
+				String profileId = "-1";
+				String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
+
+				for (Element accountLabel : labels) {
+					if (accountLabel.text().contains(user)) {
+						profileId = accountLabel.child(0).attr("value");
+					}
+				}
+
+				if (profileId.equals("-1") || profileId.equals("")) {
+					lm.e("Errore: non sono riuscito a trovare l'id dell'account");
+					return doc;
+				}
+
+				Document doc2 = session.newRequest()
+						.url(GiuaScraper.SiteURL + "/login/profilo")
+						.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
+						.post();
+
+				lm.d("Login tramite scelta account completato con successo");
+
+				return doc2;
 			}
-
-			if (profileId.equals("-1") || profileId.equals("")) {
-				lm.e("Errore: non sono riuscito a trovare l'id dell'account");
-				return doc;
-			}
-
-			Document doc2 = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/login/profilo")
-					.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
-					.post();
-
-			lm.d("Login tramite scelta account completato con successo");
-
-			return doc2;
+			lm.w("Questo account non ha più studenti collegati");
 		}
 		return doc;
 	}
 
+	/**
+	 * Ottiene tutti gli username dal dialogo della scelta dell'account
+	 * (compare nella home se l'account corrente ha più di un studente collegato)
+	 *
+	 * @return ritorna null se l'account corrente non è un genitore, ritorna una lista vuota se non trova gli account
+	 * @throws IOException
+	 */
 	public List<String> getAllUsernamesFromAccountDialog() throws IOException {
 		if (getUserTypeEnum() == userTypes.PARENT) {
-			lm.w("Questo account ha più studenti collegati, ottengo tutti gli account collegati");
-			List<String> allUsernames = new Vector<>();
 
 			//Document doc = getPage("GIUASCRAPER_INTERNAL_REQUEST_HOME_WITHOUT_HANDLE_ACCOUNTS");
 			Document doc = session.newRequest() //in teoria se è scaduta la sessione questo darà errore
@@ -999,29 +1002,30 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			Element accounts = doc.getElementById("login_profilo_profilo");
 
-			if (accounts == null) {
-				lm.e("Errore: l'account non presenta più studenti collegati!");
-				return new Vector<>();
+			if (accounts != null) {
+				List<String> allUsernames = new Vector<>();
+				lm.w("Questo account ha più studenti collegati, ottengo tutti gli account collegati");
+				Elements labels = accounts.getElementsByTag("label");
+
+				if (labels.isEmpty()) {
+					lm.e("Errore: nessuna label trovata nel dialogo per la scelta dell'account");
+					return new Vector<>();
+				}
+
+				//String profileId;
+				//String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
+
+				for (Element accountLabel : labels) {
+					String username = accountLabel.text().split("\\(")[1].replace(")", "");
+					//profileId = accountLabel.child(0).attr("value");
+
+					allUsernames.add(username);
+				}
+
+				return allUsernames;
 			}
-
-			Elements labels = accounts.getElementsByTag("label");
-
-			if (labels.isEmpty()) {
-				lm.e("Errore: nessuna label trovata nel dialogo per la scelta dell'account");
-				return new Vector<>();
-			}
-
-			//String profileId;
-			//String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
-
-			for (Element accountLabel : labels) {
-				String username = accountLabel.text().split("\\(")[1].replace(")", "");
-				//profileId = accountLabel.child(0).attr("value");
-
-				allUsernames.add(username);
-			}
-
-			return allUsernames;
+			lm.w("Questo account non ha più studenti collegati");
+			return new Vector<>();
 		}
 		return null;
 	}

@@ -49,7 +49,6 @@ public class DisciplinaryNoticesPage implements IPage {
      *
      * @return Una lista di DisciplNotice
      */
-    //FIXME: Non funziona, rivedere tutto
     public List<DisciplinaryNotices> getAllDisciplinaryNotices() {
         if (gS.isDemoMode())
             return GiuaScraperDemo.getAllDisciplNotices();
@@ -58,26 +57,24 @@ public class DisciplinaryNoticesPage implements IPage {
         Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
 
         for (Element el : allDisciplNoticeTBodyHTML) {
-            String quarterly = el.parent().child(0).text();
-
-            for (Element el2 : el.children()) {
-                String author1 = el2.child(2).child(1).text();
-                String author2;
-                try {
-                    author2 = el2.child(3).child(1).text();
-                } catch (IndexOutOfBoundsException e) {
-                    author2 = "";
+            //String quarterly = el.parent().child(0).text();
+            for(Element note: el.children()){
+                String countermeasures; String authorOfCountermeasures;
+                try{
+                    countermeasures=note.child(3).text().split("\\(")[0];
+                    authorOfCountermeasures=note.child(3).text().split("\\(")[1].replace(")","");
+                }catch (IndexOutOfBoundsException e){
+                    countermeasures="";
+                    authorOfCountermeasures="";
                 }
-
-                el2.child(2).child(1).remove();
                 allDisciplNotices.add(new DisciplinaryNotices(
-                        el2.child(0).text(),
-                        el2.child(1).text(),
-                        el2.child(2).text(),
-                        el2.child(3).text(),
-                        author1,
-                        author2,
-                        quarterly));
+                        note.child(0).text(),
+                        note.child(1).text(),
+                        note.child(2).text().split("\\(")[0],
+                        countermeasures,
+                        note.child(2).text().split("\\(")[1].replace(")",""),
+                        authorOfCountermeasures,
+                        el.parent().child(0).text()));
             }
         }
         return allDisciplNotices;

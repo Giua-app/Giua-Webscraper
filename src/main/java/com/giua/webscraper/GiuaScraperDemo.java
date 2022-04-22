@@ -276,7 +276,8 @@ public class GiuaScraperDemo {
     }
 
     public static List<AgendaObject> getAllAgendaObjects() {
-        //TODO
-        return new Vector<>();
+            return List.of(new Test("5","4","2022","2022-4-5", "Educazione fisica","Prof. Nicola Pala","Verifica sul sistema nervoso", true),
+                    new Homework("8","4","2022","2022-4-8","Informatica", "Prof. Furcas Mirko", "Esercizio di informatica", true),
+                    new Activity("15", "4","2022", "2022-4-15", "Prof. Podda Michele", "Attività", true));
     }
 }

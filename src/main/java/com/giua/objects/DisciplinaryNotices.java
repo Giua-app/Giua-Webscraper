@@ -45,6 +45,6 @@ public class DisciplinaryNotices {
     }
 
     public String toString() {
-        return this.date + " ; " + this.type + " ; " + this.authorOfDetails + ": " + this.details + " ; " + this.authorOfCountermeasures + ": " + this.countermeasures;
+        return this.quarterly + " ; " + this.date + " ; " + this.type + " ; " + this.authorOfDetails + ": " + this.details + " ; " + this.authorOfCountermeasures + ": " + this.countermeasures;
     }
 }

@@ -253,11 +253,11 @@ class TestClasses {
 
     public static void testNotes(boolean forceRefresh) {
         logln("Get disciplinary notes");
-        logln("Non funzionante");
-        /*List<DisciplinaryNotices> allDN = gS.getDisciplinaryNotesPage(forceRefresh).getAllDisciplinaryNotices();
+        //logln("Non funzionante");
+        List<DisciplinaryNotices> allDN = gS.getDisciplinaryNotesPage(forceRefresh).getAllDisciplinaryNotices();
         for (DisciplinaryNotices a : allDN) {
             logln(a.toString());
-        }*/
+        }
     }
 
     public static void testAbsences(boolean forceRefresh) {
@@ -297,7 +297,7 @@ class TestClasses {
     }
 
     private static void startLogin(com.giua.utils.LoggerManager lm) {
-        gS = new GiuaScraper(user, password, demoMode,true, lm);
+        gS = new GiuaScraper(user, password, false,demoMode, lm);
         gS.login();
 
         //Document doc = gS.getPage("");
@@ -648,7 +648,7 @@ class TestClasses {
         System.out.println("--------AVVISI---------");     //Fatto
         testAlerts(true);
 
-        System.out.println("--------AGENDA--------");     //are you sure about that?
+        System.out.println("--------AGENDA--------");     //Fatto
         testAgendaPage(true);
 
         System.out.println("--------CIRCOLARI--------");     //Fatto

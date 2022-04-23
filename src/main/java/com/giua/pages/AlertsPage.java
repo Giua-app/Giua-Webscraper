@@ -55,7 +55,7 @@ public class AlertsPage implements IPage {
     public void resetFiltersAndRefreshPage() {
         try {
             doc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.ALERTS_PAGE)
+                    .url(gS.getSiteUrl() + "/" + UrlPaths.ALERTS_PAGE)
                     .data("bacheca_avvisi_genitori[visualizza]", "T")
                     .data("bacheca_avvisi_genitori[oggetto]", "")
                     .data("bacheca_avvisi_genitori[submit]", "")
@@ -125,7 +125,7 @@ public class AlertsPage implements IPage {
 
         try {
             Document newDoc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.ALERTS_PAGE)
+                    .url(gS.getSiteUrl() + "/" + UrlPaths.ALERTS_PAGE)
                     .data("bacheca_avvisi_genitori[visualizza]", onlyNotRead ? "D" : "T")
                     .data("bacheca_avvisi_genitori[oggetto]", text)
                     .data("bacheca_avvisi_genitori[submit]", "")
@@ -271,7 +271,7 @@ public class AlertsPage implements IPage {
     public void markAlertAsRead(Alert alert) {
         try {
             gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + alert.detailsUrl)
+                    .url(gS.getSiteUrl() + alert.detailsUrl)
                     .method(Connection.Method.GET)
                     .ignoreContentType(true)
                     .maxBodySize(1)

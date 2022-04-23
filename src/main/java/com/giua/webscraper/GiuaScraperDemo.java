@@ -234,11 +234,11 @@ public class GiuaScraperDemo {
     }
     //TODO
     public static Document getPage(String page) {
-        return new Document(GiuaScraper.getSiteURL() + "/" + page);
+        return new Document(GiuaScraper.getGlobalSiteUrl() + "/" + page);
     }
     //TODO
     public static Document getPageNoCookie(String page) {
-        return new Document(GiuaScraper.getSiteURL() + "/" + page);
+        return new Document(GiuaScraper.getGlobalSiteUrl() + "/" + page);
     }
     //TODO
     public static Document getExtPage(String url) {

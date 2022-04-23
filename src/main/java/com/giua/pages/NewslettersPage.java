@@ -53,7 +53,7 @@ public class NewslettersPage implements IPage{
     public void resetFiltersAndRefreshPage() {
         try {
             doc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE)
+                    .url(gS.getSiteUrl() + "/" + UrlPaths.NEWSLETTERS_PAGE)
                     .data("circolari_genitori[visualizza]", "P")
                     .data("circolari_genitori[mese]", "")
                     .data("circolari_genitori[oggetto]", "")
@@ -115,7 +115,7 @@ public class NewslettersPage implements IPage{
         //TODO: Fare in modo che la cache venga usata veramente
         List<Newsletter> allNewsletters = new Vector<>();
         try {
-            if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + UrlPaths.NEWSLETTERS_PAGE + "/" + page)) {
+            if (!this.doc.baseUri().equals(gS.getSiteUrl() + UrlPaths.NEWSLETTERS_PAGE + "/" + page)) {
                 doc = gS.getPage(UrlPaths.NEWSLETTERS_PAGE + "/" + page);
             }
 
@@ -159,7 +159,7 @@ public class NewslettersPage implements IPage{
         try {
 
             Document newDoc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + UrlPaths.NEWSLETTERS_PAGE)
+                    .url(gS.getSiteUrl() + "/" + UrlPaths.NEWSLETTERS_PAGE)
                     .data("circolari_genitori[visualizza]", onlyNotRead ? "D" : "P")
                     .data("circolari_genitori[mese]", date)
                     .data("circolari_genitori[oggetto]", text)
@@ -202,7 +202,7 @@ public class NewslettersPage implements IPage{
     public void markNewsletterAsRead(Newsletter newsletter) {
         try {
             gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/" + newsletter.detailsUrl)
+                    .url(gS.getSiteUrl() + "/" + newsletter.detailsUrl)
                     .method(Connection.Method.GET)
                     .ignoreContentType(true)
                     .maxBodySize(1)

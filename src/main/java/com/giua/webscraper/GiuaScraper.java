@@ -44,20 +44,21 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	//region Variabili globali
 	private final String user;
-    private String realUsername;
-    private final String password;
-    private String userType = "";
-    private static String SiteURL = "https://registro.giua.edu.it";    //URL del registro
-    private static boolean debugMode;
-    final public boolean cacheable;        //Indica se si possono utilizzare le cache
-    private String PHPSESSID = "";
-    private Connection session;
-    private long lastGetPageTime = 0;
-    private final boolean demoMode;
-    private static LoggerManager lm = new LoggerManager("GiuaScraper");
+	private String realUsername;
+	private final String password;
+	private String userType = "";
+	private static String globalSiteUrl = "https://registro.giua.edu.it";    //URL per tutti gli oggetti GiuaScraper
+	private String privateSiteUrl = "";    //URL per un solo oggetto GiuaScraper. Se impostato prevale su quello globale
+	private static boolean debugMode;
+	final public boolean cacheable;        //Indica se si possono utilizzare le cache
+	private String PHPSESSID = "";
+	private Connection session;
+	private long lastGetPageTime = 0;
+	private final boolean demoMode;
+	private static LoggerManager lm = new LoggerManager("GiuaScraper");
 
-    public enum userTypes {
-        STUDENT,
+	public enum userTypes {
+		STUDENT,
         PARENT,
         TEACHER,
         ADMIN,
@@ -101,24 +102,58 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * Permette di settare l'URL del registro
+	 * Permette di settare l'URL globale del registro
 	 *
 	 * @param newUrl formattato come "https://example.com"
 	 */
-	public static void setSiteURL(String newUrl) {
+	public static void setGlobalSiteUrl(String newUrl) {
 		if (!newUrl.endsWith("/"))
-			GiuaScraper.SiteURL = newUrl;
+			GiuaScraper.globalSiteUrl = newUrl;
 		else
-			GiuaScraper.SiteURL = newUrl.substring(0, newUrl.length() - 1);    //Togli l'ultimo / dal nuovo url
+			GiuaScraper.globalSiteUrl = newUrl.substring(0, newUrl.length() - 1);    //Togli l'ultimo / dal nuovo url
 	}
 
 	/**
-	 * Permette di ottenere l'URL del registro
+	 * Permette di ottenere l'URL globale del registro
 	 *
 	 * @return l'URL del registro formattato come "https://example.com"
 	 */
-	public static String getSiteURL() {
-		return GiuaScraper.SiteURL;
+	public static String getGlobalSiteUrl() {
+		return GiuaScraper.globalSiteUrl;
+	}
+
+	/**
+	 * Permette di settare l'URL privato del registro
+	 *
+	 * @param newUrl formattato come "https://example.com"
+	 */
+	public void setPrivateSiteUrl(String newUrl) {
+		if (!newUrl.endsWith("/"))
+			privateSiteUrl = newUrl;
+		else
+			privateSiteUrl = newUrl.substring(0, newUrl.length() - 1);    //Togli l'ultimo / dal nuovo url
+	}
+
+	/**
+	 * Permette di ottenere l'URL globale del registro
+	 *
+	 * @return l'URL del registro formattato come "https://example.com"
+	 */
+	public String getPrivateSiteUrl() {
+		return privateSiteUrl;
+	}
+
+	/**
+	 * Ottieni l'URL che si dovrebbe utilizzare.<br>
+	 * Se impostato verrò ritornato l'URL privato altrimenti quello globale.
+	 *
+	 * @return l'URL da utilizzare: globale o privato
+	 */
+	public String getSiteUrl() {
+		if (privateSiteUrl.equals(""))
+			return getGlobalSiteUrl();
+		else
+			return getPrivateSiteUrl();
 	}
 
 	/**
@@ -487,7 +522,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static String getSchoolName() throws IOException {
 		Document doc = Jsoup.newSession()
-				.url(GiuaScraper.SiteURL + "/login/form/")
+				.url(GiuaScraper.getGlobalSiteUrl() + "/login/form/")
 				.method(Method.GET)
 				.get(); //pagina di login
 		Element els;
@@ -552,7 +587,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	public static boolean isGoogleLoginAvailable() {
 		Document doc = null;
 		try {
-			doc = Jsoup.connect(GiuaScraper.SiteURL + "/").get();
+			doc = Jsoup.connect(GiuaScraper.getGlobalSiteUrl() + "/").get();
 		} catch (IOException e) {
 			if (isSiteWorking())
 				throw new SiteConnectionProblems("Can't get page because the website is down, retry later", e);
@@ -662,15 +697,15 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	 * @param url percorso della risorsa nel sito.
 	 * @return Un oggetto {@code DownloadedFile}
 	 */
-    public DownloadedFile download(String url) {
+	public DownloadedFile download(String url) {
 		url = GiuaScraperUtils.convertGlobalPathToLocal(url);
-		lm.d("Eseguo download di " + GiuaScraper.SiteURL + url);
+		lm.d("Eseguo download di " + getSiteUrl() + url);
 		try {
 			if (url.startsWith("/"))
 				url = url.substring(1);
 
 			Connection.Response r = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/" + url)
+					.url(getSiteUrl() + "/" + url)
 					.ignoreContentType(true)
 					.execute();
 
@@ -709,7 +744,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+			if (getPageCache != null && (getSiteUrl() + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
 				lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
 				return getPageCache;
 			}
@@ -721,11 +756,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					throw new MaintenanceIsActiveException("The website is in maintenance");
 
 				Connection.Response response = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/" + page)
+						.url(getSiteUrl() + "/" + page)
 						.method(Method.GET)
 						.execute();
 
-				lm.d("getPage: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+				lm.d("getPage: " + getSiteUrl() + "/" + page + " caricato");
 
 				Document doc = response.parse();
 
@@ -778,7 +813,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				page = page.substring(1);
 
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-			if (getPageCache != null && (GiuaScraper.SiteURL + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+			if (getPageCache != null && (getSiteUrl() + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
 				lm.d("getPageWithNoReLogin: Rilevata richiesta uguale in meno di 500ms. Uso cache");
 				return getPageCache;
 			}
@@ -790,11 +825,11 @@ public class GiuaScraper extends GiuaScraperExceptions {
 					throw new MaintenanceIsActiveException("The website is in maintenance");
 
 				Connection.Response response = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/" + page)
+						.url(getSiteUrl() + "/" + page)
 						.method(Method.GET)
 						.execute();
 
-				lm.d("getPageWithNoReLogin: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+				lm.d("getPageWithNoReLogin: " + getSiteUrl() + "/" + page + " caricato");
 
 				Document doc = response.parse();
 
@@ -828,10 +863,10 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			if (page.startsWith("/"))
 				page = page.substring(1);
 
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL + "/" + page)
+			Document doc = Jsoup.connect(getSiteUrl() + "/" + page)
 					.get();
 
-			lm.d("getPageNoCookie: " + GiuaScraper.SiteURL + "/" + page + " caricato");
+			lm.d("getPageNoCookie: " + getSiteUrl() + "/" + page + " caricato");
 
 			return doc;
 
@@ -881,9 +916,9 @@ public class GiuaScraper extends GiuaScraperExceptions {
     public Boolean checkLogin() {
         if (demoMode)
             return GiuaScraperDemo.checkLogin();
-        try {
-            Connection.Response res = session.newRequest()
-                    .url(GiuaScraper.SiteURL)
+		try {
+			Connection.Response res = session.newRequest()
+                    .url(getSiteUrl())
                     .execute();
 
             //Il registro risponde alla richiesta GET all'URL https://registro.giua.edu.it
@@ -912,7 +947,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 		if (demoMode)
 			return GiuaScraperDemo.isSessionValid();
 		try {
-			Document doc = Jsoup.connect(GiuaScraper.SiteURL)
+			Document doc = Jsoup.connect(getSiteUrl())
 					.cookie("PHPSESSID", phpsessid)
 					.get();
 
@@ -972,7 +1007,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 				}
 
 				Document doc2 = session.newRequest()
-						.url(GiuaScraper.SiteURL + "/login/profilo")
+						.url(getSiteUrl() + "/login/profilo")
 						.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
 						.post();
 
@@ -997,7 +1032,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 			//Document doc = getPage("GIUASCRAPER_INTERNAL_REQUEST_HOME_WITHOUT_HANDLE_ACCOUNTS");
 			Document doc = session.newRequest() //in teoria se è scaduta la sessione questo darà errore
-					.url(GiuaScraper.SiteURL)
+					.url(getSiteUrl())
 					.get();
 
 			Element accounts = doc.getElementById("login_profilo_profilo");
@@ -1057,13 +1092,13 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			//logln("login: First connection (login form)");
 
 			Document firstRequestDoc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/login/form/")
+					.url(getSiteUrl() + "/login/form/")
 					.get();
 
 			//logln("login: Second connection (authenticate)");
 
 			Document doc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/ajax/token/authenticate")
+					.url(getSiteUrl() + "/ajax/token/authenticate")
 					.ignoreContentType(true)
 					.get();
 
@@ -1076,7 +1111,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 			//logln("login: Third connection (login form)");
 
 			doc = session.newRequest()
-					.url(GiuaScraper.SiteURL + "/login/form/")
+					.url(getSiteUrl() + "/login/form/")
 					.data("_username", this.user, "_password", this.password, "_csrf_token", CSRFToken, "login", "")
 					.post();
 			Elements err;
@@ -1116,7 +1151,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 	public static boolean isSiteWorking() {
 		try {
-			Jsoup.connect(GiuaScraper.SiteURL).method(Method.GET).execute();
+			Jsoup.connect(GiuaScraper.getGlobalSiteUrl()).method(Method.GET).execute();
 			return true;
 		} catch (IOException io) {
 			if (isMyInternetWorking()) {

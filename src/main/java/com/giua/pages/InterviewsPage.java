@@ -135,7 +135,7 @@ public class InterviewsPage implements IPage{
     public void bookInterview(Interview interview, BookingOption selectedBookingOption) throws GiuaScraperExceptions.SiteConnectionProblems {
         try {
             gS.getSession()
-                    .url(GiuaScraper.getSiteURL() + interview.bookingLink)
+                    .url(gS.getSiteUrl() + interview.bookingLink)
                     .data("colloqui_prenota[data]", selectedBookingOption.value)
                     .data("colloqui_prenota[submit]", "")
                     .data("colloqui_prenota[_token]", getSubmitToken())

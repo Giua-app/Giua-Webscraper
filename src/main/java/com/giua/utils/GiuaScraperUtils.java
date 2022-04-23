@@ -233,7 +233,7 @@ public class GiuaScraperUtils {
      * <br>
      * Con path locale si intende il path usato per raggiungere le varie pagine del registro<br>
      * Esempio: https://registro.com/public/circolari/genitori in questo caso "/circolari/genitori" è il path locale
-     * <br><br>
+     * <br>ATTENZIONE: Verrà utilizzato sempre l'URL globale<br>
      * <p>
      * Esempi d'uso di questa funzione:<br>
      * In ogni esempio, il path globale è "/public"<br>
@@ -277,7 +277,7 @@ public class GiuaScraperUtils {
 
         String globalPath = null;
         try {
-            globalPath = new URL(GiuaScraper.getSiteURL()).getPath();
+            globalPath = new URL(GiuaScraper.getGlobalSiteUrl()).getPath();
         } catch (MalformedURLException e) {
             //NON DOVREBBE MAI SUCCEDERE
             //Se succede vuol dire che SiteURL non è un URL valido!

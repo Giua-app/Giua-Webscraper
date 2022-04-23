@@ -77,7 +77,7 @@ public class LessonsPage implements IPage{
             return GiuaScraperDemo.getAllLessons();
         String date = Lesson.dateFormat.format(pDate);
 
-        if (!this.doc.baseUri().equals(GiuaScraper.getSiteURL() + "genitori/lezioni/" + date)) {
+        if (!this.doc.baseUri().equals(gS.getSiteUrl() + "genitori/lezioni/" + date)) {
             doc = gS.getPage("genitori/lezioni/" + date);
         }
         List<Lesson> returnLesson = new Vector<>();

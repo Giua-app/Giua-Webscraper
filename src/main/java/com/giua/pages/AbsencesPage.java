@@ -71,12 +71,12 @@ public class AbsencesPage implements IPage {
                 return;
             if (ab.justifyUrl.contains("assenza")) {
                 gS.getSession().newRequest()
-                        .url(GiuaScraper.getSiteURL() + "/" + ab.justifyUrl)
+                        .url(gS.getSiteUrl() + "/" + ab.justifyUrl)
                         .data("giustifica_assenza[tipo]", type, "giustifica_assenza[motivazione]", reason, "giustifica_assenza[submit]", "")
                         .post();
             } else if (ab.justifyUrl.contains("ritardo")) {
                 gS.getSession().newRequest()
-                        .url(GiuaScraper.getSiteURL() + "/" + ab.justifyUrl)
+                        .url(gS.getSiteUrl() + "/" + ab.justifyUrl)
                         .data("giustifica_ritardo[tipo]", type, "giustifica_ritardo[motivazione]", reason, "giustifica_ritardo[submit]", "")
                         .post();
             }
@@ -101,12 +101,12 @@ public class AbsencesPage implements IPage {
                 return;
             if (ab.justifyUrl.contains("assenza")) {
                 gS.getSession().newRequest()
-                        .url(GiuaScraper.getSiteURL() + "/" + ab.justifyUrl)
+                        .url(gS.getSiteUrl() + "/" + ab.justifyUrl)
                         .data("giustifica_assenza[tipo]", "", "giustifica_assenza[motivazione]", "", "giustifica_assenza[delete]", "")
                         .post();
             } else if (ab.justifyUrl.contains("ritardo")) {
                 gS.getSession().newRequest()
-                        .url(GiuaScraper.getSiteURL() + "/" + ab.justifyUrl)
+                        .url(gS.getSiteUrl() + "/" + ab.justifyUrl)
                         .data("giustifica_ritardo[tipo]", "", "giustifica_ritardo[motivazione]", "", "giustifica_ritardo[delete]", "")
                         .post();
             }

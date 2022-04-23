@@ -56,7 +56,7 @@ class TestClasses {
         }
 
         try {
-            GiuaScraper.setSiteURL(args[2]);
+            GiuaScraper.setGlobalSiteUrl(args[2]);
         } catch (Exception ignored) {
         }
 
@@ -637,7 +637,7 @@ class TestClasses {
         t1 = nanoTime();
         startLogin();
 
-        System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
+        System.out.println("\n-------------------\nConnecting to " + gS.getSiteUrl() + "\n-------------------\n");
 
         System.out.println("--------NEWS--------");     //Fatto
         testNews(true);
@@ -696,7 +696,7 @@ class TestClasses {
         System.out.println("Account type: " + gS.getUserTypeEnum());
         logln("Ultimo accesso: " + gS.getHomePage(false).getLastAccessTime().toString());
 
-        System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
+        System.out.println("\n-------------------\nConnecting to " + gS.getSiteUrl() + "\n-------------------\n");
 
         System.out.println("--------NEWS--------");
         testNews(false);
@@ -757,7 +757,7 @@ class TestClasses {
         System.out.println("Account type: " + gS.getUserTypeEnum());
         logln("Ultimo accesso: " + gS.getHomePage(false).getLastAccessTime().toString());
 
-        System.out.println("\n-------------------\nConnecting to " + GiuaScraper.getSiteURL() + "\n-------------------\n");
+        System.out.println("\n-------------------\nConnecting to " + gS.getSiteUrl() + "\n-------------------\n");
 
         System.out.println("--------NEWS--------");
         testNews(true);

@@ -109,7 +109,7 @@ public class DocumentsPage implements IPage {
 
         try {
             doc = gS.getSession().newRequest()
-                    .url(GiuaScraper.getSiteURL() + "/documenti/bacheca")
+                    .url(gS.getSiteUrl() + "/documenti/bacheca")
                     .data("documento[tipo]", filter)
                     .data("documento[titolo]", filterText)
                     .data("documento[_token]", getDocumentsToken())

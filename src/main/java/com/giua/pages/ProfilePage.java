@@ -38,12 +38,23 @@ public class ProfilePage implements IPage {
         doc = gS.getPage(UrlPaths.PROFILE_PAGE);
     }
 
-    //TODO: farlo meglio
+    /**
+     * Ottieni le informazioni del profilo
+     *
+     * @return Un vettore di stringhe in cui:
+     * <br>Indice 0: Utente
+     * <br>Indice 1: Tipo account
+     * <br>Indice 2: email
+     * <br><br>Può restituire null in caso non abbia trovato gli elementi
+     */
     public String[] getProfileInformation() {
         if (gS.isDemoMode())
-            return null;
+            return new String[]{"Mario Rossi genitore di Marietto Rossi", "Genitore", "mariorossi@example.com"};
 
         Element a = doc.getElementsByTag("dl").get(0);
+
+        if (a.childrenSize() < 6) return null;
+
         String utente = a.child(1).text();
         String ruolo = a.child(3).text();
         String email = a.child(5).text();

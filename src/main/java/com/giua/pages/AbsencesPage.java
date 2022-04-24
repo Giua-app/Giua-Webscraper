@@ -45,7 +45,8 @@ public class AbsencesPage implements IPage {
     @Override
     public void refreshPage() {
         doc = gS.getPage(UrlPaths.ABSENCES_PAGE);
-        tbodyGlobalSituation = doc.getElementById("gs-giustificazioni").previousElementSibling().child(1);
+        if(!gS.isDemoMode())
+            tbodyGlobalSituation = doc.getElementById("gs-giustificazioni").previousElementSibling().child(1);
     }
 
     /**
@@ -170,6 +171,8 @@ public class AbsencesPage implements IPage {
      * Ottiene il numero di giorni di assenza
      */
     public String getAbsencesDayCount(){
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getAbsencesDayCount();
         return tbodyGlobalSituation.child(0).child(1).text();
     }
 
@@ -177,6 +180,8 @@ public class AbsencesPage implements IPage {
      * Ottiene il numero di ritardi brevi
      */
     public String getShortDelaysCount(){
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getShortDelaysCount();
         return tbodyGlobalSituation.child(1).child(1).text();
     }
 
@@ -184,6 +189,8 @@ public class AbsencesPage implements IPage {
      * Ottiene il numero di ritardi
      */
     public String getDelaysCount(){
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getDelaysCount();
         return tbodyGlobalSituation.child(2).child(1).text();
     }
 
@@ -191,6 +198,8 @@ public class AbsencesPage implements IPage {
      * Ottiene il numero delle uscite anticipate
      */
     public String getEarlyExitsCount(){
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getEarlyExitsCount();
         return tbodyGlobalSituation.child(3).child(1).text();
     }
 
@@ -198,6 +207,8 @@ public class AbsencesPage implements IPage {
      * Ottiene le ore toatli di assenza
      */
     public String getTotalHourOfAbsences(){
+        if(gS.isDemoMode())
+            return GiuaScraperDemo.getTotalHourOfAbsences();
         return tbodyGlobalSituation.child(4).child(1).text();
     }
 

@@ -79,6 +79,7 @@ class TestClasses {
         demoMode=true;
         startLogin();
         testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testVotes(true);
     }
 
     private static void logln(String msg) {
@@ -639,29 +640,29 @@ class TestClasses {
 
         System.out.println("\n-------------------\nConnecting to " + gS.getSiteUrl() + "\n-------------------\n");
 
-        System.out.println("--------NEWS--------");     //Fatto
+        System.out.println("--------NEWS--------");
         testNews(true);
 
-        System.out.println("--------VOTI--------");     //Fatto
+        System.out.println("--------VOTI--------");
         testVotes(true);
 
-        System.out.println("--------AVVISI---------");     //Fatto
+        System.out.println("--------AVVISI---------");
         testAlerts(true);
 
-        System.out.println("--------AGENDA--------");     //Fatto
+        System.out.println("--------AGENDA--------");
         testAgendaPage(true);
 
-        System.out.println("--------CIRCOLARI--------");     //Fatto
+        System.out.println("--------CIRCOLARI--------");
         testNewsletters(true);
 
-        System.out.println("--------LEZIONI--------");     //Fatto
+        System.out.println("--------LEZIONI--------");
         testLessons(true);
 
-        System.out.println("--------PAGELLA--------");     //Fatto
+        System.out.println("--------PAGELLA--------");
         System.out.println("Non disponibile");
         testReportCard(true);
 
-        System.out.println("--------NOTE--------");     //Fatto
+        System.out.println("--------NOTE--------");
         testNotes(true);
 
         System.out.println("--------ASSENZE--------");
@@ -749,7 +750,7 @@ class TestClasses {
         System.out.println("Logout...");
         String phpsessid = gS.getCookie();
 
-        gS = new GiuaScraper(user, password, phpsessid, true, null);
+        gS = new GiuaScraper(user, password, phpsessid, true,demoMode, null);
         gS.login();
         System.out.println("Created new gS variable");
 

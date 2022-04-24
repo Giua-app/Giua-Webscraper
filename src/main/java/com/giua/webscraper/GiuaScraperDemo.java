@@ -24,7 +24,6 @@ import org.jsoup.nodes.Document;
 
 import java.util.*;
 
-//FIXME
 public class GiuaScraperDemo {
 
     public static List<InterviewAgenda> getInterviews() {
@@ -38,7 +37,6 @@ public class GiuaScraperDemo {
         return new Authorization("08:40", "12:20");
     }
 
-    //TODO
     public static List<Observations> getAllObservations() throws GiuaScraperExceptions.UnsupportedAccount {
         List<Observations> obs = new Vector<>();
         obs.add(new Observations("2021-11-18", "Scienze", "Clara Loggia", "L'alunno è stato bravo", "Primo Quadrimestre"));
@@ -46,14 +44,32 @@ public class GiuaScraperDemo {
         return obs;
 
     }
-    //TODO
+
     public static List<Absence> getAllAbsences() {
         List<Absence> absences = new Vector<>();
-        absences.add(new Absence("2021-10-28", "Assenza", "", true, true, "/genitori/giustifica/assenza/4"));
-        absences.add(new Absence("2021-10-29", "Ritardo (09:30)", "", false, false, "/genitori/giustifica/ritardo/3"));
+        absences.add(new Absence("2021-10-28", "Assenza", "", true, true, "/genitori/giustifica/assenza/4"));        absences.add(new Absence("2021-10-29", "Ritardo (09:30)", "", false, false, "/genitori/giustifica/ritardo/3"));
         absences.add(new Absence("2021-10-29", "Uscita anticipata (11:30)", "", true, false, "/genitori/giustifica/ritardo/3"));
         return absences;
+    }
 
+    public static String getAbsencesDayCount(){
+        return "15";
+    }
+
+    public static String getShortDelaysCount(){
+        return "5";
+    }
+
+    public static String getDelaysCount(){
+        return "2";
+    }
+
+    public static String getEarlyExitsCount(){
+        return "4";
+    }
+
+    public static String getTotalHourOfAbsences(){
+        return "25";
     }
 
     public static List<News> getAllNewsFromHome() {
@@ -65,7 +81,7 @@ public class GiuaScraperDemo {
         return news;
 
     }
-    //TODO
+
     public static List<DisciplinaryNotices> getAllDisciplNotices() {
         List<DisciplinaryNotices> disciplNotices = new Vector<>();
         disciplNotices.add(new DisciplinaryNotices("2021-10-28", "Nota individuale", "Usato la penna blu invece di quella nera per scrivere il propri nome", "Espulsione dalla scuola", "Quartilla Costa", "Quartilla Costa", "Primo quadrimestre"));
@@ -91,7 +107,7 @@ public class GiuaScraperDemo {
         return alerts;
 
     }
-    //TODO
+
     public static List<Newsletter> getAllNewsletters() throws IndexOutOfBoundsException {
         List<Newsletter> newsletters = new Vector<>();
         newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
@@ -99,7 +115,7 @@ public class GiuaScraperDemo {
         return newsletters;
 
     }
-    //TODO
+
     public static List<Newsletter> getAllNewslettersWithFilter() {
         List<Newsletter> newsletters = new Vector<>();
         newsletters.add(new Newsletter("DA LEGGERE", 32, "2021-11-21", "Il ritorno della circolare circolosa (piccolo pezzo di storia)", "", new Vector<>(), 0));
@@ -107,7 +123,7 @@ public class GiuaScraperDemo {
         return newsletters;
 
     }
-    //TODO
+
     public static List<Homework> getHomework(String date) {
         List<Homework> homeworkList = new Vector<>();
         if (date.equals("2021-11-02")) {
@@ -118,7 +134,7 @@ public class GiuaScraperDemo {
         return homeworkList;
 
     }
-    //TODO
+
     public static List<Homework> getAllHomeworksWithoutDetails() {
         List<Homework> homeworkList = new Vector<>();
         homeworkList.add(new Homework("2", "11", "2021", "2021-11-02", "", "", "", true));
@@ -126,7 +142,7 @@ public class GiuaScraperDemo {
         return homeworkList;
 
     }
-    //TODO
+
     public static List<Test> getTest(String date) {
         List<Test> tests = new Vector<>();
         if (date.equals("2021-11-02"))
@@ -136,14 +152,14 @@ public class GiuaScraperDemo {
         return tests;
 
     }
-    //TODO
+
     public static List<Test> getAllTestsWithoutDetails() {
         List<Test> tests = new Vector<>();
         tests.add(new Test("2", "11", "2021", "2021-11-02", "Storia", "Mario Ginnasio", "Epoca medievale", true));
         tests.add(new Test("12", "11", "2021", "2021-11-12", "Italiano", "Mario Ginnasio", "Poeti medievali", true));
         return tests;
     }
-    //TODO
+
     public static Map<String, List<Vote>> getAllVotes() {
         Map<String, List<Vote>> votes = new HashMap<>();
         List<Vote> itaVotes = new Vector<>();
@@ -194,7 +210,7 @@ public class GiuaScraperDemo {
         votes.add(itaVotes);
         return votes;
     }
-    //TODO
+
     public static List<Lesson> getAllLessonsOfSubject() {
         List<Lesson> lessons = new Vector<>();
         /*lessons.add(new Lesson("2021-11-01", "08:30-09:30", "Informatica", "Programmazione c#", "", true));
@@ -228,50 +244,47 @@ public class GiuaScraperDemo {
         return new ReportCard("Secondo quadrimestre", allVotes, "AMMESSO", "11", allDebts, "7.5", true);
     }
 
-    //TODO
     public static Date getLastAccessTime() {
         return new Date();
     }
-    //TODO
+
     public static Document getPage(String page) {
         return new Document(GiuaScraper.getGlobalSiteUrl() + "/" + page);
     }
-    //TODO
+
     public static Document getPageNoCookie(String page) {
         return new Document(GiuaScraper.getGlobalSiteUrl() + "/" + page);
     }
-    //TODO
+
     public static Document getExtPage(String url) {
         return new Document(url);
     }
-    //TODO
+
     public static boolean isMaintenanceActive() {
         return false;
     }
-    //TODO
+
     public static Boolean checkLogin() {
         return true;
     }
-    //TODO
+
     public static boolean isSessionValid() {
         return true;
     }
-    //TODO
+
     public static String loadUserFromDocument() {
         return "DEMO";
     }
-    //TODO
+
     public static GiuaScraper.userTypes getUserTypeEnum() {
         return GiuaScraper.userTypes.DEMO;
     }
 
     public static List<Activity> getAllActivitiesWithoutDetails() {
-        //TODO
         return new Vector<>();
     }
 
     public static List<Activity> getActivity(String date) {
-        //TODO
         return new Vector<>();
     }
 

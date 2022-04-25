@@ -744,7 +744,7 @@ public class GiuaScraper extends GiuaScraperExceptions {
 
 
 			//Se l'url è uguale a quello della richiesta precendente e l'ultima richiesta è stata fatta meno di 500ms fa allora usa la cache
-			if (getPageCache != null && (getSiteUrl() + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500000000) {
+			if (getPageCache != null && (getSiteUrl() + "/" + page).equals(getPageCache.location()) && System.nanoTime() - lastGetPageTime < 500_000_000) {
 				lm.d("getPage: Rilevata richiesta uguale in meno di 500ms. Uso cache");
 				return getPageCache;
 			}
@@ -975,49 +975,48 @@ public class GiuaScraper extends GiuaScraperExceptions {
 	}
 
 	/**
-	 * @param doc pagina home del registro
+	 * @param doc Pagina home del registro
 	 * @return
 	 * @throws IOException
 	 */
 	private Document handleAccountWithMultipleStudents(Document doc) throws IOException {
-		if (getUserTypeEnum() == userTypes.PARENT) {
-			Element accounts = doc.getElementById("login_profilo_profilo");
-			if (accounts != null) {
-				lm.w("Questo account ha più studenti collegati, scelgo automaticamente l'username corrente");
-
-				Elements labels = accounts.getElementsByTag("label");
-
-				if (labels.isEmpty()) {
-					lm.e("Errore critico: nessuna label trovata nel dialogo per la scelta dell'account");
-					return doc;
-				}
-
-				String profileId = "-1";
-				String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
-
-				for (Element accountLabel : labels) {
-					if (accountLabel.text().contains(user)) {
-						profileId = accountLabel.child(0).attr("value");
-					}
-				}
-
-				if (profileId.equals("-1") || profileId.equals("")) {
-					lm.e("Errore: non sono riuscito a trovare l'id dell'account");
-					return doc;
-				}
-
-				Document doc2 = session.newRequest()
-						.url(getSiteUrl() + "/login/profilo")
-						.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
-						.post();
-
-				lm.d("Login tramite scelta account completato con successo");
-
-				return doc2;
-			}
-			lm.w("Questo account non ha più studenti collegati");
+		Element accounts = doc.getElementById("login_profilo_profilo");
+		if (accounts == null) {
+			lm.d("Questo account non ha più studenti collegati");
+			return doc;
 		}
-		return doc;
+
+		lm.w("Questo account ha più studenti collegati, scelgo automaticamente l'username corrente");
+
+		Elements labels = accounts.getElementsByTag("label");
+
+		if (labels.isEmpty()) {
+			lm.e("Errore critico: nessuna label trovata nel dialogo per la scelta dell'account");
+			return doc;
+		}
+
+		String profileId = "-1";
+		String token = Objects.requireNonNull(doc.getElementById("login_profilo__token")).attr("value");
+
+		for (Element accountLabel : labels) {
+			if (accountLabel.text().contains(user)) {
+				profileId = accountLabel.child(0).attr("value");
+			}
+		}
+
+		if (profileId.equals("-1") || profileId.equals("")) {
+			lm.e("Errore: non sono riuscito a trovare l'id dell'account");
+			return doc;
+		}
+
+		Document doc2 = session.newRequest()
+				.url(getSiteUrl() + "/login/profilo")
+				.data("login_profilo[profilo]", profileId, "login_profilo[submit]", "", "login_profilo[_token]", token)
+				.post();
+
+		lm.d("Login tramite scelta account completato con successo");
+
+		return doc2;
 	}
 
 	/**

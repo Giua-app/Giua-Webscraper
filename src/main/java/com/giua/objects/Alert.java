@@ -42,6 +42,8 @@ public class Alert {
     public boolean isDetailed;  //Indica se per questo avviso sono stati caricati i dettagli
     public final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //es. 2021-10-22
 
+    private int id = -1;
+
     public Alert(String status, String date, String receivers, String object, String detailsUrl, int page) {
         this.status = status;
         this.date = date;
@@ -124,6 +126,15 @@ public class Alert {
         return this.details;
     }
 
+    public int getId(){
+        if(id != -1) return id;
+
+        String[] urlSplit = detailsUrl.split("/");
+        id = Integer.parseInt(urlSplit[urlSplit.length-1]);
+
+        return id;
+    }
+
     public String getStatus() {
         return this.status;
     }
@@ -164,9 +175,6 @@ public class Alert {
 
         Alert otherAlert = (Alert) obj;
 
-        return this.date.equals(otherAlert.date) &&
-                this.object.equals(otherAlert.object) &&
-                this.receivers.equals(otherAlert.receivers) &&
-                this.detailsUrl.equals(otherAlert.detailsUrl);
+        return this.getId() == otherAlert.getId();
     }
 }

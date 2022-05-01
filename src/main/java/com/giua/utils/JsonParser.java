@@ -141,7 +141,7 @@ public class JsonParser {
                 JsonNode vote = subjectVotes.next();
 
                 String value = vote.findPath("value").asText();
-                String quart = vote.findPath("Quarterly").asText();
+                int quart = vote.findPath("Quarterly").asInt();
                 boolean isAsterisk = vote.findPath("isAsterisk").asBoolean();
                 String date = vote.findPath("date").asText();
                 String judgement = vote.findPath("judgement").asText();
@@ -431,7 +431,7 @@ public class JsonParser {
             String countermeasures = node.findPath("countermeasures").asText();
             String authorOfDetails = node.findPath("authorOfDetails").asText();
             String authorOfCountermeasures = node.findPath("authorOfCountermeasures").asText();
-            String quarterly = node.findPath("quarterly").asText();
+            int quarterly = node.findPath("quarterly").asInt();
 
             returnTests.add(new DisciplinaryNotices(date, type, details, countermeasures, authorOfDetails, authorOfCountermeasures, quarterly));
 
@@ -466,7 +466,7 @@ public class JsonParser {
             String subject = node.findPath("subject").asText();
             String teacher = node.findPath("teacher").asText();
             String observations = node.findPath("observations").asText();
-            String quarterly = node.findPath("quarterly").asText();
+            int quarterly = node.findPath("quarterly").asInt();
 
             returnTests.add(new Observations(date, subject, teacher, observations, quarterly));
 

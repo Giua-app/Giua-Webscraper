@@ -33,6 +33,7 @@ public class DisciplinaryNoticesPage implements IPage {
     private GiuaScraper gS;
     private Document doc;
 
+    private int maxQuarterly = -1;
     public DisciplinaryNoticesPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
@@ -55,9 +56,11 @@ public class DisciplinaryNoticesPage implements IPage {
 
         List<DisciplinaryNotices> allDisciplNotices = new Vector<>();
         Elements allDisciplNoticeTBodyHTML = doc.getElementsByTag("tbody");
+        int quarterlyCounter = allDisciplNoticeTBodyHTML.size();
+
+        maxQuarterly = quarterlyCounter;
 
         for (Element el : allDisciplNoticeTBodyHTML) {
-            //String quarterly = el.parent().child(0).text();
             for(Element note: el.children()){
                 String countermeasures; String authorOfCountermeasures;
                 try{
@@ -74,9 +77,13 @@ public class DisciplinaryNoticesPage implements IPage {
                         countermeasures,
                         note.child(2).text().split("\\(")[1].replace(")",""),
                         authorOfCountermeasures,
-                        el.parent().child(0).text()));
+                        quarterlyCounter));
             }
+
+            quarterlyCounter--;
         }
         return allDisciplNotices;
     }
+
+    public int getMaxQuarterly(){return maxQuarterly;}
 }

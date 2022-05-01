@@ -28,20 +28,16 @@ public class DisciplinaryNotices {
     public final String countermeasures;
     public final String authorOfDetails;
     public final String authorOfCountermeasures;
-    public final String quarterly;
+    public final int quarterly;
 
-    public DisciplinaryNotices(String date, String type, String details, String countermeasures, String authorOfDetails, String authorOfCountermeasures, String quarter) {
+    public DisciplinaryNotices(String date, String type, String details, String countermeasures, String authorOfDetails, String authorOfCountermeasures, int quarterly) {
         this.date = date;
         this.type = type;
         this.details = details;
         this.countermeasures = countermeasures;
         this.authorOfDetails = authorOfDetails;
         this.authorOfCountermeasures = authorOfCountermeasures;
-        this.quarterly = quarter;
-    }
-
-    public int quarterlyToInt() {
-        return GiuaScraperUtils.quarterlyToInt(quarterly);
+        this.quarterly = quarterly;
     }
 
     public String toString() {

@@ -36,6 +36,8 @@ public class VotesPage implements IPage {
     private final GiuaScraper gS;
     private Document doc;
 
+    private int maxQuarterly = -1;
+
     public VotesPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
@@ -55,10 +57,11 @@ public class VotesPage implements IPage {
             return GiuaScraperDemo.getAllVotes();
         Map<String, List<Vote>> returnVotes = new HashMap<>();
         Elements alltbody = doc.getElementsByTag("tbody");
+        int quarterlyCounter = alltbody.size();
+
+        maxQuarterly = quarterlyCounter;
 
         for (Element tbody : alltbody) { //divisione per quadrimestri
-            final String quart = tbody.parent().child(0).text();
-
             for (final Element subjectVotesHTML : tbody.children()) {
                 final String subject = subjectVotesHTML.child(0).text();
                 final Elements allVotesHTML = subjectVotesHTML.child(1).children();
@@ -71,27 +74,30 @@ public class VotesPage implements IPage {
                     final String args = getDetailOfVote(allVotesHTML.get(i + 1), 2);
                     final String judg = getDetailOfVote(allVotesHTML.get(i + 1), 3);
                     final boolean isRelevantForMean = !(allVotesHTML.get(i).attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
+                    final int quarterly = quarterlyCounter;
 
                     if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti
                         if (returnVotes.containsKey(subject)) {            //Se la materia esiste gia aggiungo solamente il voto
                             List<Vote> tempList = returnVotes.get(subject); //uso questa variabile come appoggio per poter modificare la lista di voti di quella materia
-                            tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));
+                            tempList.add(new Vote(voteAsString, voteDate, type, args, judg, quarterly, false, isRelevantForMean));
                         } else {
                             returnVotes.put(subject, new Vector<>() {{
-                                add(new Vote(voteAsString, voteDate, type, args, judg, quart, false, isRelevantForMean));    //il voto lo aggiungo direttamente
+                                add(new Vote(voteAsString, voteDate, type, args, judg, quarterly, false, isRelevantForMean));    //il voto lo aggiungo direttamente
                             }});
                         }
                     } else {        //è un asterisco
                         if (returnVotes.containsKey(subject)) {
-                            returnVotes.get(subject).add(new Vote("", voteDate, type, args, judg, quart, true, false));
+                            returnVotes.get(subject).add(new Vote("", voteDate, type, args, judg, quarterly, true, false));
                         } else {
                             returnVotes.put(subject, new Vector<>() {{
-                                add(new Vote("", voteDate, type, args, judg, quart, true, false));
+                                add(new Vote("", voteDate, type, args, judg, quarterly, true, false));
                             }});
                         }
                     }
                 }
             }
+
+            quarterlyCounter--;
         }
 
         return returnVotes;
@@ -151,7 +157,7 @@ public class VotesPage implements IPage {
                                 el.child(1).text(),
                                 el.child(2).text(),
                                 el.child(4).text(),
-                                GiuaScraperUtils.getQuarterName(i + 1),
+                                i + 1,
                                 el.child(3).text().equals(""),
                                 el.child(3).className().equals("label label-default gs-big")
                         ));
@@ -164,6 +170,8 @@ public class VotesPage implements IPage {
         } else
             return new Vector<>();
     }
+
+    public int getMaxQuarterly(){return maxQuarterly;}
 
     /**
      * Ottiene la media di tutti i voti di tutti i quadrimestri e li ritorna in un {@code float[]}
@@ -179,7 +187,7 @@ public class VotesPage implements IPage {
 
         for (String subject : allVotes.keySet()) {
             for (Vote vote : allVotes.get(subject)) {
-                int index = vote.quarterlyToInt() - 1;
+                int index = vote.quarterly - 1;
 
                 float currentMean = allMeans.get(index);
                 if (currentMean != -1f)
@@ -239,7 +247,7 @@ public class VotesPage implements IPage {
         int counter = 0;
 
         for (Vote vote : votes) {
-            if (!vote.isAsterisk && vote.isRelevantForMean && vote.quarterlyToInt() == quarterly) {
+            if (!vote.isAsterisk && vote.isRelevantForMean && vote.quarterly == quarterly) {
                 mean += vote.toFloat();
                 counter++;
             }

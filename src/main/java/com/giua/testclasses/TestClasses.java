@@ -129,7 +129,7 @@ class TestClasses {
         List<List<Vote>> filterVotes = votesPage.getAllVotes("Italiano");
         for (Vote vote : filterVotes.get(0)) { //Prendo i voti del primo quadrimestre
             logln(vote.toString());
-            logln(vote.quarterly);
+            logln(String.valueOf(vote.quarterly));
         }
     }
 

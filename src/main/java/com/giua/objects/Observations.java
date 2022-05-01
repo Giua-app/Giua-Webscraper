@@ -27,18 +27,14 @@ public class Observations {
     public final String subject;
     public final String teacher;
     public final String observations;
-    public final String quarterly;
+    public final int quarterly;
 
-    public Observations(String date, String subject, String teacher, String observations, String quarterly) {
+    public Observations(String date, String subject, String teacher, String observations, int quarterly) {
         this.date = date;
         this.subject = subject;
         this.teacher = teacher;
         this.observations = observations;
         this.quarterly = quarterly;
-    }
-
-    public int quarterlyToInt() {
-        return GiuaScraperUtils.quarterlyToInt(quarterly);
     }
 
     public String toString() {

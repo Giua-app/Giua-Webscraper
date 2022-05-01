@@ -23,7 +23,7 @@ import com.giua.utils.GiuaScraperUtils;
 
 public class Vote{
     public final String value;
-    public final String quarterly;
+    public final int quarterly;
     public final boolean isAsterisk;
     public final String date;
     public final String judgement;
@@ -31,7 +31,7 @@ public class Vote{
     public final String arguments;
     public final boolean isRelevantForMean;
 
-    public Vote(String value, String date, String testType, String arguments, String judgement, String quarterly, boolean isAsterisk, boolean isRelevantForMean) {
+    public Vote(String value, String date, String testType, String arguments, String judgement, int quarterly, boolean isAsterisk, boolean isRelevantForMean) {
         this.value = value;
         this.date = date;
         this.testType = testType;
@@ -73,10 +73,6 @@ public class Vote{
             return Integer.parseInt(value);
     }
 
-    public int quarterlyToInt() {
-        return GiuaScraperUtils.quarterlyToInt(quarterly);
-    }
-
     @Override
     public boolean equals(Object obj) {
         boolean isInstanceOfVote = obj instanceof Vote;
@@ -87,7 +83,7 @@ public class Vote{
 
         return value.equals(otherVote.value) &&
                 date.equals(otherVote.date) &&
-                quarterly.equals(otherVote.quarterly) &&
+                quarterly == otherVote.quarterly &&
                 testType.equals(otherVote.testType) &&
                 arguments.equals(otherVote.arguments) &&
                 judgement.equals(otherVote.judgement) &&

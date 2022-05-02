@@ -34,6 +34,8 @@ public class DisciplinaryNoticesPage implements IPage {
     private Document doc;
 
     private int maxQuarterly = -1;
+    private final List<String> allQuarterlyNames = new Vector<>();
+
     public DisciplinaryNoticesPage(GiuaScraper gS) {
         this.gS = gS;
         refreshPage();
@@ -59,6 +61,7 @@ public class DisciplinaryNoticesPage implements IPage {
         int quarterlyCounter = allDisciplNoticeTBodyHTML.size();
 
         maxQuarterly = quarterlyCounter;
+        getAllQuarterlyNames(); //Aggiorna i nomi dei quadrimestri
 
         for (Element el : allDisciplNoticeTBodyHTML) {
             for(Element note: el.children()){
@@ -83,6 +86,21 @@ public class DisciplinaryNoticesPage implements IPage {
             quarterlyCounter--;
         }
         return allDisciplNotices;
+    }
+
+    public List<String> getAllQuarterlyNames(){
+        if(allQuarterlyNames.size() > 0) return allQuarterlyNames;
+
+        Elements allTbody = doc.getElementsByTag("tbody");
+
+        if(allTbody.size() == 0) return new Vector<>();
+
+        for(Element tbody : allTbody){
+            final String quarterlyName = tbody.parent().child(0).text();
+            allQuarterlyNames.add(quarterlyName);
+        }
+
+        return allQuarterlyNames;
     }
 
     public int getMaxQuarterly(){return maxQuarterly;}

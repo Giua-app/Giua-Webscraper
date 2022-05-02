@@ -37,6 +37,7 @@ public class VotesPage implements IPage {
     private Document doc;
 
     private int maxQuarterly = -1;
+    private final List<String> allQuarterlyNames = new Vector<>();
 
     public VotesPage(GiuaScraper gS) {
         this.gS = gS;
@@ -60,6 +61,7 @@ public class VotesPage implements IPage {
         int quarterlyCounter = alltbody.size();
 
         maxQuarterly = quarterlyCounter;
+        getAllQuarterlyNames(); //Aggiorna i nomi dei quadrimestri
 
         for (Element tbody : alltbody) { //divisione per quadrimestri
             for (final Element subjectVotesHTML : tbody.children()) {
@@ -169,6 +171,21 @@ public class VotesPage implements IPage {
 
         } else
             return new Vector<>();
+    }
+
+    public List<String> getAllQuarterlyNames(){
+        if(allQuarterlyNames.size() > 0) return allQuarterlyNames;
+
+        Elements allTbody = doc.getElementsByTag("tbody");
+
+        if(allTbody.size() == 0) return new Vector<>();
+
+        for(Element tbody : allTbody){
+            final String quarterlyName = tbody.parent().child(0).text();
+            allQuarterlyNames.add(quarterlyName);
+        }
+
+        return allQuarterlyNames;
     }
 
     public int getMaxQuarterly(){return maxQuarterly;}

@@ -35,6 +35,7 @@ public class ObservationsPage implements IPage {
     private Document doc;
 
     private int maxQuarterly = -1;
+    private final List<String> allQuarterlyNames = new Vector<>();
 
     public ObservationsPage(GiuaScraper gS) {
         this.gS = gS;
@@ -65,6 +66,7 @@ public class ObservationsPage implements IPage {
         int quarterlyCounter = obsTables.size();
 
         maxQuarterly = quarterlyCounter;
+        getAllQuarterlyNames(); //Aggiorna i nomi dei quadrimestri
 
         for (Element el : obsTables) {
             for (Element el2 : el.children()) {
@@ -82,6 +84,21 @@ public class ObservationsPage implements IPage {
         }
 
         return returnAllObs;
+    }
+
+    public List<String> getAllQuarterlyNames(){
+        if(allQuarterlyNames.size() > 0) return allQuarterlyNames;
+
+        Elements allTbody = doc.getElementsByTag("tbody");
+
+        if(allTbody.size() == 0) return new Vector<>();
+
+        for(Element tbody : allTbody){
+            final String quarterlyName = tbody.parent().child(0).text();
+            allQuarterlyNames.add(quarterlyName);
+        }
+
+        return allQuarterlyNames;
     }
 
     public int getMaxQuarterly(){return maxQuarterly;}

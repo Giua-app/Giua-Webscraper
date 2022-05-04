@@ -49,6 +49,16 @@ public class ReportCard {
         this.mean=mean;
     }
 
+    public ReportCard(boolean exists) {
+        this.quarterly =null;
+        this.allVotes = null;
+        this._exists = exists;
+        this.finalResult = null;
+        this.credits = null;
+        this.allDebts=null;
+        this.mean=null;
+    }
+
     public String toString() {
         return "Quadrimestre: "+quarterly+"; \r\n" +
                 "Voti: "+allVotes+"; \r\n" +

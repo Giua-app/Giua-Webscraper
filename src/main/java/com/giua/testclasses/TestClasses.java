@@ -76,10 +76,10 @@ class TestClasses {
         }
 
         GiuaScraper.setDebugMode(logEnabled);
-        demoMode=true;
+        demoMode=false;
         startLogin();
-        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
-        //testVotes(true);
+        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        //testReportCard(true);
     }
 
     private static void logln(String msg) {
@@ -134,11 +134,11 @@ class TestClasses {
     }
 
     private static void testAlerts(boolean forceRefresh) {
-        /**logln("Get avvisi");
+        logln("Get avvisi");
         List<Alert> allAvvisi = gS.getAlertsPage(forceRefresh).getAllAlerts(1);
-        for (Alert a : allAvvisi) {
+        for (Alert a : allAvvisi)
             logln(a.toString());
-        }
+
         logln("Marking first alert as read");
          gS.getAlertsPage(false).markAlertAsRead(allAvvisi.get(0));
          logln("Get first alert with filter");
@@ -146,8 +146,8 @@ class TestClasses {
          logln("Get details of first alert");
          allAvvisi.get(0).getDetailsToString(gS);
          logln(allAvvisi.get(0).toString());
-         */
-        logln("Test notifiche \r\n");
+
+        /**logln("Test notifiche \r\n");
         AlertsPage aP = gS.getAlertsPage(forceRefresh);
 
         List<Alert> newAlerts = aP.getAllAlertsWithFilters(false, "per la materia");
@@ -156,7 +156,7 @@ class TestClasses {
             List<Alert> o = aP.getAlertsToNotify(oldAlerts);
         }
         for(int i=0; i< newAlerts.size(); i++)
-            logln(newAlerts.get(i).toString());
+            logln(newAlerts.get(i).toString());*/
     }
 
     private static void testAgendaPage(boolean forceRefresh) {
@@ -275,12 +275,16 @@ class TestClasses {
         logln("Get report card");
 
         ReportcardPage reportcardPage= gS.getReportCardPage(forceRefresh);
+        logln("Anno scolastico precedente");
         ReportCard rC=reportcardPage.getReportcard(ReportcardPage.lastYear);
         logln(rC.toString());
+        logln("Primo quadrimestre");
         rC=reportcardPage.getReportcard(ReportcardPage.firstQuaterly);
         logln(rC.toString());
+        logln("Secondo quadrimestre");
         rC=reportcardPage.getReportcard(ReportcardPage.secondQuaterly);
         logln(rC.toString());
+        logln("Esami di recupero debiti");
         rC=reportcardPage.getReportcard(ReportcardPage.finalExams);
         logln(rC.toString());
 

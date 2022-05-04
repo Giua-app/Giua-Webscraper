@@ -20,9 +20,11 @@
 package com.giua.pages;
 
 import com.giua.objects.ReportCard;
+import com.giua.utils.GiuaScraperUtils;
 import com.giua.utils.LoggerManager;
 import com.giua.webscraper.GiuaScraper;
 import com.giua.webscraper.GiuaScraperDemo;
+import com.giua.webscraper.GiuaScraperExceptions;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -69,9 +71,8 @@ public class ReportcardPage implements IPage{
         String credits=null;
         Map<String, List<String>>allDebts=new HashMap<>();
 
-        if(quaterlyName.equals("A.S. Precedente")){
+        if(quaterlyName.equals("A.S. Precedente"))
             return getOldYearReportCard();
-        }
         try {
             //quadrimestre
             Elements els = doc.getElementsByClass("dropdown-menu").get(3).children();
@@ -83,6 +84,9 @@ public class ReportcardPage implements IPage{
                     break;
                 }
             }
+            if(GiuaScraperUtils.convertGlobalPathToLocal(gS.getSiteUrl(),false).equals("/genitori/pagelle"))
+                    return new ReportCard(false);   //la pagella non è presente nel sito
+
             //scrutini
             if(doc!=null) {
                 Elements allSubjectsHTML = doc.getElementsByTag("tbody").get(0).children();
@@ -98,7 +102,7 @@ public class ReportcardPage implements IPage{
             }
         } catch (IndexOutOfBoundsException ignored) {}
         //esito e crediti
-        if(!quaterlyName.equals("Primo Quadrimestre")) {
+        if(!quaterlyName.equals(firstQuaterly)) { //i debiti sono presenti solo nel primo quadrimestre
             try {
                 finalResult = doc.getElementsByClass("alert alert-success").get(0).child(0).text().split(":")[1].trim();
                 mean=doc.getElementsByClass("alert alert-success").get(0).child(1).text().split(":")[1].trim();
@@ -127,7 +131,9 @@ public class ReportcardPage implements IPage{
                     page.put(element.child(0).text(), list);
                 }
                 allDebts=page;
-            }catch (NullPointerException ignored){}
+            }catch (IndexOutOfBoundsException e){
+                allDebts=null;
+            }
         }
         returnRc=new ReportCard(quarterly, allVotes, finalResult, credits, allDebts, mean, true);
         return returnRc;
@@ -205,13 +211,12 @@ public class ReportcardPage implements IPage{
         float mean = 0f;
 
         for (String subject : allVotes.keySet()) {
-            List<String> s = allVotes.get(subject);
-            float vote;
-            if(subject.equals("Religione Cattolica o attività alternative"))
-                vote=getReligionVote(s.get(0));
-            else
+            if(!subject.equals("Religione Cattolica o attività alternative")){
+                List<String> s = allVotes.get(subject);
+                float vote;
                 vote = Float.parseFloat(s.get(0));
-            mean += vote;
+                mean += vote;
+            }
         }
         return String.valueOf( mean / allVotes.keySet().size());
     }
@@ -224,6 +229,7 @@ public class ReportcardPage implements IPage{
         religionVotes.put("Sufficiente",6);
         religionVotes.put("Insufficiente",5);
         religionVotes.put("Scarso",4);
+        religionVotes.put("--",-1);//L'alunno non fa religione
         return religionVotes.get(sVote);
     }
 }

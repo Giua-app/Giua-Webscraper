@@ -71,7 +71,7 @@ public class VotesPage implements IPage {
                     final String type = getDetailOfVote(allVotesHTML.get(i + 1), 1);
                     final String args = getDetailOfVote(allVotesHTML.get(i + 1), 2);
                     final String judg = getDetailOfVote(allVotesHTML.get(i + 1), 3);
-                    final boolean isRelevantForMean = !(allVotesHTML.get(i).attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
+                    final boolean isRelevantForMean = !subject.equalsIgnoreCase("religione") && !(allVotesHTML.get(i).attributes().get("class").equals("btn btn-xs gs-btn-secondary"));
                     final int quarterly = quarterlyCounter;
 
                     if (voteAsString.length() > 0) {    //Gli asterischi sono caratteri vuoti

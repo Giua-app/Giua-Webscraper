@@ -19,8 +19,6 @@
 
 package com.giua.objects;
 
-import com.giua.utils.GiuaScraperUtils;
-
 public class Vote{
     public final String value;
     public final int quarterly;
@@ -39,7 +37,7 @@ public class Vote{
         this.judgement = judgement;
         this.quarterly = quarterly;
         this.isAsterisk = isAsterisk;
-        this.isRelevantForMean=isRelevantForMean;
+        this.isRelevantForMean = isRelevantForMean;
     }
 
     //Mette anche i dettagli nella stringa

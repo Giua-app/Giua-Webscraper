@@ -27,6 +27,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -87,16 +88,18 @@ public class ObservationsPage implements IPage {
     }
 
     public List<String> getAllQuarterlyNames(){
-        if(allQuarterlyNames.size() > 0) return allQuarterlyNames;
+        if (allQuarterlyNames.size() > 0) return allQuarterlyNames;
 
         Elements allTbody = doc.getElementsByTag("tbody");
 
-        if(allTbody.size() == 0) return new Vector<>();
+        if (allTbody.size() == 0) return new Vector<>();
 
-        for(Element tbody : allTbody){
+        for (Element tbody : allTbody) {
             final String quarterlyName = tbody.parent().child(0).text();
             allQuarterlyNames.add(quarterlyName);
         }
+
+        Collections.reverse(allQuarterlyNames);
 
         return allQuarterlyNames;
     }

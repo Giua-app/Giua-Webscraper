@@ -20,7 +20,10 @@
 package com.giua.testclasses;
 
 import com.giua.objects.*;
-import com.giua.pages.*;
+import com.giua.pages.AbsencesPage;
+import com.giua.pages.HomePage;
+import com.giua.pages.ReportcardPage;
+import com.giua.pages.VotesPage;
 import com.giua.utils.JsonBuilder;
 import com.giua.webscraper.GiuaScraper;
 
@@ -78,7 +81,7 @@ class TestClasses {
         GiuaScraper.setDebugMode(logEnabled);
         demoMode=false;
         startLogin();
-        //testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
+        testAll(); //Chiamando questo metodo vengono effettuati i test di praticamente tutte le funzioni fondamentali e dello scraping della libreria
         //testReportCard(true);
     }
 

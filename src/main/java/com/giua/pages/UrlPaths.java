@@ -30,11 +30,11 @@ public class UrlPaths {
     public static String OBSERVATIONS_PAGE = "genitori/osservazioni/";
     public static String AUTHORIZATIONS_PAGE = "genitori/deroghe/";
     public static String REPORTCARD_PAGE = "genitori/pagelle";
-    public static String INTERVIEWS_PAGE = "genitori/colloqui";
+    public static String INTERVIEWS_PAGE = "colloqui/genitori";
     public static String NEWSLETTERS_PAGE = "circolari/genitori";
     public static String ALERTS_PAGE = "genitori/avvisi";
     public static String DOCUMENTS_PAGE = "documenti/bacheca";
     public static String PINBOARD_PAGE = "genitori/eventi";
     public static String PROFILE_PAGE = "utenti/profilo";
-
+    public static String REQUESTS_PAGE = "richieste/lista";
 }

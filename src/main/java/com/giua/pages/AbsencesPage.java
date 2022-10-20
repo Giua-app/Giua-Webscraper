@@ -168,30 +168,21 @@ public class AbsencesPage implements IPage {
     }
 
     /**
-     * Ottiene il numero di giorni di assenza
-     */
-    public String getAbsencesDayCount(){
-        if(gS.isDemoMode())
-            return GiuaScraperDemo.getAbsencesDayCount();
-        return tbodyGlobalSituation.child(0).child(1).text();
-    }
-
-    /**
      * Ottiene il numero di ritardi brevi
      */
     public String getShortDelaysCount(){
         if(gS.isDemoMode())
             return GiuaScraperDemo.getShortDelaysCount();
-        return tbodyGlobalSituation.child(1).child(1).text();
+        return tbodyGlobalSituation.child(2).child(1).text();
     }
 
     /**
      * Ottiene il numero di ritardi
      */
-    public String getDelaysCount(){
-        if(gS.isDemoMode())
+    public String getLongDelaysCount() {
+        if (gS.isDemoMode())
             return GiuaScraperDemo.getDelaysCount();
-        return tbodyGlobalSituation.child(2).child(1).text();
+        return tbodyGlobalSituation.child(1).child(1).text();
     }
 
     /**
@@ -209,19 +200,19 @@ public class AbsencesPage implements IPage {
     public String getTotalHourOfAbsences(){
         if(gS.isDemoMode())
             return GiuaScraperDemo.getTotalHourOfAbsences();
-        return tbodyGlobalSituation.child(4).child(1).text();
+        return tbodyGlobalSituation.child(0).child(1).text();
     }
 
     /**
      * Ottiene tutte le info extra
+     *
      * @return Una stringa contenente per ordine:
      * Numero giorni di assenza, Numero ritardi brevi, Numero di ritardi, Numero di uscite anticipate, Totale ore di assenza
      * Ogni valore e' diviso da " ; " senza le virgolette
      */
-    public String getAllExtraInfo(){
-        return getAbsencesDayCount() + " ; "
-                + getShortDelaysCount() + " ; "
-                + getDelaysCount() + " ; "
+    public String getAllExtraInfo() {
+        return getShortDelaysCount() + " ; "
+                + getLongDelaysCount() + " ; "
                 + getEarlyExitsCount() + " ; "
                 + getTotalHourOfAbsences();
     }
